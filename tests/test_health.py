@@ -1,4 +1,4 @@
-from .conftest import get_route_path
+from tests.conftest import get_route_path
 from starlette.testclient import TestClient
 from fastapi import FastAPI
 
