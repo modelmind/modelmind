@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "modelmind"
+version = "0.1.0"
+description = "The most accurate OpenSource Personality Test based on MBTI"
+authors = ["Bryan Djafer <yukky.bryan@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12.1"
+fastapi = "^0.109.2"
+uvicorn = "^0.27.1"
+pydantic = "^2.6.1"
+pydantic-settings = "^2.1.0"
+google-cloud-firestore = "^2.14.0"
+httpx = "^0.26.0"
+typer = "^0.9.0"
+sentry-sdk = {extras = ["fastapi"], version = "^1.40.4"}
+ujson = "^5.9.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+mypy = "^1.8.0"
+isort = "^5.13.2"
+pre-commit = "^3.6.1"
+flake8 = "^7.0.0"
+autoflake = "^2.2.1"
+mock-firestore = "^0.11.0"
+black = "23.11.0"
+
+
+[tool.mypy]
+ignore_missing_imports = true
+plugins = "pydantic.mypy"
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

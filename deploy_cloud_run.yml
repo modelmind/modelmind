@@ -1,0 +1,120 @@
+logsBucket: "${_LOGS_GCS_BUCKET}"
+options:
+  logging: GCS_ONLY
+  dynamic_substitutions: true
+timeout: 3600s
+
+images:
+  - ${_TARGET_SERVICE_IMAGE}
+
+steps:
+
+  - id: 'Install python dependencies'
+    name: '${_PYTHON_DOCKER_IMAGE}'
+    entrypoint: /bin/sh
+    args:
+      - "-c"
+      - "pip install -r requirements-dev.txt -r requirements.txt --user"
+
+  - id: 'Pytest'
+    name: '${_PYTHON_DOCKER_IMAGE}'
+    entrypoint: /bin/sh
+    args:
+      - "-c"
+      - "python -m pytest -v --cov-config .coveragerc --cov=agicap_gateway -l --tb=short --maxfail=1 tests/ --junitxml=${SHORT_SHA}_test_log.xml"
+    waitFor: [ "Install python dependencies" ]
+
+  - id: "Build image and tag it"
+    name: "${_DOCKER_IMAGE}"
+    dir: "back"
+    args:
+      - build
+      - --file
+      - Dockerfile
+      - --tag
+      - ${_TARGET_SERVICE_IMAGE}:${SHORT_SHA}
+      - --tag
+      - ${_TARGET_SERVICE_IMAGE}:latest
+      - --network
+      - cloudbuild
+      - .
+    waitFor: [ "-" ]
+
+  - id: "Publish image to Artifact Registry"
+    name: "${_DOCKER_IMAGE}"
+    args:
+      - push
+      - --all-tags
+      - ${_TARGET_SERVICE_IMAGE}
+
+  - id: "Deploy revision with tag"
+    name: "${_CLOUD_SDK_IMAGE}"
+    entrypoint: "gcloud"
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_NAME}
+      - --platform
+      - managed
+      - --region
+      - ${_REGION}
+      - --image
+      - ${_TARGET_SERVICE_IMAGE}:${SHORT_SHA}
+      - --args
+      - run
+      - --tag
+      - ${_CLOUDRUN_TAG}
+      - --allow-unauthenticated
+      - --ingress
+      - internal-and-cloud-load-balancing
+      - --service-account
+      - ${_SA_EMAIL}
+      - --port
+      - ${_PORT}
+      - --execution-environment
+      - gen1
+      - --timeout
+      - "60"
+      - --command
+      - ${_COMMAND}
+      - --args
+      - ${_ARGS}
+      - --set-env-vars
+      - SERVER__PORT=${_PORT}
+      - --set-env-vars
+      - SERVER__RELOAD=false
+      - --set-env-vars
+      - SERVER__SERVICE=${_SERVER__SERVICE}
+      - --set-env-vars
+      - SERVER__TAG=${_CLOUDRUN_TAG}
+      - --set-env-vars
+      - SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
+      - --set-env-vars
+      - SERVER__INCLUDE_MY_ACCOUNT_ROUTER=true
+      - --set-env-vars
+      - CLOUD_TASKS__SERVICE_ACCOUNT_EMAIL=${_SA_RUNNER_EMAIL}
+      - --set-env-vars
+      - ELASTIC__SERVICE_NAME=${_ELASTIC__API_SERVICE_NAME}
+      - --set-env-vars
+      - ELASTIC__SERVER_URL=${_ELASTIC__SERVER_URL}
+      - --set-env-vars
+      - AGICAP_GATEWAY__BASE_URL=${_AGICAP_GATEWAY_BASE_URL}
+      - --set-env-vars
+      - ENVIRONMENT=${_CLOUDRUN_TAG}
+      - --set-secrets
+      - ELASTIC__API_KEY=${_ELASTIC__API_KEY}
+      - --vpc-connector=${_VPC_CONNECTOR}
+      - --vpc-egress=all-traffic
+
+  - id: "Update Traffic to prod"
+    name: "${_CLOUD_SDK_IMAGE}"
+    entrypoint: "gcloud"
+    args:
+      - run
+      - services
+      - update-traffic
+      - ${_SERVICE_NAME}
+      - --to-tags
+      - ${_CLOUDRUN_TAG}=100
+      - --region
+      - ${_REGION}
