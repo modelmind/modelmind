@@ -10,14 +10,40 @@ PACKAGE_NAME = Path(__file__).parent.name
 ENV_PREFIX = f"{PACKAGE_NAME.upper()}_"
 
 
+class Environment(str, Enum):
+    DEV = "dev"
+    PROD = "prod"
+
+
+class LogLevel(str, Enum):  # noqa: WPS600
+    """Possible log levels."""
+
+    NOTSET = "NOTSET"
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    FATAL = "FATAL"
+
+
+class FirebaseSettings(BaseSettings):
+    prefix: str = ""
+
+
+class SentrySettings(BaseSettings):
+    dsn: str = ""
+    traces_sample_rate: float = 1.0
+    profiles_sample_rate: float = 1.0
+
+
 class Server(BaseModel):
     port: int = 8080
     host: str = "0.0.0.0"
-    log_level: str = "debug"
+    log_level: LogLevel = LogLevel.DEBUG
     reload: bool = False
     service: str | None = None
     tag: str | None = None
-    workers: int = 4
+    workers: int = 1
     include_my_account_router: bool = False
     include_runner_router: bool = False
 
@@ -35,46 +61,25 @@ class Server(BaseModel):
             return ""
 
 
-class ElasticSettings(BaseModel):
-    service_name: str | None = None
-    server_url: str | None = None
-    api_key: str | None = None
-
-
-class Environment(str, Enum):
-    PREPROD = "preprod"
-    PROD = "prod"
-    LOCAL = "local"
-
-
-class LoggingSettings(BaseModel):
-    log_level: str = "INFO"
-    logger_name: str = f"{PACKAGE_NAME}_logger"
-
-
-class Gainsight(BaseSettings):
-    api_key: str = ""
-    base_url: str = "https://agicap.eu.gainsightcloud.com"
-
-
-class AgicapGateway(BaseSettings):
-    # base_url: str = "http://0.0.0.0:8080"
-    base_url: str = "https://agicap-gateway.agicap-lab.com/prod"
-
-
 class Settings(BaseSettings):
+    """
+    Application settings.
+
+    These parameters can be configured
+    with environment variables.
+    """
     server: Server = Server()
-    elastic: ElasticSettings = ElasticSettings()
-    environment: Environment = Environment.LOCAL
-    logger: LoggingSettings = LoggingSettings()
-    agicap_gateway: AgicapGateway = AgicapGateway()
-    gainsight: Gainsight = Gainsight()
+    environment: Environment = Environment.DEV
 
     model_config = SettingsConfigDict(
         env_file=(".env", ".env.local", ".env.dev", ".env.prod"),
+        env_prefix="MODELMIND_",
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
     )
+
+    firebase: FirebaseSettings = FirebaseSettings()
+    sentry: SentrySettings = SentrySettings()
 
 
 settings = Settings()

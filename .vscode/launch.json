@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "modelmind.api.application:main",
+                "modelmind.api.app:main",
                 "--reload"
             ],
             "jinja": true,

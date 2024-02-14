@@ -7,7 +7,7 @@ if "pytest" in sys.argv[0]:
     # testing db
     from mockfirestore import MockFirestore
 
-    db = MockFirestore()
+    firestore_client = MockFirestore()
 else:
     # not a testing db
-    db = firestore.Client()  # pragma: no cover
+    firestore_client = firestore.Client()  # pragma: no cover
