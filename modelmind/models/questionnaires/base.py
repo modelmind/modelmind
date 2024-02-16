@@ -7,6 +7,7 @@ from modelmind.models.results.base import BaseResult
 class BaseQuestionnaire(ABC):
 
     name: str
+    engine: BaseEngine
 
     def __init__(self, engine: BaseEngine, questions: list[BaseQuestion]) -> None:
         self.engine = engine
