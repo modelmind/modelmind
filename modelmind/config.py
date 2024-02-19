@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 from pathlib import Path
 from tempfile import gettempdir
 
@@ -18,12 +18,12 @@ class Environment(str, Enum):
 class LogLevel(str, Enum):  # noqa: WPS600
     """Possible log levels."""
 
-    NOTSET = "NOTSET"
-    DEBUG = "DEBUG"
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    FATAL = "FATAL"
+    NOTSET = "notset"
+    DEBUG = "debug"
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+    FATAL = "fatal"
 
 
 class FirebaseSettings(BaseSettings):
@@ -36,10 +36,17 @@ class SentrySettings(BaseSettings):
     profiles_sample_rate: float = 1.0
 
 
+class JWTSettings(BaseSettings):
+    secret_key: str = "secret"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_minutes: int = 60 * 24 * 7
+
+
 class Server(BaseModel):
     port: int = 8080
     host: str = "0.0.0.0"
-    log_level: LogLevel = LogLevel.DEBUG
+    log_level: str = LogLevel.DEBUG.value
     reload: bool = False
     service: str | None = None
     tag: str | None = None
@@ -80,6 +87,7 @@ class Settings(BaseSettings):
 
     firebase: FirebaseSettings = FirebaseSettings()
     sentry: SentrySettings = SentrySettings()
+    jwt: JWTSettings = JWTSettings()
 
 
 settings = Settings()

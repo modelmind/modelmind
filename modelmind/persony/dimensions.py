@@ -1,4 +1,5 @@
-from enum import Enum
+from enum import StrEnum
+
 
 
 class ClassVar:
@@ -12,7 +13,7 @@ class ClassVar:
         self.value = value
 
 
-class MBTICategory(Enum):
+class PersonyDimension(StrEnum):
 
     PREFERENCE_IE = "P-IE"
     PREFERENCE_NS = "P-NS"

@@ -16,6 +16,7 @@ httpx = "^0.26.0"
 typer = "^0.9.0"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.4"}
 ujson = "^5.9.0"
+pyjwt = "^2.8.0"
 
 
 [tool.poetry.group.dev.dependencies]

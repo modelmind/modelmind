@@ -43,4 +43,3 @@ def mbti_to_grant_type(mbti_type: MBTIType) -> GrantStackType:
         MBTIType.ESTP: GrantStackType.SeTiFeNi,
         MBTIType.ESFP: GrantStackType.SeFiTeNi,
     }[mbti_type]
-

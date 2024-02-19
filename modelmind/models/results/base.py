@@ -1,13 +1,14 @@
 from abc import ABC
-from typing import Any
+from typing import Any, Generic, TypeVar
 from pydantic import Field
-from modelmind.models.questions.base import QuestionKey
 
+
+QuestionKey = TypeVar("QuestionKey", bound=str)
 
 ResultData = dict[QuestionKey, Any]
 
 
-class BaseResult(ABC):
+class BaseResult(Generic[QuestionKey], ABC):
 
     data: ResultData = Field(default_factory=dict)
 

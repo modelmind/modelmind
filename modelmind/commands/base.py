@@ -4,7 +4,7 @@ from typing import TypeVar
 from pydantic import BaseModel
 
 Input = TypeVar("Input", bound=BaseModel)
-Output = TypeVar("Output", bound=BaseModel)
+Output = TypeVar("Output")
 
 
 class Command(Generic[Input, Output], ABC):

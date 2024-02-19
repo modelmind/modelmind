@@ -18,4 +18,3 @@ class MBTIType(StrEnum):
     ISFP = "ISFP"
     ESTP = "ESTP"
     ESFP = "ESFP"
-

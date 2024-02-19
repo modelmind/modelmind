@@ -10,4 +10,4 @@ if "pytest" in sys.argv[0]:
     firestore_client = MockFirestore()
 else:
     # not a testing db
-    firestore_client = firestore.Client()  # pragma: no cover
+    firestore_client = firestore.AsyncClient()  # pragma: no cover
