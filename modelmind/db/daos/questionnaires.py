@@ -1,23 +1,37 @@
 from typing import List, Optional
-from uuid import UUID
+
+from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
+
+from modelmind.utils.type_adapter import TypeAdapter
 
 from .base import FirestoreDAO
-from modelmind.services.firestore import firestore_client as db
-from modelmind.db.schemas.firestore import Document
+from modelmind.db.schemas import DBIdentifierUUID
+from modelmind.db.schemas.questions import DBQuestion
+from modelmind.db.schemas.questionnaires import DBQuestionnaire
+from modelmind.db.exceptions.questionnaires import QuestionnaireNotFound
 
 
-class QuestionnairesDAO(FirestoreDAO):
-    collection_name = "questionnaires"
-
-    @classmethod
-    async def get(self, questionnaire_id: UUID) -> None:
-        ...
+class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
+    _collection_name = "questionnaires"
 
     @classmethod
-    async def get_questions(self, questionnaire_id: UUID, language: Optional[str]) -> List[Document]:
-        doc_ref = db.collection(self.collection_name).document(str(questionnaire_id))
-        doc = await doc_ref.get()
-        if doc.exists:
-            return doc.to_dict().get("questions")
-        else:
-            return []
+    async def get_by_name(cls, name: str) -> DBQuestionnaire:
+        query = cls.collection().where("name", "==", name)
+        docs: list[DocumentSnapshot] = await query.get()
+        for doc in docs:
+            return DBQuestionnaire.model_validate(doc.to_dict())
+        raise QuestionnaireNotFound()
+
+
+    @classmethod
+    async def get_questions(cls, questionnaire_id: DBIdentifierUUID, language: Optional[str] = None) -> List[DBQuestion]:
+        questions_ref: AsyncCollectionReference = cls.collection().document(str(questionnaire_id)).collection('questions')
+
+        if language:
+            questions_ref = questions_ref.where('language', '==', language)
+
+        questions_docs: List[DocumentSnapshot] = await questions_ref.get()
+        questions_list = [doc.to_dict() for doc in questions_docs if doc.exists]
+
+        return TypeAdapter.validate(List[DBQuestion], questions_list)
+

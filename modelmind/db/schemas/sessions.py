@@ -1,7 +1,10 @@
 from enum import StrEnum
 from typing import Optional
+from uuid import uuid4
 
-from .firestore import Document, DocumentCreate, DocumentUpdate
+from pydantic import Field
+
+from . import DBIdentifierUUID, DBObject, DBObjectCreate, DBOBjectUpdate
 
 
 class SessionStatus(StrEnum):
@@ -10,7 +13,18 @@ class SessionStatus(StrEnum):
     EXPIRED = "expired"
 
 
-class CreateSession(DocumentCreate):
+class DBCreateSession(DBObjectCreate):
+    id: DBIdentifierUUID = Field(default_factory=uuid4)
+    questionnaire_id: str
+
+    status: SessionStatus
+    language: str
+
+    metadata: Optional[dict] = None
+
+
+class DBSession(DBObject):
+    id: DBIdentifierUUID
 
     questionnaire_id: str
 
@@ -20,16 +34,6 @@ class CreateSession(DocumentCreate):
     metadata: Optional[dict] = None
 
 
-class SessionDocument(Document):
-
-    questionnaire_id: str
-
-    status: SessionStatus
-    language: str
-
-    metadata: Optional[dict] = None
-
-
-class UpdateSession(DocumentUpdate):
-
+class DBUpdateSession(DBOBjectUpdate):
+    id: DBIdentifierUUID
     status: Optional[SessionStatus]

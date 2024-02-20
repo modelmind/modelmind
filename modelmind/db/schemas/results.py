@@ -1,9 +1,16 @@
 from typing import Optional
-from .firestore import Document, DocumentCreate
+from . import DBObject, DBObjectCreate, DBOBjectUpdate
 from uuid import UUID
 
 
-class CreateResult(DocumentCreate):
+class Result(DBObject):
+    questionnaire_id: UUID
+    session_id: UUID
+
+    data: dict
+
+
+class CreateResult(DBObjectCreate):
     questionnaire_id: UUID
     session_id: UUID
 
@@ -12,12 +19,5 @@ class CreateResult(DocumentCreate):
     fingerprint: Optional[str] = None
 
 
-class ResultDocument(Document):
-    questionnaire_id: UUID
-    session_id: UUID
-
-    data: dict
-
-
-class UpdateResultFingerprint(Document):
+class UpdateResultFingerprint(DBOBjectUpdate):
     fingerprint: str | None = None

@@ -1,10 +1,10 @@
-from .firestore import Document
+from . import DBObject, DBObjectCreate
 
 
 
-class CreateProfile(Document):
+class CreateProfile(DBObjectCreate):
     ...
 
 
-class ProfileDocument(Document):
+class Profile(DBObject):
     ...

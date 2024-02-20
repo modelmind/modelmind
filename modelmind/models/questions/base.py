@@ -9,3 +9,9 @@ class BaseQuestion(BaseModel, ABC):
     language: str
 
 
+
+class Question(BaseQuestion):
+    pass
+
+
+

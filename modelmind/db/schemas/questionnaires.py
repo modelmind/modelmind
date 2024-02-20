@@ -1,5 +1,8 @@
-from .firestore import Document
+from . import DBIdentifierUUID, DBObject
 
-class QuestionnaireDocument(Document):
 
+class DBQuestionnaire(DBObject):
+    id: DBIdentifierUUID
     name: str
+    engine: str
+

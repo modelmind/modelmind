@@ -2,8 +2,8 @@ from typing import List
 from uuid import UUID
 
 from .base import FirestoreDAO
-from modelmind.services.firestore import firestore_client as db
-from modelmind.db.schemas.firestore import Document
+from modelmind.db.firestore import firestore_client as db
+from modelmind.db.schemas import DBObject
 
 
 class ResultsDAO(FirestoreDAO):

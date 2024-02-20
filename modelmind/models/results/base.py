@@ -12,8 +12,8 @@ class BaseResult(Generic[QuestionKey], ABC):
 
     data: ResultData = Field(default_factory=dict)
 
-    def __init__(self, **kwargs):
-        pass
+    def __init__(self, data: ResultData, **kwargs):
+        self.data = data or {}
 
     def is_empty(self) -> bool:
         return not bool(self.data)
@@ -23,3 +23,11 @@ class BaseResult(Generic[QuestionKey], ABC):
 
     def get_answered_questions(self) -> list[QuestionKey]:
         return [k for k, v in self.data.items() if v is not None]
+
+
+
+class Result(BaseResult[str]):
+
+    def __init__(self, data: ResultData, **kwargs):
+        super().__init__(data=data, **kwargs)
+

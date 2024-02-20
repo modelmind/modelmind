@@ -8,13 +8,15 @@ class BaseQuestionnaire(ABC):
 
     name: str
     engine: BaseEngine
+    questions: list[BaseQuestion]
 
-    def __init__(self, engine: BaseEngine, questions: list[BaseQuestion]) -> None:
+    def __init__(self, name: str, engine: BaseEngine, questions: list[BaseQuestion]) -> None:
+        self.name = name
         self.engine = engine
         self.questions = questions
 
     @abstractmethod
-    async def infer_next_questions(
+    async def next_questions(
         self,
         results: BaseResult,
     ) -> list[BaseQuestion]:
@@ -26,3 +28,21 @@ class BaseQuestionnaire(ABC):
         results: BaseResult,
     ) -> bool:
         raise NotImplementedError
+
+
+class Questionnaire(BaseQuestionnaire):
+
+    def __init__(self, name: str, engine: BaseEngine, questions: list[BaseQuestion]) -> None:
+        super().__init__(name, engine, questions)
+
+    async def next_questions(
+        self,
+        results: BaseResult,
+    ) -> list[BaseQuestion]:
+        return await self.engine.infer_next_questions(self.questions, results)
+
+    async def is_questionnaire_completed(
+        self,
+        results: BaseResult,
+    ) -> bool:
+        return False

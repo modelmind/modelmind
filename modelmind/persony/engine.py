@@ -6,7 +6,7 @@ from modelmind.persony.dimensions import PersonyDimension
 from modelmind.persony.question import PersonyQuestion
 
 
-class PersonyEngine(BaseEngine):
+class PersonyEngineV1(BaseEngine):
 
     def __init__(self, questions: list[PersonyQuestion], results: list[BaseResult]) -> None:
         self.questions = questions
@@ -14,3 +14,7 @@ class PersonyEngine(BaseEngine):
 
     async def infer_next_questions(self, results: BaseResult) -> list[BaseQuestion]:
         return []
+
+
+
+

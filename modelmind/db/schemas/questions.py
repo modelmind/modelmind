@@ -1,9 +1,9 @@
-from .firestore import Document
+from . import DBObject
 from uuid import UUID
 from pydantic import ConfigDict
 
 
-class QuestionDocument(Document):
+class DBQuestion(DBObject):
     questionnaire_id: UUID
     language: str
 
