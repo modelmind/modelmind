@@ -1,10 +1,21 @@
+from enum import StrEnum
 import math
 from typing import List
+from modelmind.models.analytics.base import BaseAnalytics
 
-from pydantic import BaseModel
+
+class JungFunction(StrEnum):
+    Ni = "Ni"
+    Ne = "Ne"
+    Si = "Si"
+    Se = "Se"
+    Ti = "Ti"
+    Te = "Te"
+    Fi = "Fi"
+    Fe = "Fe"
 
 
-class JungFunctions(BaseModel):
+class JungFunctionsAnalytics(BaseAnalytics):
     Ni: int = 0
     Ne: int = 0
     Si: int = 0
@@ -50,6 +61,6 @@ class JungFunctions(BaseModel):
         total = sum(getattr(self, func) for func in self.model_fields)
         return {func: (getattr(self, func) / total) * 100 for func in self.model_fields}
 
-    def add(self, function: str, value: int) -> None:
+    def add(self, function: JungFunction, value: int) -> None:
         if function in self.model_fields:
             setattr(self, function, getattr(self, function) + value)

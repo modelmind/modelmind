@@ -1,11 +1,10 @@
-from enum import Enum
-
-from pydantic import BaseModel
+from enum import StrEnum
+from modelmind.models.analytics.base import BaseAnalytics
 
 from .types import MBTIType
 
 
-class MBTITrait(Enum):
+class MBTITrait(StrEnum):
     I = "I"
     E = "E"
     N = "N"
@@ -16,7 +15,8 @@ class MBTITrait(Enum):
     P = "P"
 
 
-class MBTITraits(BaseModel):
+class MBTITraitsAnalytics(BaseAnalytics):
+
     I: int = 0
     E: int = 0
     N: int = 0
@@ -92,43 +92,43 @@ class MBTITraits(BaseModel):
         self.P = value
 
     @property
-    def dominants(self) -> str:
-        return "".join(
+    def dominants(self) -> MBTIType:
+        return MBTIType("".join(
             [
                 "E" if self.E > self.I else "I",
                 "S" if self.S > self.N else "N",
                 "T" if self.T > self.F else "F",
                 "J" if self.J > self.P else "P",
             ],
-        )
+        ))
 
     @property
     def percentages(self) -> dict[str, float]:
         return {
-            "I": (self.I / (self.I + self.E)) * 100,
-            "E": (self.E / (self.I + self.E)) * 100,
-            "N": (self.N / (self.N + self.S)) * 100,
-            "S": (self.S / (self.N + self.S)) * 100,
-            "T": (self.T / (self.T + self.F)) * 100,
-            "F": (self.F / (self.T + self.F)) * 100,
-            "J": (self.J / (self.J + self.P)) * 100,
-            "P": (self.P / (self.J + self.P)) * 100,
+            MBTITrait.I: (self.I / (self.I + self.E)) * 100,
+            MBTITrait.E: (self.E / (self.I + self.E)) * 100,
+            MBTITrait.N: (self.N / (self.N + self.S)) * 100,
+            MBTITrait.S: (self.S / (self.N + self.S)) * 100,
+            MBTITrait.T: (self.T / (self.T + self.F)) * 100,
+            MBTITrait.F: (self.F / (self.T + self.F)) * 100,
+            MBTITrait.J: (self.J / (self.J + self.P)) * 100,
+            MBTITrait.P: (self.P / (self.J + self.P)) * 100,
         }
 
-    def get_opposite_trait(self, trait: str) -> str:
+    def get_opposite_trait(self, trait: MBTITrait) -> MBTITrait:
         opposites = {
-            "I": "E",
-            "E": "I",
-            "N": "S",
-            "S": "N",
-            "T": "F",
-            "F": "T",
-            "J": "P",
-            "P": "J",
+            MBTITrait.I: MBTITrait.E,
+            MBTITrait.E: MBTITrait.I,
+            MBTITrait.N: MBTITrait.S,
+            MBTITrait.S: MBTITrait.N,
+            MBTITrait.T: MBTITrait.F,
+            MBTITrait.F: MBTITrait.T,
+            MBTITrait.J: MBTITrait.P,
+            MBTITrait.P: MBTITrait.J,
         }
         return opposites.get(trait, trait)
 
-    def add(self, trait_name: str, value: int) -> None:
+    def add(self, trait_name: MBTITrait, value: int) -> None:
         if trait_name in self.model_fields:
             setattr(self, trait_name, getattr(self, trait_name) + value)
         else:

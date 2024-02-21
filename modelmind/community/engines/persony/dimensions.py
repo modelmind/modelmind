@@ -1,5 +1,6 @@
+from modelmind.community.theory.mbti.trait import MBTITrait
+from modelmind.community.theory.jung.functions import JungFunction
 from enum import StrEnum
-
 
 
 class ClassVar:
@@ -38,149 +39,133 @@ class PersonyDimension(StrEnum):
 
     _category_data = ClassVar(
         {
-            "PREFERENCE_IE": {"value": "P-IE", "negtrait": "I", "postrait": "E"},
-            "PREFERENCE_NS": {"value": "P-NS", "negtrait": "N", "postrait": "S"},
-            "PREFERENCE_TF": {"value": "P-TF", "negtrait": "T", "postrait": "F"},
-            "PREFERENCE_JP": {"value": "P-JP", "negtrait": "J", "postrait": "P"},
+            "PREFERENCE_IE": {"lowTrait": MBTITrait.I, "highTrait": MBTITrait.E},
+            "PREFERENCE_NS": {"lowTrait": MBTITrait.N, "highTrait": MBTITrait.S},
+            "PREFERENCE_TF": {"lowTrait": MBTITrait.T, "highTrait": MBTITrait.F},
+            "PREFERENCE_JP": {"lowTrait": MBTITrait.J, "highTrait": MBTITrait.P},
             "LIFESTYLE_NINE": {
-                "value": "L-NINE",
-                "negtrait": "J",
-                "postrait": "P",
-                "negfunc": "Ni",
-                "posfunc": "Ne",
+                "lowTrait": MBTITrait.J,
+                "highTrait": MBTITrait.P,
+                "lowFunction": JungFunction.Ni,
+                "highFunction": JungFunction.Ne,
             },
             "LIFESTYLE_SISE": {
-                "value": "L-SISE",
-                "negtrait": "J",
-                "postrait": "P",
-                "negfunc": "Si",
-                "posfunc": "Se",
+                "lowTrait": MBTITrait.J,
+                "highTrait": MBTITrait.P,
+                "lowFunction": JungFunction.Si,
+                "highFunction": JungFunction.Se,
             },
             "LIFESTYLE_TETI": {
-                "value": "L-TETI",
-                "negtrait": "J",
-                "postrait": "P",
-                "negfunc": "Te",
-                "posfunc": "Ti",
+                "lowTrait": MBTITrait.J,
+                "highTrait": MBTITrait.P,
+                "lowFunction": JungFunction.Te,
+                "highFunction": JungFunction.Ti,
             },
             "LIFESTYLE_FEFI": {
-                "value": "L-FEFI",
-                "negtrait": "J",
-                "postrait": "P",
-                "negfunc": "Fe",
-                "posfunc": "Fi",
+                "lowTrait": MBTITrait.J,
+                "highTrait": MBTITrait.P,
+                "lowFunction": JungFunction.Fe,
+                "highFunction": JungFunction.Fi,
             },
             "TEMPERAMENT_NISI": {
-                "value": "T-NISI",
-                "negtrait": "N",
-                "postrait": "S",
-                "negfunc": "Ni",
-                "posfunc": "Si",
+                "lowTrait": MBTITrait.N,
+                "highTrait": MBTITrait.S,
+                "lowFunction": JungFunction.Ni,
+                "highFunction": JungFunction.Si,
             },
             "TEMPERAMENT_NESE": {
-                "value": "T-NESE",
-                "negtrait": "N",
-                "postrait": "S",
-                "negfunc": "Ne",
-                "posfunc": "Se",
+                "lowTrait": MBTITrait.N,
+                "highTrait": MBTITrait.S,
+                "lowFunction": JungFunction.Ne,
+                "highFunction": JungFunction.Se,
             },
             "TEMPERAMENT_TEFE": {
-                "value": "T-TEFE",
-                "negtrait": "T",
-                "postrait": "F",
-                "negfunc": "Te",
-                "posfunc": "Fe",
+                "lowTrait": MBTITrait.T,
+                "highTrait": MBTITrait.F,
+                "lowFunction": JungFunction.Te,
+                "highFunction": JungFunction.Fe,
             },
             "TEMPERAMENT_TIFI": {
-                "value": "T-TIFI",
-                "negtrait": "T",
-                "postrait": "F",
-                "negfunc": "Ti",
-                "posfunc": "Fi",
+                "lowTrait": MBTITrait.T,
+                "highTrait": MBTITrait.F,
+                "lowFunction": JungFunction.Ti,
+                "highFunction": JungFunction.Fi,
             },
             "ATTITUDE_INJ": {
-                "value": "A-INJ",
-                "negtrait": "E",
-                "postrait": "I",
-                "negfunc": "Se",
-                "posfunc": "Ni",
+                "lowTrait": MBTITrait.E,
+                "highTrait": MBTITrait.I,
+                "lowFunction": JungFunction.Se,
+                "highFunction": JungFunction.Ni,
             },
             "ATTITUDE_ISJ": {
-                "value": "A-ISJ",
-                "negtrait": "E",
-                "postrait": "I",
-                "negfunc": "Ne",
-                "posfunc": "Si",
+                "lowTrait": MBTITrait.E,
+                "highTrait": MBTITrait.I,
+                "lowFunction": JungFunction.Ne,
+                "highFunction": JungFunction.Si,
             },
             "ATTITUDE_ITP": {
-                "value": "A-ITP",
-                "negtrait": "E",
-                "postrait": "I",
-                "negfunc": "Fe",
-                "posfunc": "Ti",
+                "lowTrait": MBTITrait.E,
+                "highTrait": MBTITrait.I,
+                "lowFunction": JungFunction.Fe,
+                "highFunction": JungFunction.Ti,
             },
             "ATTITUDE_IFP": {
-                "value": "A-IFP",
-                "negtrait": "E",
-                "postrait": "I",
-                "negfunc": "Te",
-                "posfunc": "Fi",
+                "lowTrait": MBTITrait.E,
+                "highTrait": MBTITrait.I,
+                "lowFunction": JungFunction.Te,
+                "highFunction": JungFunction.Fi,
             },
             "ATTITUDE_ETJ": {
-                "value": "A-ETJ",
-                "negtrait": "I",
-                "postrait": "E",
-                "negfunc": "Fi",
-                "posfunc": "Te",
+                "lowTrait": MBTITrait.I,
+                "highTrait": MBTITrait.E,
+                "lowFunction": JungFunction.Fi,
+                "highFunction": JungFunction.Te,
             },
             "ATTITUDE_EFJ": {
-                "value": "A-EFJ",
-                "negtrait": "I",
-                "postrait": "E",
-                "negfunc": "Ti",
-                "posfunc": "Fe",
+                "lowTrait": MBTITrait.I,
+                "highTrait": MBTITrait.E,
+                "lowFunction": JungFunction.Ti,
+                "highFunction": JungFunction.Fe,
             },
             "ATTITUDE_ENP": {
-                "value": "A-ENP",
-                "negtrait": "I",
-                "postrait": "E",
-                "negfunc": "Si",
-                "posfunc": "Ne",
+                "lowTrait": MBTITrait.I,
+                "highTrait": MBTITrait.E,
+                "lowFunction": JungFunction.Si,
+                "highFunction": JungFunction.Ne,
             },
             "ATTITUDE_ESP": {
-                "value": "A-ESP",
-                "negtrait": "I",
-                "postrait": "E",
-                "negfunc": "Ni",
-                "posfunc": "Se",
+                "lowTrait": MBTITrait.I,
+                "highTrait": MBTITrait.E,
+                "lowFunction": JungFunction.Ni,
+                "highFunction": JungFunction.Se,
             },
         },
     )
 
     @property
-    def data(self) -> dict[str, str]:
+    def data(self) -> dict[str, MBTITrait | JungFunction]:
         return self._category_data[self.name]
 
     @property
-    def postrait(self) -> str:
-        return self.data["postrait"]
+    def data_traits(self) -> dict[str, MBTITrait]:
+        return {k: v for k, v in self.data.items() if isinstance(v, MBTITrait)}
 
     @property
-    def negtrait(self) -> str:
-        return self.data["negtrait"]
+    def data_functions(self) -> dict[str, JungFunction]:
+        return {k: v for k, v in self.data.items() if isinstance(v, JungFunction)}
 
     @property
-    def negfunc(self) -> str | None:
-        return self.data["negfunc"] if "negfunc" in self.data else None
+    def high_trait(self) -> MBTITrait:
+        return self.data_traits["highTrait"]
 
     @property
-    def posfunc(self) -> str | None:
-        return self.data["posfunc"] if "posfunc" in self.data else None
+    def low_trait(self) -> MBTITrait:
+        return self.data_traits["lowTrait"]
 
     @property
-    def step(self) -> str:
-        return self.name.split("_")[0]
+    def low_function(self) -> JungFunction | None:
+        return self.data_functions.get("lowFunction")
 
-    @classmethod
-    def steps(cls) -> list[str]:
-        return list(c.step for c in cls)
+    @property
+    def high_function(self) -> JungFunction | None:
+        return self.data_functions.get("highFunction")

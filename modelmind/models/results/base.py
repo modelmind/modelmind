@@ -21,7 +21,7 @@ class BaseResult(Generic[QuestionKey], ABC):
     def count_answered_questions(self) -> int:
         return len([v for v in self.data.values() if v is not None])
 
-    def get_answered_questions(self) -> list[QuestionKey]:
+    def list_answered_questions_keys(self) -> list[QuestionKey]:
         return [k for k, v in self.data.items() if v is not None]
 
 
