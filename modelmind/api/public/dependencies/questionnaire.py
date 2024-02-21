@@ -4,8 +4,7 @@ from modelmind.db.daos.questionnaires import QuestionnairesDAO
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.questions import DBQuestion
 from modelmind.db.exceptions.questionnaires import QuestionnaireNotFound
-from modelmind.models.engines.base import BaseEngine
-from modelmind.services.engine_factory import EngineFactory
+from modelmind.community.engines.engine_factory import EngineFactory
 from modelmind.models.questionnaires.base import Questionnaire
 from modelmind.models.questions.base import Question
 

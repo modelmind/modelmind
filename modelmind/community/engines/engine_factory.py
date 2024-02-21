@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Type
 from modelmind.models.engines.base import BaseEngine
-from modelmind.persony.engine import PersonyEngineV1
+from .persony import PersonyEngineV1
 
 
 class EngineName(StrEnum):

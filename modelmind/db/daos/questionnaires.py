@@ -2,13 +2,13 @@ from typing import List, Optional
 
 from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
 
-from modelmind.utils.type_adapter import TypeAdapter
+from db.utils.type_adapter import TypeAdapter
 
 from .base import FirestoreDAO
-from modelmind.db.schemas import DBIdentifierUUID
-from modelmind.db.schemas.questions import DBQuestion
-from modelmind.db.schemas.questionnaires import DBQuestionnaire
-from modelmind.db.exceptions.questionnaires import QuestionnaireNotFound
+from db.schemas import DBIdentifierUUID
+from db.schemas.questions import DBQuestion
+from db.schemas.questionnaires import DBQuestionnaire
+from db.exceptions.questionnaires import QuestionnaireNotFound
 
 
 class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):

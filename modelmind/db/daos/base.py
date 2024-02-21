@@ -2,10 +2,10 @@ from abc import ABC
 from typing import Any, Dict, TypeVar, Generic, List, Optional, Type, AsyncIterable
 from google.cloud.firestore import AsyncCollectionReference, DocumentReference, DocumentSnapshot
 from pydantic import BaseModel
-from modelmind.db.exceptions.base import DBObjectNotFound
-from modelmind.db.firestore import firestore_client as db
-from modelmind.db.schemas import DBIdentifier
-from modelmind.utils.type_adapter import TypeAdapter
+from db.exceptions.base import DBObjectNotFound
+from db.firestore import firestore_client as db
+from db.schemas import DBIdentifier
+from db.utils.type_adapter import TypeAdapter
 
 # Generic type for documents stored in Firestore
 T = TypeVar('T', bound=BaseModel)

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from .types import MBTIType
 
 
-class Trait(Enum):
+class MBTITrait(Enum):
     I = "I"
     E = "E"
     N = "N"

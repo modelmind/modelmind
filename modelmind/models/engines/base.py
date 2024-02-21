@@ -1,17 +1,16 @@
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar
+from models.questions.base import BaseQuestion
+from models.results.base import BaseResult
 
-Question = TypeVar('Question', bound=Any)
-Result = TypeVar('Result', bound=Any)
 
 class BaseEngine(BaseModel, ABC):
 
-    def __init__(self, questions: list[Question]) -> None:
+    def __init__(self, questions: list[BaseQuestion]) -> None:
         self.questions = questions
 
     @abstractmethod
-    async def infer_next_questions(self, questions: list[Question], current_result: Result) -> list[Question]:
+    async def infer_next_questions(self, current_result: BaseResult) -> list[BaseQuestion]:
         raise NotImplementedError
 
 

@@ -3,7 +3,7 @@ from . import DBObject, DBObjectCreate, DBOBjectUpdate
 from uuid import UUID
 
 
-class Result(DBObject):
+class DBResult(DBObject):
     questionnaire_id: UUID
     session_id: UUID
 
