@@ -1,0 +1,4 @@
+
+
+class TheoryException(Exception):
+    pass

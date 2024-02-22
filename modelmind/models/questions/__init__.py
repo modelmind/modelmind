@@ -1,6 +1,8 @@
-from .base import Question, QuestionKey
+from .base import Question, QuestionKey, QuestionCategory, QuestionID
 
 __all__ = [
     "Question",
-    "QuestionKey"
+    "QuestionKey",
+    "QuestionCategory",
+    "QuestionID",
 ]

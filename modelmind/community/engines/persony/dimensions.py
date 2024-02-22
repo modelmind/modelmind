@@ -155,12 +155,12 @@ class PersonyDimension(StrEnum):
         return {k: v for k, v in self.data.items() if isinstance(v, JungFunction)}
 
     @property
-    def high_trait(self) -> MBTITrait:
-        return self.data_traits["highTrait"]
+    def high_trait(self) -> MBTITrait | None:
+        return self.data_traits.get("highTrait")
 
     @property
-    def low_trait(self) -> MBTITrait:
-        return self.data_traits["lowTrait"]
+    def low_trait(self) -> MBTITrait | None:
+        return self.data_traits.get("lowTrait")
 
     @property
     def low_function(self) -> JungFunction | None:
@@ -169,3 +169,47 @@ class PersonyDimension(StrEnum):
     @property
     def high_function(self) -> JungFunction | None:
         return self.data_functions.get("highFunction")
+
+    @property
+    def has_function(self) -> bool:
+        return self.low_function is not None or self.high_function is not None
+
+    @classmethod
+    def preferences(cls) -> list[str]:
+        return [
+            cls.PREFERENCE_IE,
+            cls.PREFERENCE_NS,
+            cls.PREFERENCE_TF,
+            cls.PREFERENCE_JP,
+        ]
+
+    @classmethod
+    def lifestyles(cls) -> list[str]:
+        return [
+            cls.LIFESTYLE_NINE,
+            cls.LIFESTYLE_SISE,
+            cls.LIFESTYLE_TETI,
+            cls.LIFESTYLE_FEFI,
+        ]
+
+    @classmethod
+    def temperaments(cls) -> list[str]:
+        return [
+            cls.TEMPERAMENT_NISI,
+            cls.TEMPERAMENT_NESE,
+            cls.TEMPERAMENT_TEFE,
+            cls.TEMPERAMENT_TIFI,
+        ]
+
+    @classmethod
+    def attitudes(cls) -> list[str]:
+        return [
+            cls.ATTITUDE_INJ,
+            cls.ATTITUDE_ISJ,
+            cls.ATTITUDE_ITP,
+            cls.ATTITUDE_IFP,
+            cls.ATTITUDE_ETJ,
+            cls.ATTITUDE_EFJ,
+            cls.ATTITUDE_ENP,
+            cls.ATTITUDE_ESP,
+        ]

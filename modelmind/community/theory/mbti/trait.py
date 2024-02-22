@@ -17,14 +17,77 @@ class MBTITrait(StrEnum):
 
 class MBTITraitsAnalytics(BaseAnalytics):
 
-    I: int = 0
-    E: int = 0
-    N: int = 0
-    S: int = 0
-    T: int = 0
-    F: int = 0
-    J: int = 0
-    P: int = 0
+    def __init__(self) -> None:
+
+        self.I: int = 0
+        self.E: int = 0
+        self.N: int = 0
+        self.S: int = 0
+        self.T: int = 0
+        self.F: int = 0
+        self.J: int = 0
+        self.P: int = 0
+
+    @property
+    def dominants(self) -> MBTIType:
+        return MBTIType("".join(
+            [
+                MBTITrait.E if self.E > self.I else MBTITrait.I,
+                MBTITrait.S if self.S > self.N else MBTITrait.N,
+                MBTITrait.T if self.T > self.F else MBTITrait.F,
+                MBTITrait.J if self.J > self.P else MBTITrait.P,
+            ],
+        ))
+
+    @property
+    def percentages(self) -> dict[str, float]:
+        return {
+            MBTITrait.I: (self.I / (self.I + self.E)) * 100,
+            MBTITrait.E: (self.E / (self.I + self.E)) * 100,
+            MBTITrait.N: (self.N / (self.N + self.S)) * 100,
+            MBTITrait.S: (self.S / (self.N + self.S)) * 100,
+            MBTITrait.T: (self.T / (self.T + self.F)) * 100,
+            MBTITrait.F: (self.F / (self.T + self.F)) * 100,
+            MBTITrait.J: (self.J / (self.J + self.P)) * 100,
+            MBTITrait.P: (self.P / (self.J + self.P)) * 100,
+        }
+
+    def get_opposite_trait(self, trait: MBTITrait) -> MBTITrait:
+        opposites = {
+            MBTITrait.I: MBTITrait.E,
+            MBTITrait.E: MBTITrait.I,
+            MBTITrait.N: MBTITrait.S,
+            MBTITrait.S: MBTITrait.N,
+            MBTITrait.T: MBTITrait.F,
+            MBTITrait.F: MBTITrait.T,
+            MBTITrait.J: MBTITrait.P,
+            MBTITrait.P: MBTITrait.J,
+        }
+        return opposites.get(trait, trait)
+
+    def add(self, trait_name: MBTITrait, value: int) -> None:
+        setattr(self, trait_name, getattr(self, trait_name) + value)
+
+    def compute_mbti_probabilities(self) -> dict[str, float]:
+
+        mbti_types = list(MBTIType.__members__.keys())
+
+        # Calculate probabilities based on the trait scores
+        probabilities = {}
+        for mbti in mbti_types:
+            p = 1.0
+            for letter in mbti:
+                p *= (
+                    self.percentages[letter] / 100
+                )  # Convert the percentage to a proportion
+            probabilities[mbti] = p
+
+        # Normalize the probabilities so they sum to 1
+        total = sum(probabilities.values())
+        for mbti in probabilities:
+            probabilities[mbti] /= total
+
+        return probabilities
 
     # Alias properties
     @property
@@ -91,66 +154,7 @@ class MBTITraitsAnalytics(BaseAnalytics):
     def perceiving(self, value: int) -> None:
         self.P = value
 
-    @property
-    def dominants(self) -> MBTIType:
-        return MBTIType("".join(
-            [
-                "E" if self.E > self.I else "I",
-                "S" if self.S > self.N else "N",
-                "T" if self.T > self.F else "F",
-                "J" if self.J > self.P else "P",
-            ],
-        ))
 
-    @property
-    def percentages(self) -> dict[str, float]:
-        return {
-            MBTITrait.I: (self.I / (self.I + self.E)) * 100,
-            MBTITrait.E: (self.E / (self.I + self.E)) * 100,
-            MBTITrait.N: (self.N / (self.N + self.S)) * 100,
-            MBTITrait.S: (self.S / (self.N + self.S)) * 100,
-            MBTITrait.T: (self.T / (self.T + self.F)) * 100,
-            MBTITrait.F: (self.F / (self.T + self.F)) * 100,
-            MBTITrait.J: (self.J / (self.J + self.P)) * 100,
-            MBTITrait.P: (self.P / (self.J + self.P)) * 100,
-        }
 
-    def get_opposite_trait(self, trait: MBTITrait) -> MBTITrait:
-        opposites = {
-            MBTITrait.I: MBTITrait.E,
-            MBTITrait.E: MBTITrait.I,
-            MBTITrait.N: MBTITrait.S,
-            MBTITrait.S: MBTITrait.N,
-            MBTITrait.T: MBTITrait.F,
-            MBTITrait.F: MBTITrait.T,
-            MBTITrait.J: MBTITrait.P,
-            MBTITrait.P: MBTITrait.J,
-        }
-        return opposites.get(trait, trait)
-
-    def add(self, trait_name: MBTITrait, value: int) -> None:
-        if trait_name in self.model_fields:
-            setattr(self, trait_name, getattr(self, trait_name) + value)
-        else:
-            raise ValueError(f"Trait {trait_name} not recognized.")
-
-    def compute_mbti_probabilities(self) -> dict[str, float]:
-
-        mbti_types = list(MBTIType.__members__.keys())
-
-        # Calculate probabilities based on the trait scores
-        probabilities = {}
-        for mbti in mbti_types:
-            p = 1.0
-            for letter in mbti:
-                p *= (
-                    self.percentages[letter] / 100
-                )  # Convert the percentage to a proportion
-            probabilities[mbti] = p
-
-        # Normalize the probabilities so they sum to 1
-        total = sum(probabilities.values())
-        for mbti in probabilities:
-            probabilities[mbti] /= total
-
-        return probabilities
+class MBTITraitException(Exception):
+    pass

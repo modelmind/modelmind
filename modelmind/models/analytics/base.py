@@ -4,3 +4,5 @@ from pydantic import BaseModel
 
 class BaseAnalytics(BaseModel, ABC):
     ...
+
+

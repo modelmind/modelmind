@@ -7,7 +7,9 @@ from pydantic import BaseModel, Field
 
 KEY_DELIMITER = '#'
 
+QuestionID = str
 QuestionKey = str
+QuestionCategory = str
 
 class BaseQuestion(BaseModel, ABC):
 
@@ -41,8 +43,8 @@ class ScaleQuestion(BaseQuestion):
 
 
 class Question(BaseModel):
-    id: str
-    category: str
+    id: QuestionID
+    category: QuestionCategory
     question: Union[ChoiceQuestion, TextQuestion, ScaleQuestion] = Field(..., discriminator='type')
 
     language: str | None = None
