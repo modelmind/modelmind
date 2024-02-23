@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel
 from modelmind.community.theory.mbti.types import MBTIType
+from modelmind.models.analytics.base import BaseAnalytics
 from modelmind.models.questions import Question, QuestionKey
 from modelmind.models.results import Result
 from modelmind.models.engines.base import BaseEngine
@@ -91,10 +92,10 @@ class PersonyEngineV1(BaseEngine):
         """Returns the Question object for the given key, or None if not found."""
         return self.question_key_mapping.get(key)
 
-    def build_analytics(self, current_result: Result) -> tuple[dict[AnalyticsType, MBTITraitsAnalytics], dict[AnalyticsType, JungFunctionsAnalytics]]:
+    def build_analytics(self, current_result: Result) -> list[BaseAnalytics]:
         """Build the analytics for the current result."""
-        base_mbti_analytics = MBTITraitsAnalytics()
-        advanced_mbti_analytics = MBTITraitsAnalytics()
+        base_mbti_analytics = MBTITraitsAnalytics(complexity=MBTITraitsAnalytics.Complexity.basic)
+        advanced_mbti_analytics = MBTITraitsAnalytics(complexity=MBTITraitsAnalytics.Complexity.advanced)
         jung_analytics = JungFunctionsAnalytics()
 
         for question_key, value in current_result.data.items():
@@ -134,15 +135,7 @@ class PersonyEngineV1(BaseEngine):
                     jung_analytics.add(dimension.low_function, self.config.neutral_addition)
                     jung_analytics.add(dimension.high_function, self.config.neutral_addition)
 
-        return (
-            {
-                self.AnalyticsType.BASE_MBTI_TRAITS: base_mbti_analytics,
-                self.AnalyticsType.ADVANCED_MBTI_TRAITS: advanced_mbti_analytics
-            },
-            {
-                self.AnalyticsType.JUNG_FUNCTIONS: jung_analytics
-            },
-        )
+        return [base_mbti_analytics, advanced_mbti_analytics, jung_analytics]
 
     def get_current_step(self, current_result: Result) -> Step:
         counts = self.get_questions_counts_by_step(current_result)
@@ -279,6 +272,9 @@ class PersonyEngineV1(BaseEngine):
             questions = []
 
         return TypeAdapter.validate(List[Question], questions)
+
+    def is_completed(self, current_result: Result) -> bool:
+        return self.get_current_step(current_result) == self.Step.COMPLETED
 
 
 class PersonyEngineException(EngineException):

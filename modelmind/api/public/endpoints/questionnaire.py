@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, Path, Body, HTTPException
 from modelmind.api.public.dependencies.session import verify_session_status, create_jwt_session_token, create_session
 from modelmind.db.schemas.sessions import DBSession, SessionStatus
-from modelmind.commands.next_questions import NextQuestionsCommand, NextQuestions
+from modelmind.db.daos.results import ResultsDAO
 from modelmind.api.public.dependencies.questionnaire import initialize_questionnaire
-from modelmind.api.public.dependencies.results import initialize_results
+from modelmind.api.public.dependencies.results import get_results
+from modelmind.api.public.dependencies.daos import results_dao_provider
+from modelmind.api.public.schemas.next_questions import NextQuestions
+from modelmind.api.public.schemas.analytics import Analytics
 from modelmind.models.questionnaires.base import Questionnaire
 from modelmind.models.questions.base import BaseQuestion
 from modelmind.models.results.base import Result
@@ -22,15 +25,25 @@ async def start_questionnaire_session(
 
 
 @router.post("/{name}/questions/{language}/next", response_model=NextQuestions, dependencies=[Depends(verify_session_status)])
-async def next_questions(
-    current_result: Result = Depends(initialize_results),
+async def next(
+    current_result: Result = Depends(get_results),
     questionnaire: Questionnaire = Depends(initialize_questionnaire),
+    results_dao: ResultsDAO = Depends(results_dao_provider),
 ) -> NextQuestions:
 
-    try:
-        return await NextQuestionsCommand(
-            questionnaire=questionnaire,
-            current_result=current_result,
-        ).run()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if questionnaire.is_completed(current_result):
+        raise HTTPException(status_code=400, detail="Questionnaire already completed")
+
+    next_questions = await questionnaire.next_questions(current_result)
+    analytics = questionnaire.get_analytics(current_result)
+
+    return NextQuestions(
+        questions=next_questions,
+        analytics=analytics,
+        session_status=SessionStatus.IN_PROGRESS
+    )
+
+    # Check if the questionnaire is completed
+    #if questionnaire completed then save to DB + return empty list
+
+    # if not completed, then get next questions

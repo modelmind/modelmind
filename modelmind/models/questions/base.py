@@ -18,7 +18,7 @@ class BaseQuestion(BaseModel, ABC):
         raise NotImplementedError
 
 
-class ChoiceQuestion(BaseQuestion):
+class ChoiceQuestion(BaseModel):
     type: Literal['choiceQuestion']
     text: str
     multiple: bool
@@ -27,12 +27,12 @@ class ChoiceQuestion(BaseQuestion):
     shuffle: bool
 
 
-class TextQuestion(BaseQuestion):
+class TextQuestion(BaseModel):
     type: Literal['textQuestion']
     text: str
 
 
-class ScaleQuestion(BaseQuestion):
+class ScaleQuestion(BaseModel):
     type: Literal['scaleQuestion']
     text: str
     min: int
@@ -42,7 +42,7 @@ class ScaleQuestion(BaseQuestion):
     highLabel: str
 
 
-class Question(BaseModel):
+class Question(BaseQuestion):
     id: QuestionID
     category: QuestionCategory
     question: Union[ChoiceQuestion, TextQuestion, ScaleQuestion] = Field(..., discriminator='type')

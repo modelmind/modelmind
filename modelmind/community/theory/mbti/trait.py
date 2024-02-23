@@ -17,8 +17,12 @@ class MBTITrait(StrEnum):
 
 class MBTITraitsAnalytics(BaseAnalytics):
 
-    def __init__(self) -> None:
+    class Complexity(StrEnum):
+        basic = "basic"
+        advanced = "advanced"
 
+    def __init__(self, complexity: Complexity = Complexity.basic) -> None:
+        self.complexity = complexity
         self.I: int = 0
         self.E: int = 0
         self.N: int = 0

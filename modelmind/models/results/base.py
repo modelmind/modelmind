@@ -1,14 +1,14 @@
 from abc import ABC
-from typing import Any, Generic, TypeVar
-from pydantic import Field
+from typing import Any
+from pydantic import BaseModel, Field
+from modelmind.models.questions import QuestionKey
 
 
-QuestionKey = TypeVar("QuestionKey", bound=str)
 
 ResultData = dict[QuestionKey, Any]
 
 
-class BaseResult(Generic[QuestionKey], ABC):
+class BaseResult(BaseModel, ABC):
 
     data: ResultData = Field(default_factory=dict)
 
@@ -24,9 +24,11 @@ class BaseResult(Generic[QuestionKey], ABC):
     def list_answered_questions_keys(self) -> list[QuestionKey]:
         return [k for k, v in self.data.items() if v is not None]
 
+    # TODO: get category from question key, delimeter is #
 
 
-class Result(BaseResult[str]):
+
+class Result(BaseResult):
 
     def __init__(self, data: ResultData, **kwargs):
         super().__init__(data=data, **kwargs)

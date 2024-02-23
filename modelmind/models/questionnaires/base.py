@@ -1,16 +1,23 @@
 from abc import ABC, abstractmethod
-from modelmind.models.engines.base import BaseEngine
-from modelmind.models.questions.base import BaseQuestion
-from modelmind.models.results.base import BaseResult
 
+from pydantic import BaseModel
+from modelmind.models.engines.base import BaseEngine, Engine
+from modelmind.models.questions.base import BaseQuestion, Question
+from modelmind.models.results.base import BaseResult, Result
+from modelmind.models.analytics.base import BaseAnalytics, Analytics
+from typing import TypeVar, Generic
 
-class BaseQuestionnaire(ABC):
+QuestionType = TypeVar('QuestionType', bound=BaseQuestion)
+EngineType = TypeVar('EngineType', bound=BaseEngine)
+ResultType = TypeVar('ResultType', bound=BaseResult)
+
+class BaseQuestionnaire(BaseModel, Generic[QuestionType, EngineType, ResultType], ABC):
 
     name: str
-    engine: BaseEngine
-    questions: list[BaseQuestion]
+    engine: EngineType
+    questions: list[QuestionType]
 
-    def __init__(self, name: str, engine: BaseEngine, questions: list[BaseQuestion]) -> None:
+    def __init__(self, name: str, engine: EngineType, questions: list[QuestionType]) -> None:
         self.name = name
         self.engine = engine
         self.questions = questions
@@ -18,31 +25,36 @@ class BaseQuestionnaire(ABC):
     @abstractmethod
     async def next_questions(
         self,
-        results: BaseResult,
-    ) -> list[BaseQuestion]:
+        results: ResultType,
+    ) -> list[QuestionType]:
         raise NotImplementedError
 
     @abstractmethod
-    async def is_questionnaire_completed(
+    def is_completed(
         self,
-        results: BaseResult,
+        results: ResultType,
     ) -> bool:
         raise NotImplementedError
 
 
-class Questionnaire(BaseQuestionnaire):
+class Questionnaire(BaseQuestionnaire[Question, Engine, Result]):
 
-    def __init__(self, name: str, engine: BaseEngine, questions: list[BaseQuestion]) -> None:
-        super().__init__(name, engine, questions)
+    def __init__(self, name: str, engine: Engine, questions: list[Question]) -> None:
+        pass
 
     async def next_questions(
         self,
-        results: BaseResult,
-    ) -> list[BaseQuestion]:
-        return await self.engine.infer_next_questions(self.questions, results)
+        results: Result,
+    ) -> list[Question]:
+        return await self.engine.infer_next_questions(results)
 
-    async def is_questionnaire_completed(
+    def is_completed(
         self,
-        results: BaseResult,
+        results: Result,
     ) -> bool:
-        return False
+        return self.engine.is_completed(results)
+
+    def get_analytics(self, results: Result) -> list[Analytics]:
+        analytics_list = self.engine.get_analytics(results)
+
+        return Analytics.combine(analytics_list)
