@@ -1,5 +1,3 @@
 from .base import Statistics
 
-__all__ = [
-    "Statistics"
-]
+__all__ = ["Statistics"]

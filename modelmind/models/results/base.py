@@ -1,15 +1,14 @@
 from abc import ABC
 from typing import Any
+
 from pydantic import BaseModel, Field
+
 from modelmind.models.questions import QuestionKey
-
-
 
 ResultData = dict[QuestionKey, Any]
 
 
 class BaseResult(BaseModel, ABC):
-
     data: ResultData = Field(default_factory=dict)
 
     def __init__(self, data: ResultData, **kwargs):
@@ -27,9 +26,6 @@ class BaseResult(BaseModel, ABC):
     # TODO: get category from question key, delimeter is #
 
 
-
 class Result(BaseResult):
-
     def __init__(self, data: ResultData, **kwargs):
         super().__init__(data=data, **kwargs)
-

@@ -1,7 +1,6 @@
 from enum import StrEnum
 
 
-
 class GrantStackType(StrEnum):
     NiTeFiSe = "NiTeFiSe"
     TiNeSiFe = "TiNeSiFe"

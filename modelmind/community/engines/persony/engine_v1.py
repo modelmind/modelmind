@@ -2,20 +2,24 @@ from enum import StrEnum
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel
+
+from modelmind.community.engines.exceptions import EngineException
+from modelmind.community.engines.persony.dimensions import PersonyDimension
+from modelmind.community.theory.jung.functions import JungFunctionsAnalytics
+from modelmind.community.theory.mbti.trait import MBTITrait, MBTITraitsAnalytics
 from modelmind.community.theory.mbti.types import MBTIType
 from modelmind.models.analytics.base import BaseAnalytics
+from modelmind.models.engines.base import Engine
 from modelmind.models.questions import Question, QuestionKey
 from modelmind.models.results import Result
-from modelmind.models.engines.base import BaseEngine
-from modelmind.community.theory.mbti.trait import MBTITrait, MBTITraitsAnalytics
-from modelmind.community.theory.jung.functions import JungFunctionsAnalytics
-from modelmind.community.engines.persony.dimensions import PersonyDimension
-from modelmind.community.engines.exceptions import EngineException
 from modelmind.utils.type_adapter import TypeAdapter
 
 
-class PersonyEngineV1(BaseEngine):
+class PersonyQuestion(Question):
+    category: PersonyDimension
 
+
+class PersonyEngineV1(Engine[PersonyQuestion]):
     class Config(BaseModel):
         neutral_addition: int = 1
         questions_count: dict[str, int] = {
@@ -25,16 +29,10 @@ class PersonyEngineV1(BaseEngine):
             "ATTITUDE": 8,
         }
 
-
-    class PersonyQuestion(Question):
-        category: PersonyDimension
-
-
     class AnalyticsType(StrEnum):
         BASE_MBTI_TRAITS = "BASE_MBTI_TRAITS"
         ADVANCED_MBTI_TRAITS = "ADVANCED_MBTI_TRAITS"
         JUNG_FUNCTIONS = "JUNG_FUNCTIONS"
-
 
     class Step(StrEnum):
         PREFERENCES = "PREFERENCES"
@@ -55,30 +53,21 @@ class PersonyEngineV1(BaseEngine):
                 return cls.ATTITUDE
             raise InvalidQuestionCategory(f"Question category {question_category} not supported.")
 
-
-
     def __init__(self, questions: list[PersonyQuestion], config: "Config") -> None:
         self.questions = questions
         self.config = config
-        self.question_key_mapping = self._create_question_key_mapping(questions)
-        self.question_step_mapping = self._create_question_step_mapping(questions)
-
-
-    def _create_question_key_mapping(self, questions: List[PersonyQuestion]) -> Dict[QuestionKey, PersonyQuestion]:
-        """Preprocess the questions list to create a key to question mapping."""
-        return {question.key: question for question in questions}
+        self._question_step_mapping = self._create_question_step_mapping(questions)
 
     def _create_question_step_mapping(self, questions: List[PersonyQuestion]) -> Dict[Step, List[PersonyQuestion]]:
         """Preprocess the questions list to create a step to question mapping."""
-        step_mapping = dict() # type: ignore
+        step_mapping = dict()  # type: ignore
         for question in questions:
             step = self.Step.get_step(question.category)
             step_mapping[step] = step_mapping.get(step, []) + [question]
         return step_mapping
 
-
     def get_questions_counts_by_step(self, current_result: Result) -> dict[Step, int]:
-        counts = dict() # type: ignore
+        counts = dict()  # type: ignore
         for question_key, value in current_result.data.items():
             question = self.get_question_by_key(question_key)
             if question is None:
@@ -87,10 +76,9 @@ class PersonyEngineV1(BaseEngine):
             counts[step] = counts.get(step, 0) + 1
         return counts
 
-
     def get_question_by_key(self, key: QuestionKey) -> PersonyQuestion | None:
         """Returns the Question object for the given key, or None if not found."""
-        return self.question_key_mapping.get(key)
+        return self._question_key_mapping.get(key)
 
     def build_analytics(self, current_result: Result) -> list[BaseAnalytics]:
         """Build the analytics for the current result."""
@@ -151,106 +139,166 @@ class PersonyEngineV1(BaseEngine):
         else:
             return self.Step.COMPLETED
 
-    def get_remaining_questions_by_category(self, category: PersonyDimension, current_result: Result) -> List[PersonyQuestion]:
-        return [question for question in self.questions if question.category == category and question.key not in current_result.data]
+    def _get_remaining_questions_by_category(
+        self, category: PersonyDimension, current_result: Result
+    ) -> List[PersonyQuestion]:
+        return [
+            question
+            for question in self.questions
+            if question.category == category and question.key not in current_result.data
+        ]
 
-    def get_preferences_questions(self, current_result: Result, max_questions: Optional[int] = None) -> List[PersonyQuestion]:
+    def _get_preferences_questions(
+        self, current_result: Result, max_questions: Optional[int] = None
+    ) -> List[PersonyQuestion]:
         return (
-            self.get_remaining_questions_by_category(PersonyDimension.PREFERENCE_IE, current_result)[:max_questions]
-            + self.get_remaining_questions_by_category(PersonyDimension.PREFERENCE_NS, current_result)[:max_questions]
-            + self.get_remaining_questions_by_category(PersonyDimension.PREFERENCE_TF, current_result)[:max_questions]
-            + self.get_remaining_questions_by_category(PersonyDimension.PREFERENCE_JP, current_result)[:max_questions]
+            self._get_remaining_questions_by_category(PersonyDimension.PREFERENCE_IE, current_result)[:max_questions]
+            + self._get_remaining_questions_by_category(PersonyDimension.PREFERENCE_NS, current_result)[:max_questions]
+            + self._get_remaining_questions_by_category(PersonyDimension.PREFERENCE_TF, current_result)[:max_questions]
+            + self._get_remaining_questions_by_category(PersonyDimension.PREFERENCE_JP, current_result)[:max_questions]
         )
 
-    def get_lifestyle_questions(self, current_result: Result, dominants: MBTIType, max_questions: Optional[int] = None) -> List[PersonyQuestion]:
-
+    def _get_lifestyle_questions(
+        self, current_result: Result, dominants: MBTIType, max_questions: Optional[int] = None
+    ) -> List[PersonyQuestion]:
         if MBTITrait.N + MBTITrait.T in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_NINE, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_TETI, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_NINE, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_TETI, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.N + MBTITrait.F in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_NINE, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_FEFI, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_NINE, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_FEFI, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.S + MBTITrait.T in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_SISE, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_TETI, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_SISE, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_TETI, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.S + MBTITrait.F in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_SISE, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_FEFI, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_SISE, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.LIFESTYLE_FEFI, current_result)[
+                    :max_questions
+                ]
             )
         else:
             raise PersonyEngineException(f"[Lifestyle] Invalid dominants {dominants}.")
 
-    def get_temperament_questions(self, current_result: Result, dominants: MBTIType, max_questions: Optional[int] = None) -> List[PersonyQuestion]:
+    def _get_temperament_questions(
+        self, current_result: Result, dominants: MBTIType, max_questions: Optional[int] = None
+    ) -> List[PersonyQuestion]:
         if MBTITrait.J in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.TEMPERAMENT_NISI, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.TEMPERAMENT_TEFE, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.TEMPERAMENT_NISI, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.TEMPERAMENT_TEFE, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.P in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.TEMPERAMENT_NESE, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.TEMPERAMENT_TIFI, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.TEMPERAMENT_NESE, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.TEMPERAMENT_TIFI, current_result)[
+                    :max_questions
+                ]
             )
         else:
             raise PersonyEngineException(f"[Temperament] Invalid dominants {dominants}.")
 
-    def get_attitude_questions(self, current_result: Result, dominants: MBTIType, max_questions: Optional[int] = None) -> List[PersonyQuestion]:
+    def _get_attitude_questions(
+        self, current_result: Result, dominants: MBTIType, max_questions: Optional[int] = None
+    ) -> List[PersonyQuestion]:
         if MBTITrait.N + MBTITrait.T + MBTITrait.J in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_INJ, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ETJ, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_INJ, current_result)[:max_questions]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ETJ, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.N + MBTITrait.N + MBTITrait.J in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_INJ, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_EFJ, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_INJ, current_result)[:max_questions]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_EFJ, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.S + MBTITrait.T + MBTITrait.J in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ISJ, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ETJ, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ISJ, current_result)[:max_questions]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ETJ, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.S + MBTITrait.F + MBTITrait.J in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ISJ, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_EFJ, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ISJ, current_result)[:max_questions]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_EFJ, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.N + MBTITrait.T + MBTITrait.P in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ITP, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ENP, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ITP, current_result)[:max_questions]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ENP, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.N + MBTITrait.F + MBTITrait.P in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_IFP, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ENP, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_IFP, current_result)[:max_questions]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ENP, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.S + MBTITrait.T + MBTITrait.P in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ITP, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ESP, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ITP, current_result)[:max_questions]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ESP, current_result)[
+                    :max_questions
+                ]
             )
         elif MBTITrait.S + MBTITrait.F + MBTITrait.P in dominants:
             return (
-                self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_IFP, current_result)[:max_questions]
-                + self.get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ESP, current_result)[:max_questions]
+                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_IFP, current_result)[:max_questions]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ESP, current_result)[
+                    :max_questions
+                ]
             )
         else:
             raise PersonyEngineException(f"[Attitude] Invalid dominants {dominants}.")
 
+    def _get_advanced_mbti_analytics(self, analytics: list[BaseAnalytics]) -> MBTITraitsAnalytics:
+        advanced_mbti_analytics = next(
+            (a for a in analytics if isinstance(a, MBTITraitsAnalytics)
+             and a.complexity == self.AnalyticsType.ADVANCED_MBTI_TRAITS), None
+        )
+        if not isinstance(advanced_mbti_analytics, MBTITraitsAnalytics):
+            raise PersonyEngineException("Could not find advanced MBTI analytics.")
+        return advanced_mbti_analytics
 
     async def infer_next_questions(self, current_result: Result) -> list[Question]:
+        analytics = self.build_analytics(current_result)
 
-        mbti_analytics, jung_analytics = self.build_analytics(current_result)
-
-        advanced_mbti_analytics = mbti_analytics[self.AnalyticsType.ADVANCED_MBTI_TRAITS]
+        advanced_mbti_analytics = self._get_advanced_mbti_analytics(analytics)
 
         current_dominants = advanced_mbti_analytics.dominants
 
@@ -258,16 +306,16 @@ class PersonyEngineV1(BaseEngine):
 
         if current_step == self.Step.PREFERENCES:
             max_questions = self.config.questions_count[self.Step.PREFERENCES] // 4
-            questions = self.get_preferences_questions(current_result, max_questions)
+            questions = self._get_preferences_questions(current_result, max_questions)
         elif current_step == self.Step.LIFESTYLE:
             max_questions = self.config.questions_count[self.Step.LIFESTYLE] // 2
-            questions = self.get_lifestyle_questions(current_result, current_dominants, max_questions)
+            questions = self._get_lifestyle_questions(current_result, current_dominants, max_questions)
         elif current_step == self.Step.TEMPERAMENT:
             max_questions = self.config.questions_count[self.Step.TEMPERAMENT] // 2
-            questions = self.get_temperament_questions(current_result, current_dominants, max_questions)
+            questions = self._get_temperament_questions(current_result, current_dominants, max_questions)
         elif current_step == self.Step.ATTITUDE:
             max_questions = self.config.questions_count[self.Step.ATTITUDE] // 2
-            questions = self.get_attitude_questions(current_result, current_dominants, max_questions)
+            questions = self._get_attitude_questions(current_result, current_dominants, max_questions)
         else:
             questions = []
 

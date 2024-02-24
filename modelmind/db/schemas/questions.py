@@ -1,6 +1,8 @@
-from . import DBObject
 from uuid import UUID
+
 from pydantic import ConfigDict
+
+from . import DBObject
 
 
 class DBQuestion(DBObject):

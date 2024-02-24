@@ -1,14 +1,16 @@
 from abc import ABC
-from typing import Any, Dict, TypeVar, Generic, List, Optional, Type, AsyncIterable
-from google.cloud.firestore import AsyncCollectionReference, DocumentReference, DocumentSnapshot
-from pydantic import BaseModel
+from typing import Any, AsyncIterable, Dict, Generic, List, Optional, Type, TypeVar
+
 from db.exceptions.base import DBObjectNotFound
 from db.firestore import firestore_client as db
 from db.schemas import DBIdentifier
 from db.utils.type_adapter import TypeAdapter
+from google.cloud.firestore import AsyncCollectionReference, DocumentReference, DocumentSnapshot
+from pydantic import BaseModel
 
 # Generic type for documents stored in Firestore
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
+
 
 class FirestoreDAO(Generic[T], ABC):
     _collection_name: str = ""
@@ -26,7 +28,7 @@ class FirestoreDAO(Generic[T], ABC):
         Determine the collection name. Use the class name if _collection_name is not explicitly set.
         """
         if not cls._collection_name:
-            return cls.__name__.split('DAO')[0].lower()
+            return cls.__name__.split("DAO")[0].lower()
         return cls._collection_name
 
     @classmethod

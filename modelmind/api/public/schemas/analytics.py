@@ -1,7 +1,10 @@
-from typing import Any
-from pydantic import BaseModel
+from modelmind.models.analytics.base import Analytics
+
+from .base import BaseResponse
+
+# TODO: we may want to decouple the response schema from the domain model
+# Use an analytics response builder/factory?
 
 
-
-class Analytics(BaseModel):
-    persony: Any
+class AnalyticsResponse(BaseResponse):
+    analytics: list[Analytics]

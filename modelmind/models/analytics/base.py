@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Union
-from pydantic import BaseModel
+from typing import Literal, Optional, Union
+
+from pydantic import BaseModel, Field
 
 
 class BaseAnalytics(BaseModel, ABC):
-
     class BaseItem(BaseModel):
         ...
 
@@ -15,32 +15,27 @@ class BaseAnalytics(BaseModel, ABC):
         raise NotImplementedError
 
 
-
 class Analytics(BaseAnalytics):
-
-    class Item(BaseAnalytics.BaseItem):
+    # TODO: Add support for more item types
+    # TODO: may change extra to a more specific type
+    class ScoreItem(BaseAnalytics.BaseItem):
+        type: Literal["score"] = "score"
         name: str
-        value: int | float | str
+        value: int | float
         percentage: Optional[float] = None
-        category: Optional[str] = None
+        categories: list[str] = []
 
     name: str
-    items: list[Item]
+    items: list[Union[ScoreItem]] = Field(..., discriminator="type")
     extra: dict
 
     @classmethod
     def combine(cls, analytics: list[Union[BaseAnalytics, "Analytics"]]) -> list["Analytics"]:
-        return [
-            analytic.to_analytics_representation()
-            for analytic in analytics
-        ]
+        return [analytic.to_analytics_representation() for analytic in analytics]
 
     def to_analytics_representation(self) -> "Analytics":
         return self
 
     @property
     def categories(self) -> list[str]:
-        return list(set([item.category for item in self.items if item.category is not None]))
-
-
-
+        return list(set([category for item in self.items for category in item.categories]))

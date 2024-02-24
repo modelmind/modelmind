@@ -1,23 +1,23 @@
 from typing import Optional
-from . import DBObject, DBObjectCreate, DBOBjectUpdate
-from uuid import UUID
+
+from . import DBIdentifierUUID, DBObject, DBObjectCreate, DBOBjectUpdate
 
 
 class DBResult(DBObject):
-    questionnaire_id: UUID
-    session_id: UUID
+    questionnaire_id: DBIdentifierUUID
+    session_id: DBIdentifierUUID
 
     data: dict
 
 
 class CreateResult(DBObjectCreate):
-    questionnaire_id: UUID
-    session_id: UUID
+    questionnaire_id: DBIdentifierUUID
+    session_id: DBIdentifierUUID
 
     data: dict
 
-    fingerprint: Optional[str] = None
+    user_hash: Optional[str] = None
 
 
-class UpdateResultFingerprint(DBOBjectUpdate):
-    fingerprint: str | None = None
+class UpdateResultPublicKey(DBOBjectUpdate):
+    user_hash: str | None = None

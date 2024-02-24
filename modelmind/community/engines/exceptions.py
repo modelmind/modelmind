@@ -1,4 +1,2 @@
-
-
 class EngineException(Exception):
     pass

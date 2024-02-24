@@ -1,6 +1,7 @@
 from .jung.stacks import GrantStackType
 from .mbti.types import MBTIType
 
+
 def grant_type_to_mbti(grant_type: GrantStackType) -> MBTIType:
     return {
         GrantStackType.NiTeFiSe: MBTIType.INTJ,
@@ -20,8 +21,6 @@ def grant_type_to_mbti(grant_type: GrantStackType) -> MBTIType:
         GrantStackType.SeTiFeNi: MBTIType.ESTP,
         GrantStackType.SeFiTeNi: MBTIType.ESFP,
     }[grant_type]
-
-
 
 
 def mbti_to_grant_type(mbti_type: MBTIType) -> GrantStackType:

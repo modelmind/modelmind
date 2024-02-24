@@ -1,6 +1,7 @@
-from modelmind.community.theory.mbti.trait import MBTITrait
-from modelmind.community.theory.jung.functions import JungFunction
 from enum import StrEnum
+
+from modelmind.community.theory.jung.functions import JungFunction
+from modelmind.community.theory.mbti.trait import MBTITrait
 
 
 class ClassVar:
@@ -15,7 +16,6 @@ class ClassVar:
 
 
 class PersonyDimension(StrEnum):
-
     PREFERENCE_IE = "P-IE"
     PREFERENCE_NS = "P-NS"
     PREFERENCE_TF = "P-TF"

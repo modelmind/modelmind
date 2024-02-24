@@ -1,6 +1,8 @@
 from enum import StrEnum
 from typing import Type
-from modelmind.models.engines.base import BaseEngine
+
+from modelmind.models.engines.base import BaseEngine, Engine
+
 from .persony import PersonyEngineV1
 
 
@@ -9,13 +11,10 @@ class EngineName(StrEnum):
 
 
 class EngineFactory:
-
-    engine_map = {
-        EngineName.PERSONY_V1: PersonyEngineV1
-    }
+    engine_map = {EngineName.PERSONY_V1: PersonyEngineV1}
 
     @classmethod
-    def get_engine(cls, engine_name: str) -> Type[BaseEngine]:
+    def get_engine(cls, engine_name: str) -> Type[Engine]:
         try:
             return cls.engine_map[EngineName(engine_name)]
         except KeyError:

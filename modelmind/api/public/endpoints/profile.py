@@ -11,4 +11,3 @@ async def get_questionnaire_results(id: str) -> list:
 @router.get("/me")
 async def get_my_profile() -> dict:
     return {"name": "", "email": "", "phone": ""}
-

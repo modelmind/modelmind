@@ -15,7 +15,9 @@ class SessionStatus(StrEnum):
 
 class DBCreateSession(DBObjectCreate):
     id: DBIdentifierUUID = Field(default_factory=uuid4)
-    questionnaire_id: str
+
+    profile_id: DBIdentifierUUID
+    questionnaire_id: DBIdentifierUUID
 
     status: SessionStatus
     language: str
@@ -26,7 +28,8 @@ class DBCreateSession(DBObjectCreate):
 class DBSession(DBObject):
     id: DBIdentifierUUID
 
-    questionnaire_id: str
+    profile_id: DBIdentifierUUID
+    questionnaire_id: DBIdentifierUUID
 
     status: SessionStatus
     language: str

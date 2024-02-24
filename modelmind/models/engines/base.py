@@ -1,15 +1,17 @@
-from typing import Any
-from pydantic import BaseModel
 from abc import ABC, abstractmethod
-from modelmind.models.questions.base import Question
-from modelmind.models.results.base import Result
+from typing import Any, Dict, Generic, List, TypeVar
+
+from pydantic import BaseModel
+
 from modelmind.models.analytics.base import BaseAnalytics
+from modelmind.models.questions.base import Question
+from modelmind.models.results.base import Result, QuestionKey
+
+QuestionType = TypeVar("QuestionType", bound=Question)
 
 
-class BaseEngine(BaseModel, ABC):
-
-
-    def __init__(self, questions: list[Question], *args: Any, **kwargs: Any) -> None:
+class BaseEngine(BaseModel, Generic[QuestionType], ABC):
+    def __init__(self, questions: list[QuestionType], *args: Any, **kwargs: Any) -> None:
         ...
 
     @abstractmethod
@@ -21,12 +23,15 @@ class BaseEngine(BaseModel, ABC):
         raise NotImplementedError
 
 
-
-class Engine(BaseEngine):
-
-    def __init__(self, questions: list[Question], *args: Any, **kwargs: Any) -> None:
+class Engine(BaseEngine, Generic[QuestionType]):
+    def __init__(self, questions: list[QuestionType], *args: Any, **kwargs: Any) -> None:
         super().__init__(questions, *args, **kwargs)
         self._analytics: list[BaseAnalytics] = []
+        self._question_key_mapping: Dict[QuestionKey, QuestionType] = self._create_question_key_mapping(questions)
+
+    def _create_question_key_mapping(self, questions: List[QuestionType]) -> Dict[QuestionKey, QuestionType]:
+        """Preprocess the questions list to create a key to question mapping."""
+        return {question.key: question for question in questions}
 
     def is_completed(self, current_result: Result) -> bool:
         return current_result.is_empty()

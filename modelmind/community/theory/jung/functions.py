@@ -1,7 +1,8 @@
-from enum import StrEnum
 import math
+from enum import StrEnum
 from typing import List
-from modelmind.models.analytics.base import BaseAnalytics
+
+from modelmind.models.analytics.base import Analytics, BaseAnalytics
 
 
 class JungFunction(StrEnum):
@@ -24,6 +25,9 @@ class JungFunctionsAnalytics(BaseAnalytics):
     Te: int = 0
     Fi: int = 0
     Fe: int = 0
+
+    def __init__(self) -> None:
+        pass
 
     @staticmethod
     def _softmax(x: List[int]) -> List[float]:
@@ -64,3 +68,38 @@ class JungFunctionsAnalytics(BaseAnalytics):
     def add(self, function: JungFunction, value: int) -> None:
         if function in self.model_fields:
             setattr(self, function, getattr(self, function) + value)
+
+    @property
+    def categories(self) -> dict[JungFunction, List[str]]:
+        return {
+            JungFunction.Ni: ["intuition", "introverted", "irrational"],
+            JungFunction.Ne: ["intuition", "extroverted", "irrational"],
+            JungFunction.Si: ["sensing", "introverted", "irrational"],
+            JungFunction.Se: ["sensing", "extroverted", "irrational"],
+            JungFunction.Ti: ["thinking", "introverted", "rational"],
+            JungFunction.Te: ["thinking", "extroverted", "rational"],
+            JungFunction.Fi: ["feeling", "introverted", "rational"],
+            JungFunction.Fe: ["feeling", "extroverted", "rational"],
+        }
+
+    def to_analytics_representation(self) -> "Analytics":
+        items = [
+            Analytics.ScoreItem(
+                name=func.value,
+                value=getattr(self, func.value),
+                percentage=self.percentages[func.value],
+                categories=self.categories[func],
+            )
+            for func in JungFunction
+        ]
+
+        extra = {
+            "percentages": self.percentages,
+            "normalized_functions": self.normalized_functions,
+        }
+
+        return Analytics(
+            name=self.__class__.__name__,
+            items=items,
+            extra=extra,
+        )

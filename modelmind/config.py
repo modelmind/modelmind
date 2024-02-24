@@ -75,6 +75,7 @@ class Settings(BaseSettings):
     These parameters can be configured
     with environment variables.
     """
+
     server: Server = Server()
     environment: Environment = Environment.DEV
 

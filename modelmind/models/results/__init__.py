@@ -1,5 +1,3 @@
 from .base import Result
 
-__all__ = [
-    "Result"
-]
+__all__ = ["Result"]
