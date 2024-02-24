@@ -1,15 +1,41 @@
-# modelmind
+<div align="center">
+   <a href="https://langfuse.com">
+      <h1>🫧 Modelmind </h1>
+   </a>
+ <div>
+   <h3>
+      Building the most accurate and reliable personality test.
+   </h3>
+    <div>
+     Understand yourself - grow together
+   </div>
+   </br>
+   <div>
+      <a href="">
+         <strong>Theory</strong>
+      </a> ·
+      <a href="">
+         <strong>Methodology</strong>
+      </a> ·
+      <a href="https://langfuse.com/idea">
+         <strong>Suggestions</strong>
+      </a> ·
+      <a href="https://discord.com/">
+         <strong>Discord</strong>
+      </a> 
+   </div>
+   </br>
+      <img src="https://img.shields.io/badge/License-MIT-red.svg?style=flat-square" alt="MIT License">
+   </div>
+</div>
+</br>
 
-This project was generated using fastapi_template.
 
-## IAP Access
-```
-gcloud iap web add-iam-policy-binding \
-    --resource-type=backend-services \
-    --service $BACKEND_SERVICE \
-    --member=user:$USER_EMAIL \
-    --role='roles/iap.httpsResourceAccessor'
-```
+# Overview
+
+## Iterative Improvement
+
+
 
 ## Poetry
 
