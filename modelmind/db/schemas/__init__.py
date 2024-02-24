@@ -16,7 +16,7 @@ class DBObject(BaseModel):
 
 
 class DBObjectCreate(DBObject):
-    id: DBIdentifier = Field(default_factory=uuid4)
+    id: DBIdentifierUUID = Field(default_factory=uuid4)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 

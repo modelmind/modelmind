@@ -1,10 +1,10 @@
 from typing import List, Optional
 
-from db.exceptions.questionnaires import QuestionnaireNotFound
-from db.schemas import DBIdentifierUUID
-from db.schemas.questionnaires import DBQuestionnaire
-from db.schemas.questions import DBQuestion
-from db.utils.type_adapter import TypeAdapter
+from modelmind.db.exceptions.questionnaires import QuestionnaireNotFound
+from modelmind.db.schemas import DBIdentifierUUID
+from modelmind.db.schemas.questionnaires import DBQuestionnaire
+from modelmind.db.schemas.questions import DBQuestion
+from modelmind.db.utils.type_adapter import TypeAdapter
 from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
 
 from .base import FirestoreDAO

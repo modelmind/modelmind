@@ -15,6 +15,7 @@ def get_result(data: dict = Body(..., description="The current results data of t
 
 async def get_result_from_session(session: DBSession = Depends(get_session_from_token)) -> Result:
     try:
-        return await ResultsDAO.get_result_from_session_id(session.id)
+        db_result = await ResultsDAO.get_result_from_session_id(session.id)
+        return Result(data=db_result.data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

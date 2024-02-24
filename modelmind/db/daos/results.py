@@ -1,8 +1,8 @@
 from typing import List
 from uuid import UUID
 
-from db.firestore import firestore_client as db
-from db.schemas.results import CreateResult, DBResult
+from modelmind.db.firestore import firestore_client as db
+from modelmind.db.schemas.results import CreateResult, DBResult
 
 from .base import FirestoreDAO
 

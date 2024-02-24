@@ -1,7 +1,7 @@
-from db.exceptions.sessions import SessionNotFound
-from db.firestore import firestore_client as db
-from db.schemas import DBIdentifierUUID
-from db.schemas.sessions import DBCreateSession, DBSession, SessionStatus
+from modelmind.db.exceptions.sessions import SessionNotFound
+from modelmind.db.firestore import firestore_client as db
+from modelmind.db.schemas import DBIdentifierUUID
+from modelmind.db.schemas.sessions import DBCreateSession, DBSession, SessionStatus
 
 from .base import FirestoreDAO
 
