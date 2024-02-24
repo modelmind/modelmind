@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, AsyncIterable, Dict, Generic, List, Optional, Type, TypeVar
+from typing import Any, AsyncIterable, Dict, Generic, List, Type, TypeVar
 
 from db.exceptions.base import DBObjectNotFound
 from db.firestore import firestore_client as db

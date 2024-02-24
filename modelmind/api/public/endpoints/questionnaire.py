@@ -5,7 +5,7 @@ from modelmind.api.public.dependencies.profile import get_or_create_profile
 from modelmind.api.public.dependencies.questionnaire import (
     get_questionnaire_by_name,
     initialize_questionnaire_from_session,
-    validate_requested_language
+    validate_requested_language,
 )
 from modelmind.api.public.dependencies.results import get_result, get_result_from_session
 from modelmind.api.public.dependencies.session.create import create_jwt_session_token, create_session

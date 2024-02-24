@@ -13,7 +13,6 @@ from modelmind.models.questionnaires.base import Questionnaire
 from modelmind.models.questions.base import Question
 
 
-
 async def get_questionnaire_by_name(name: str = Path(...)) -> DBQuestionnaire:
     try:
         # TODO: Cache this
@@ -25,10 +24,9 @@ async def get_questionnaire_by_name(name: str = Path(...)) -> DBQuestionnaire:
 
 
 def validate_requested_language(
-        questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_name),
-        language: str = Path(..., description="The language code for the questionnaire")
-    ) -> str:
-
+    questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_name),
+    language: str = Path(..., description="The language code for the questionnaire"),
+) -> str:
     # TODO: we may want to check the languages available for the questions given a questionnaire name
     available_languages = ["en"]
 
@@ -52,7 +50,8 @@ async def get_language_from_session(session: DBSession = Depends(get_session_fro
 
 
 async def get_questions_from_session(
-    questionnaire: DBQuestionnaire = Depends(get_questionnaire_from_session), language: str = Depends(get_language_from_session)
+    questionnaire: DBQuestionnaire = Depends(get_questionnaire_from_session),
+    language: str = Depends(get_language_from_session),
 ) -> List[DBQuestion]:
     try:
         # TODO: Cache this

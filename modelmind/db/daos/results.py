@@ -2,7 +2,6 @@ from typing import List
 from uuid import UUID
 
 from db.firestore import firestore_client as db
-from db.schemas import DBObject
 from db.schemas.results import CreateResult, DBResult
 
 from .base import FirestoreDAO

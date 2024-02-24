@@ -5,18 +5,16 @@ from pydantic import BaseModel
 
 from modelmind.community.engines.exceptions import EngineException
 from modelmind.community.engines.persony.dimensions import PersonyDimension
-from modelmind.community.theory.jung.functions import JungFunctionsAnalytics
-from modelmind.community.theory.mbti.trait import MBTITrait, MBTITraitsAnalytics
+from modelmind.community.theory.mbti.trait import MBTITrait
 from modelmind.community.theory.mbti.types import MBTIType
 from modelmind.models.analytics.base import BaseAnalytics
 from modelmind.models.engines.base import Engine
-from modelmind.models.questions import Question, QuestionKey
+from modelmind.models.questions import Question
 from modelmind.models.results import Result
 from modelmind.utils.type_adapter import TypeAdapter
 
-
-class PersonyQuestion(Question):
-    category: PersonyDimension
+from .analyzer import PersonyAnalyzer
+from .questions import PersonyQuestion
 
 
 class PersonyEngineV1(Engine[PersonyQuestion]):
@@ -28,11 +26,6 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
             "TEMPERAMENT": 16,
             "ATTITUDE": 8,
         }
-
-    class AnalyticsType(StrEnum):
-        BASE_MBTI_TRAITS = "BASE_MBTI_TRAITS"
-        ADVANCED_MBTI_TRAITS = "ADVANCED_MBTI_TRAITS"
-        JUNG_FUNCTIONS = "JUNG_FUNCTIONS"
 
     class Step(StrEnum):
         PREFERENCES = "PREFERENCES"
@@ -57,73 +50,40 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
         self.questions = questions
         self.config = config
         self._question_step_mapping = self._create_question_step_mapping(questions)
-
-    def _create_question_step_mapping(self, questions: List[PersonyQuestion]) -> Dict[Step, List[PersonyQuestion]]:
-        """Preprocess the questions list to create a step to question mapping."""
-        step_mapping = dict()  # type: ignore
-        for question in questions:
-            step = self.Step.get_step(question.category)
-            step_mapping[step] = step_mapping.get(step, []) + [question]
-        return step_mapping
+        self.analyzer = PersonyAnalyzer(
+            config=PersonyAnalyzer.Config(neutral_addition=config.neutral_addition),
+            question_key_mapping=self.question_key_mapping,
+        )
 
     def get_questions_counts_by_step(self, current_result: Result) -> dict[Step, int]:
         counts = dict()  # type: ignore
-        for question_key, value in current_result.data.items():
-            question = self.get_question_by_key(question_key)
+        for question_key, _ in current_result.data.items():
+            question = self.question_key_mapping.get(question_key)
             if question is None:
                 continue
             step = self.Step.get_step(question.category)
             counts[step] = counts.get(step, 0) + 1
         return counts
 
-    def get_question_by_key(self, key: QuestionKey) -> PersonyQuestion | None:
-        """Returns the Question object for the given key, or None if not found."""
-        return self._question_key_mapping.get(key)
-
     def build_analytics(self, current_result: Result) -> list[BaseAnalytics]:
         """Build the analytics for the current result."""
-        base_mbti_analytics = MBTITraitsAnalytics(complexity=MBTITraitsAnalytics.Complexity.basic)
-        advanced_mbti_analytics = MBTITraitsAnalytics(complexity=MBTITraitsAnalytics.Complexity.advanced)
-        jung_analytics = JungFunctionsAnalytics()
+        return self.analyzer.calculate_analytics(current_result)
 
-        for question_key, value in current_result.data.items():
-            question = self.get_question_by_key(question_key)
-            if question is None:
-                continue
+    def is_completed(self, current_result: Result) -> bool:
+        return self.get_current_step(current_result) == self.Step.COMPLETED
 
-            # Instantiate the corresponding dimension to the question category
-            # Contains mapping for low and high traits/functions
-            dimension = PersonyDimension(question.category)
+    async def infer_next_questions(self, current_result: Result) -> list[Question]:
+        self.build_analytics(current_result)
 
-            if value < 0:
-                # If the value is negative, we increase the low trait/function
-                if dimension.low_trait and not dimension.has_function:
-                    base_mbti_analytics.add(dimension.low_trait, abs(value))
-                if dimension.low_trait:
-                    advanced_mbti_analytics.add(dimension.low_trait, abs(value))
-                if dimension.low_function:
-                    jung_analytics.add(dimension.low_function, abs(value))
-            elif value > 0:
-                # If the value is positive, we increase the high trait/function
-                if dimension.high_trait and not dimension.has_function:
-                    base_mbti_analytics.add(dimension.high_trait, value)
-                if dimension.high_trait:
-                    advanced_mbti_analytics.add(dimension.high_trait, value)
-                if dimension.high_function:
-                    jung_analytics.add(dimension.high_function, value)
-            else:
-                # If the value is neutral (0), we increase for both traits/functions
-                if dimension.low_trait and dimension.high_trait and not dimension.has_function:
-                    base_mbti_analytics.add(dimension.low_trait, self.config.neutral_addition)
-                    base_mbti_analytics.add(dimension.high_trait, self.config.neutral_addition)
-                if dimension.low_trait and dimension.high_trait:
-                    advanced_mbti_analytics.add(dimension.low_trait, self.config.neutral_addition)
-                    advanced_mbti_analytics.add(dimension.high_trait, self.config.neutral_addition)
-                if dimension.low_function and dimension.high_function:
-                    jung_analytics.add(dimension.low_function, self.config.neutral_addition)
-                    jung_analytics.add(dimension.high_function, self.config.neutral_addition)
+        advanced_mbti_analytics = self.analyzer.advanced_mbti_analytics
 
-        return [base_mbti_analytics, advanced_mbti_analytics, jung_analytics]
+        current_dominants = advanced_mbti_analytics.dominants
+
+        current_step = self.get_current_step(current_result)
+
+        questions = self.select_remaining_questions_from_step(current_step, current_result, current_dominants)
+
+        return TypeAdapter.validate(List[Question], questions)
 
     def get_current_step(self, current_result: Result) -> Step:
         counts = self.get_questions_counts_by_step(current_result)
@@ -138,6 +98,33 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
             return self.Step.ATTITUDE
         else:
             return self.Step.COMPLETED
+
+    def select_remaining_questions_from_step(
+        self, step: Step, current_result: Result, current_dominants: MBTIType
+    ) -> List[PersonyQuestion]:
+        if step == self.Step.PREFERENCES:
+            max_questions = self.config.questions_count[self.Step.PREFERENCES] // 4
+            questions = self._get_preferences_questions(current_result, max_questions)
+        elif step == self.Step.LIFESTYLE:
+            max_questions = self.config.questions_count[self.Step.LIFESTYLE] // 2
+            questions = self._get_lifestyle_questions(current_result, current_dominants, max_questions)
+        elif step == self.Step.TEMPERAMENT:
+            max_questions = self.config.questions_count[self.Step.TEMPERAMENT] // 2
+            questions = self._get_temperament_questions(current_result, current_dominants, max_questions)
+        elif step == self.Step.ATTITUDE:
+            max_questions = self.config.questions_count[self.Step.ATTITUDE] // 2
+            questions = self._get_attitude_questions(current_result, current_dominants, max_questions)
+        else:
+            questions = []
+        return questions
+
+    def _create_question_step_mapping(self, questions: List[PersonyQuestion]) -> Dict[Step, List[PersonyQuestion]]:
+        """Preprocess the questions list to create a step to question mapping."""
+        step_mapping = dict()  # type: ignore
+        for question in questions:
+            step = self.Step.get_step(question.category)
+            step_mapping[step] = step_mapping.get(step, []) + [question]
+        return step_mapping
 
     def _get_remaining_questions_by_category(
         self, category: PersonyDimension, current_result: Result
@@ -285,44 +272,6 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
             )
         else:
             raise PersonyEngineException(f"[Attitude] Invalid dominants {dominants}.")
-
-    def _get_advanced_mbti_analytics(self, analytics: list[BaseAnalytics]) -> MBTITraitsAnalytics:
-        advanced_mbti_analytics = next(
-            (a for a in analytics if isinstance(a, MBTITraitsAnalytics)
-             and a.complexity == self.AnalyticsType.ADVANCED_MBTI_TRAITS), None
-        )
-        if not isinstance(advanced_mbti_analytics, MBTITraitsAnalytics):
-            raise PersonyEngineException("Could not find advanced MBTI analytics.")
-        return advanced_mbti_analytics
-
-    async def infer_next_questions(self, current_result: Result) -> list[Question]:
-        analytics = self.build_analytics(current_result)
-
-        advanced_mbti_analytics = self._get_advanced_mbti_analytics(analytics)
-
-        current_dominants = advanced_mbti_analytics.dominants
-
-        current_step = self.get_current_step(current_result)
-
-        if current_step == self.Step.PREFERENCES:
-            max_questions = self.config.questions_count[self.Step.PREFERENCES] // 4
-            questions = self._get_preferences_questions(current_result, max_questions)
-        elif current_step == self.Step.LIFESTYLE:
-            max_questions = self.config.questions_count[self.Step.LIFESTYLE] // 2
-            questions = self._get_lifestyle_questions(current_result, current_dominants, max_questions)
-        elif current_step == self.Step.TEMPERAMENT:
-            max_questions = self.config.questions_count[self.Step.TEMPERAMENT] // 2
-            questions = self._get_temperament_questions(current_result, current_dominants, max_questions)
-        elif current_step == self.Step.ATTITUDE:
-            max_questions = self.config.questions_count[self.Step.ATTITUDE] // 2
-            questions = self._get_attitude_questions(current_result, current_dominants, max_questions)
-        else:
-            questions = []
-
-        return TypeAdapter.validate(List[Question], questions)
-
-    def is_completed(self, current_result: Result) -> bool:
-        return self.get_current_step(current_result) == self.Step.COMPLETED
 
 
 class PersonyEngineException(EngineException):

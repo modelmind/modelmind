@@ -6,7 +6,7 @@ from .types import MBTIType
 
 
 class MBTITrait(StrEnum):
-    I = "I"
+    I = "I"  # type: ignore
     E = "E"
     N = "N"
     S = "S"

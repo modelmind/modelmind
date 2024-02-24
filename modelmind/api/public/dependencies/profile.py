@@ -29,7 +29,7 @@ async def get_or_create_profile(profile_id: str = Depends(get_profile_id)) -> DB
     else:
         try:
             return await ProfilesDAO.get_from_id(profile_id)
-        except ProfileNotFound as e:
+        except ProfileNotFound:
             return await ProfilesDAO.create_profile()
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

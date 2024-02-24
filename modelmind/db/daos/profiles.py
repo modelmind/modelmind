@@ -21,5 +21,5 @@ class ProfilesDAO(FirestoreDAO[DBProfile]):
         try:
             doc = await db.collection(cls._collection_name).document(id).get()
             return DBProfile.model_validate(doc.to_dict())
-        except Exception as e:
+        except Exception:
             raise ProfileNotFound()

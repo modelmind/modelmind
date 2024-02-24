@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from modelmind.models.analytics.base import BaseAnalytics
 from modelmind.models.questions.base import Question
-from modelmind.models.results.base import Result, QuestionKey
+from modelmind.models.results.base import QuestionKey, Result
 
 QuestionType = TypeVar("QuestionType", bound=Question)
 
@@ -27,9 +27,9 @@ class Engine(BaseEngine, Generic[QuestionType]):
     def __init__(self, questions: list[QuestionType], *args: Any, **kwargs: Any) -> None:
         super().__init__(questions, *args, **kwargs)
         self._analytics: list[BaseAnalytics] = []
-        self._question_key_mapping: Dict[QuestionKey, QuestionType] = self._create_question_key_mapping(questions)
+        self.question_key_mapping: Dict[QuestionKey, QuestionType] = self._createquestion_key_mapping(questions)
 
-    def _create_question_key_mapping(self, questions: List[QuestionType]) -> Dict[QuestionKey, QuestionType]:
+    def _createquestion_key_mapping(self, questions: List[QuestionType]) -> Dict[QuestionKey, QuestionType]:
         """Preprocess the questions list to create a key to question mapping."""
         return {question.key: question for question in questions}
 
