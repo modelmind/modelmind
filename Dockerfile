@@ -26,6 +26,6 @@ USER app
 ENV SERVER__PORT=$SERVER__PORT
 
 EXPOSE $SERVER__PORT
-ENTRYPOINT ["python", "-m", "agibot"]
+ENTRYPOINT ["python", "-m", "modelmind"]
 
 CMD ["run"]
