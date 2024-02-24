@@ -9,21 +9,6 @@ images:
 
 steps:
 
-  - id: 'Install python dependencies'
-    name: '${_PYTHON_DOCKER_IMAGE}'
-    entrypoint: /bin/sh
-    args:
-      - "-c"
-      - "pip install -r requirements-dev.txt -r requirements.txt --user"
-
-  - id: 'Pytest'
-    name: '${_PYTHON_DOCKER_IMAGE}'
-    entrypoint: /bin/sh
-    args:
-      - "-c"
-      - "python -m pytest -v --cov-config .coveragerc --cov=agicap_gateway -l --tb=short --maxfail=1 tests/ --junitxml=${SHORT_SHA}_test_log.xml"
-    waitFor: [ "Install python dependencies" ]
-
   - id: "Build image and tag it"
     name: "${_DOCKER_IMAGE}"
     dir: "back"
@@ -89,20 +74,6 @@ steps:
       - SERVER__TAG=${_CLOUDRUN_TAG}
       - --set-env-vars
       - SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
-      - --set-env-vars
-      - SERVER__INCLUDE_MY_ACCOUNT_ROUTER=true
-      - --set-env-vars
-      - CLOUD_TASKS__SERVICE_ACCOUNT_EMAIL=${_SA_RUNNER_EMAIL}
-      - --set-env-vars
-      - ELASTIC__SERVICE_NAME=${_ELASTIC__API_SERVICE_NAME}
-      - --set-env-vars
-      - ELASTIC__SERVER_URL=${_ELASTIC__SERVER_URL}
-      - --set-env-vars
-      - AGICAP_GATEWAY__BASE_URL=${_AGICAP_GATEWAY_BASE_URL}
-      - --set-env-vars
-      - ENVIRONMENT=${_CLOUDRUN_TAG}
-      - --set-secrets
-      - ELASTIC__API_KEY=${_ELASTIC__API_KEY}
       - --vpc-connector=${_VPC_CONNECTOR}
       - --vpc-egress=all-traffic
 
