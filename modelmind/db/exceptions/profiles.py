@@ -1,5 +1,9 @@
-from .base import DBObjectNotFound
+from .base import DBOBjectCreationFailed, DBObjectNotFound
 
 
-class ProfileNotFound(DBObjectNotFound):
+class DBProfileNotFound(DBObjectNotFound):
+    pass
+
+
+class DBProfileCreationFailed(DBOBjectCreationFailed):
     pass

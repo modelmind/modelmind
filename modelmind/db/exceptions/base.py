@@ -4,3 +4,7 @@ class DBException(Exception):
 
 class DBObjectNotFound(DBException):
     pass
+
+
+class DBOBjectCreationFailed(DBException):
+    pass

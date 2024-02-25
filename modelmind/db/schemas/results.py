@@ -1,18 +1,18 @@
 from typing import Optional
 
-from . import DBIdentifierUUID, DBObject, DBObjectCreate, DBOBjectUpdate
+from . import DBIdentifier, DBObject, DBObjectCreate, DBOBjectUpdate
 
 
 class DBResult(DBObject):
-    questionnaire_id: DBIdentifierUUID
-    session_id: DBIdentifierUUID
+    questionnaire_id: DBIdentifier
+    session_id: DBIdentifier
 
     data: dict
 
 
 class CreateResult(DBObjectCreate):
-    questionnaire_id: DBIdentifierUUID
-    session_id: DBIdentifierUUID
+    questionnaire_id: DBIdentifier
+    session_id: DBIdentifier
 
     data: dict
 

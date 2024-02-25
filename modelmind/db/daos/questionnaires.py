@@ -1,59 +1,58 @@
-from typing import List, Optional
+from typing import AsyncIterator, List, Optional
 
 from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
 
 from modelmind.db.exceptions.questionnaires import DBQuestionnaireNotFound
-from modelmind.db.schemas import DBIdentifierUUID
+from modelmind.db.schemas import DBIdentifier
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.questions import DBQuestion
-from modelmind.db.utils.type_adapter import TypeAdapter
 
-from .base import FirestoreDAO
+from .base import FieldFilter, FirestoreDAO
 
 
 class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
     _collection_name = "questionnaires"
-    _subcollection_questions = "questions"
 
     @classmethod
-    async def get_from_id(cls, questionnaire_id: DBIdentifierUUID) -> DBQuestionnaire:
-        doc: DocumentSnapshot = await cls.collection().document(str(questionnaire_id)).get()
-        if doc.exists:
-            return DBQuestionnaire.model_validate(doc.to_dict())
-        raise DBQuestionnaireNotFound()
+    def questions_collection(self, questionnaire_id: DBIdentifier) -> AsyncCollectionReference:
+        return self.document_ref(questionnaire_id).collection("questions")
 
     @classmethod
-    async def get_from_name(cls, name: str) -> DBQuestionnaire:
-        query = cls.collection().where("name", "==", name)
-        docs: list[DocumentSnapshot] = await query.get()
-        for doc in docs:
-            return DBQuestionnaire.model_validate(doc.to_dict())
-        raise DBQuestionnaireNotFound()
+    async def get_from_id(self, questionnaire_id: DBIdentifier) -> DBQuestionnaire:
+        try:
+            return await self.get(questionnaire_id)
+        except Exception:
+            raise DBQuestionnaireNotFound()
 
     @classmethod
-    async def get_questions(
-        cls, questionnaire_id: DBIdentifierUUID, language: Optional[str] = None
-    ) -> List[DBQuestion]:
-        questions_ref: AsyncCollectionReference = (
-            cls.collection().document(str(questionnaire_id)).collection(cls._subcollection_questions)
-        )
+    async def get_from_name(self, name: str) -> DBQuestionnaire:
+        try:
+            return (await self.search([FieldFilter("name", "==", name)], limit=1))[0]
+        except Exception:
+            raise DBQuestionnaireNotFound()
+
+    @classmethod
+    async def get_questions(self, questionnaire_id: DBIdentifier, language: Optional[str] = None) -> List[DBQuestion]:
+        questions = self.questions_collection(questionnaire_id)
 
         if language:
-            questions_ref = questions_ref.where("language", "==", language)
+            questions = questions.where("language", "==", language)
 
-        questions_docs: List[DocumentSnapshot] = await questions_ref.get()
-        questions_list = [doc.to_dict() for doc in questions_docs if doc.exists]
+        questions_iterator: AsyncIterator[DocumentSnapshot] = await questions.stream()
 
-        return TypeAdapter.validate(List[DBQuestion], questions_list)
+        db_questions: list[DBQuestion] = []
+        async for question in questions_iterator:
+            db_questions.append(DBQuestion.model_validate({"id": question.id, **question.to_dict()}))
+
+        return db_questions
 
     @classmethod
-    async def get_available_languages(cls, questionnaire_id: DBIdentifierUUID) -> List[str]:
-        # TODO: optimize this
-        questions_ref: AsyncCollectionReference = (
-            cls.collection().document(str(questionnaire_id)).collection(cls._subcollection_questions)
-        )
-        questions_docs: List[DocumentSnapshot] = await questions_ref.get()
+    async def get_available_languages(self, questionnaire_id: DBIdentifier) -> List[str]:
+        # TODO: optimize this, maybe we can store the available languages in the questionnaire document
+        questions = self.questions_collection(questionnaire_id)
+
+        questions_iterator: AsyncIterator[DocumentSnapshot] = await questions.stream()
         languages = set()
-        for doc in questions_docs:
-            languages.add(doc.get("language"))
+        async for question in questions_iterator:
+            languages.add(question.get("language"))
         return list(languages)

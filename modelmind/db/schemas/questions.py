@@ -1,12 +1,10 @@
-from uuid import UUID
-
 from pydantic import ConfigDict
 
-from . import DBObject
+from . import DBIdentifier, DBObject
 
 
 class DBQuestion(DBObject):
-    questionnaire_id: UUID
+    questionnaire_id: DBIdentifier
     language: str
 
     text: str

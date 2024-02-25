@@ -1,8 +1,5 @@
-from uuid import UUID
-
-from modelmind.db.exceptions.profiles import ProfileNotFound
-from modelmind.db.firestore import firestore_client as db
-from modelmind.db.schemas.profiles import CreateProfile, DBIdentifierUUID, DBProfile
+from modelmind.db.exceptions.profiles import DBProfileCreationFailed, DBProfileNotFound
+from modelmind.db.schemas.profiles import CreateProfile, DBIdentifier, DBProfile
 
 from .base import FirestoreDAO
 
@@ -11,14 +8,15 @@ class ProfilesDAO(FirestoreDAO[DBProfile]):
     _collection_name = "profiles"
 
     @classmethod
-    async def create_profile(cls) -> DBIdentifierUUID:
-        profile = CreateProfile()
-        await cls.add(profile.model_dump(), str(profile.id))
-        return UUID(profile.id)
+    async def create(self) -> DBProfile:
+        try:
+            return await self.add(CreateProfile().model_dump())
+        except Exception:
+            raise DBProfileCreationFailed()
 
     @classmethod
-    async def get_from_id(cls, profile_id: str) -> DBProfile:
+    async def get_from_id(self, profile_id: DBIdentifier) -> DBProfile:
         try:
-            return await cls.get(profile_id)
+            return await self.get(profile_id)
         except Exception:
-            raise ProfileNotFound()
+            raise DBProfileNotFound()

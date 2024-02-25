@@ -1,8 +1,7 @@
-from . import DBIdentifierUUID, DBObject
+from . import DBObject
 
 
 class DBQuestionnaire(DBObject):
-    id: DBIdentifierUUID
     name: str
     engine: str
 

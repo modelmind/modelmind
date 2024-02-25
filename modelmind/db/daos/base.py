@@ -2,7 +2,6 @@ import logging
 from abc import ABC
 from time import perf_counter
 from typing import Any, AsyncIterator, Dict, Generic, List, Literal, Optional, Type, TypeVar
-from uuid import UUID
 
 from google.cloud.firestore import (
     AsyncClient,
@@ -16,9 +15,7 @@ from google.cloud.firestore_v1.types import write
 
 from modelmind.db.exceptions.base import DBObjectNotFound
 from modelmind.db.firestore import firestore_client as db
-from modelmind.db.schemas import DBIdentifier, DBIdentifierUUID, DBIdentifierStr
-from modelmind.db.utils.type_adapter import TypeAdapter
-from modelmind.db.schemas import DBObject
+from modelmind.db.schemas import DBIdentifier, DBObject
 
 # Generic type for documents stored in Firestore
 T = TypeVar("T", bound=DBObject)
@@ -41,7 +38,6 @@ class FirestoreDAO(Generic[T], ABC):
     # Specify the type of the Pydantic model for deserialization
     model: Type[T]
 
-
     @classmethod
     def db(cls) -> AsyncClient:
         """Get a reference to the Firestore database."""
@@ -62,6 +58,11 @@ class FirestoreDAO(Generic[T], ABC):
         return db.collection(cls._collection_name)
 
     @classmethod
+    def document_ref(cls, document_id: DBIdentifier) -> AsyncDocumentReference:
+        """Get a reference to a specific document in the collection."""
+        return cls.collection().document(str(document_id))
+
+    @classmethod
     def validate(cls, document_id: DBIdentifier, data: Any) -> T:
         """Validate the input data and return the model."""
         return cls.model.model_validate({DBObject.id_name: document_id, **data})
@@ -69,7 +70,7 @@ class FirestoreDAO(Generic[T], ABC):
     @classmethod
     async def get(cls, document_id: DBIdentifier) -> T:
         """Fetch a single document and parse it into the model."""
-        doc_ref: AsyncDocumentReference = cls.collection().document(str(document_id))
+        doc_ref: AsyncDocumentReference = cls.document_ref(document_id)
         doc: DocumentSnapshot = await doc_ref.get()
         if not doc.exists:
             logging.debug(f"Document with ID {document_id} not found in {cls.collection_name()}.")
@@ -87,7 +88,7 @@ class FirestoreDAO(Generic[T], ABC):
     @classmethod
     async def update(cls, document_id: DBIdentifier, data: Dict[str, Any]) -> None:
         """Update an existing document."""
-        doc_ref: AsyncDocumentReference = cls.collection().document(str(document_id))
+        doc_ref: AsyncDocumentReference = cls.document_ref(document_id)
         write_result: write.WriteResult = doc_ref.update(data)
         logging.debug(
             f"Document with ID {document_id} from {cls.collection_name()} updated at {write_result.update_time}"
@@ -96,7 +97,7 @@ class FirestoreDAO(Generic[T], ABC):
     @classmethod
     async def delete(cls, document_id: DBIdentifier) -> None:
         """Delete a document from the collection."""
-        timestamp = await cls.collection().document(str(document_id)).delete()
+        timestamp = await cls.document_ref(document_id).delete()
         logging.debug(f"Document with ID {document_id} from {cls.collection_name()} deleted at {timestamp}")
 
     @classmethod
@@ -127,7 +128,7 @@ class FirestoreDAO(Generic[T], ABC):
             logging.debug(f"Document with ID {doc.id} retrieved from {cls.collection_name()}.")
 
         logging.info(f"Query took {perf_counter() - start} seconds.")
-        return TypeAdapter.validate(List[T], result)
+        return result
 
     @classmethod
     async def search(
@@ -162,7 +163,7 @@ class FirestoreDAO(Generic[T], ABC):
             logging.debug(f"Document with ID {doc.id} retrieved from {cls.collection_name()}.")
 
         logging.info(f"Query took {perf_counter() - start} seconds.")
-        return TypeAdapter.validate(List[T], result)
+        return result
 
     @classmethod
     async def search_as_dicts(
@@ -217,7 +218,8 @@ class FirestoreDAO(Generic[T], ABC):
 
         for i, write_result in enumerate(write_results):
             logging.debug(
-                f"Document with ID {write_result.update_time} from {cls.collection_name()} updated at {write_result.update_time}"
+                f"Document with ID {write_result.update_time} from {cls.collection_name()}"
+                f"updated at {write_result.update_time}"
             )
             if not write_result.update_time:
                 raise Exception(f"Document with ID {write_result.update_time} from {cls.collection_name()} not updated")

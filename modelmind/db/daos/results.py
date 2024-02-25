@@ -1,37 +1,44 @@
-from typing import List
-from uuid import UUID
+from typing import List, Optional
 
-from modelmind.db.firestore import firestore_client as db
+from modelmind.db.schemas import DBIdentifier
 from modelmind.db.schemas.results import CreateResult, DBResult
 
-from .base import FirestoreDAO
+from .base import FieldFilter, FirestoreDAO
 
 
 class ResultsDAO(FirestoreDAO[DBResult]):
     _collection_name = "results"
 
     @classmethod
-    async def save(self, result: CreateResult) -> None:
-        await db.collection(self.collection_name).document(result.id).set(result.model_dump())
+    async def save(self, result: CreateResult) -> DBResult:
+        try:
+            return await self.add(result.model_dump())
+        except Exception as e:
+            # TODO: custom exception
+            raise e
 
     @classmethod
-    async def get_result_from_session_id(self, session_id: UUID) -> DBResult:
-        query = db.collection(self.collection_name).where("session_id", "==", session_id)
-        docs = await query.get()
-        return DBResult.model_validate(docs[0].to_dict())
+    async def get_result_from_session_id(self, session_id: DBIdentifier) -> DBResult:
+        try:
+            return (await self.search(filters=[FieldFilter("session_id", "==", session_id)], limit=1))[0]
+        except Exception as e:
+            # TODO: custom exception
+            raise e
 
     @classmethod
-    async def get_results_from_questionnaire(self, questionnaire_id: UUID, limit: int) -> List[DBResult]:
-        query = (
-            db.collection(self.collection_name)
-            .where("questionnaire_id", "==", questionnaire_id)
-            .order_by("created_at", direction="DESCENDING")
-            .limit(limit)
-        )
-        docs = await query.get()
-        return [DBResult.model_validate(doc.to_dict()) for doc in docs]
+    async def get_results_from_questionnaire(
+        self, questionnaire_id: DBIdentifier, limit: Optional[int] = None
+    ) -> List[DBResult]:
+        try:
+            return await self.search(filters=[FieldFilter("questionnaire_id", "==", questionnaire_id)], limit=limit)
+        except Exception as e:
+            # TODO: custom exception
+            raise e
 
     @classmethod
-    async def get_result_from_id(self, result_id: UUID) -> DBResult:
-        doc = await db.collection(self.collection_name).document(str(result_id)).get()
-        return DBResult.model_validate(doc.to_dict())
+    async def get_from_id(self, result_id: DBIdentifier) -> DBResult:
+        try:
+            return await self.get(result_id)
+        except Exception as e:
+            # TODO: custom exception
+            raise e
