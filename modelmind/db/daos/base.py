@@ -65,7 +65,11 @@ class FirestoreDAO(Generic[T], ABC):
     @classmethod
     def validate(cls, document_id: DBIdentifier, data: Any) -> T:
         """Validate the input data and return the model."""
-        return cls.model.model_validate({DBObject.id_name: document_id, **data})
+        try:
+            return cls.model.model_validate({DBObject.id_name(): document_id, **data})
+        except Exception as e:
+            logging.error(f"Validation failed for document with ID {document_id} in {cls.collection_name()}. {e}")
+            raise e
 
     @classmethod
     async def get(cls, document_id: DBIdentifier) -> T:
@@ -81,7 +85,8 @@ class FirestoreDAO(Generic[T], ABC):
     @classmethod
     async def add(cls, document_data: Dict[str, Any], document_id: Optional[DBIdentifier] = None) -> T:
         """Add a new document to the collection."""
-        update_time, doc_ref = await cls.collection().add(document_data, str(document_id))
+        document_id = str(document_id) if document_id else document_data.get(DBObject.id_name())
+        update_time, doc_ref = await cls.collection().add(document_data, document_id)
         logging.debug(f"Document {doc_ref.id} added to collection {cls.collection_name()} at {update_time}")
         return cls.validate(document_id or doc_ref.id, document_data)
 
@@ -159,6 +164,7 @@ class FirestoreDAO(Generic[T], ABC):
         start = perf_counter()
 
         async for doc in docs:
+            print("doc", doc.id, doc.to_dict())
             result.append(cls.validate(doc.id, doc.to_dict()))
             logging.debug(f"Document with ID {doc.id} retrieved from {cls.collection_name()}.")
 

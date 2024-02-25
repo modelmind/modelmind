@@ -7,6 +7,7 @@ from .base import FirestoreDAO
 
 class SessionsDAO(FirestoreDAO[DBSession]):
     _collection_name = "sessions"
+    model = DBSession
 
     @classmethod
     async def create(self, session: DBCreateSession) -> DBSession:

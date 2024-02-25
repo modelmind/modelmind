@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 from uuid import UUID
 
@@ -21,6 +22,7 @@ async def get_profile(profile_id: UUID | None = Depends(get_profile_id)) -> DBPr
         except DBProfileNotFound as e:
             raise HTTPException(status_code=404, detail=str(e))
         except Exception as e:
+            logging.error(f"Error getting profile: {e}")
             raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -35,4 +37,5 @@ async def get_or_create_profile(profile_id: UUID | None = Depends(get_profile_id
             profile = await ProfilesDAO.create()
             return await ProfilesDAO.get_from_id(profile.id)
         except Exception as e:
+            logging.error(f"Error getting profile: {e}")
             raise HTTPException(status_code=500, detail=str(e))

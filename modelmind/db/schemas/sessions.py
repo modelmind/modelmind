@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from pydantic import Field
 
-from . import DBIdentifier, DBIdentifierUUID, DBObject, DBObjectCreate, DBOBjectUpdate
+from . import DBIdentifier, DBObject, DBObjectCreate, DBOBjectUpdate
 
 
 class SessionStatus(StrEnum):
@@ -14,7 +14,7 @@ class SessionStatus(StrEnum):
 
 
 class DBCreateSession(DBObjectCreate):
-    id: DBIdentifierUUID = Field(default_factory=uuid4)
+    id: DBIdentifier = Field(default_factory=lambda: str(uuid4()))
 
     profile_id: DBIdentifier
     questionnaire_id: DBIdentifier

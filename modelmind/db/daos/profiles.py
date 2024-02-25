@@ -6,6 +6,7 @@ from .base import FirestoreDAO
 
 class ProfilesDAO(FirestoreDAO[DBProfile]):
     _collection_name = "profiles"
+    model = DBProfile
 
     @classmethod
     async def create(self) -> DBProfile:

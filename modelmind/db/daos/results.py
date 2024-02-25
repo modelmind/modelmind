@@ -8,6 +8,7 @@ from .base import FieldFilter, FirestoreDAO
 
 class ResultsDAO(FirestoreDAO[DBResult]):
     _collection_name = "results"
+    model = DBResult
 
     @classmethod
     async def save(self, result: CreateResult) -> DBResult:

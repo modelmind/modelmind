@@ -1,3 +1,4 @@
+import logging
 from typing import AsyncIterator, List, Optional
 
 from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
@@ -12,6 +13,7 @@ from .base import FieldFilter, FirestoreDAO
 
 class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
     _collection_name = "questionnaires"
+    model = DBQuestionnaire
 
     @classmethod
     def questions_collection(self, questionnaire_id: DBIdentifier) -> AsyncCollectionReference:
@@ -20,16 +22,19 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
     @classmethod
     async def get_from_id(self, questionnaire_id: DBIdentifier) -> DBQuestionnaire:
         try:
+            print("Searching for questionnaire with id", questionnaire_id)
             return await self.get(questionnaire_id)
         except Exception:
-            raise DBQuestionnaireNotFound()
+            raise DBQuestionnaireNotFound("Questionnaire with id %s not found" % questionnaire_id)
 
     @classmethod
     async def get_from_name(self, name: str) -> DBQuestionnaire:
         try:
+            print("Searching for questionnaire with name", name)
+            logging.info("Searching for questionnaire with name %s", name)
             return (await self.search([FieldFilter("name", "==", name)], limit=1))[0]
         except Exception:
-            raise DBQuestionnaireNotFound()
+            raise DBQuestionnaireNotFound("Questionnaire with name %s not found" % name)
 
     @classmethod
     async def get_questions(self, questionnaire_id: DBIdentifier, language: Optional[str] = None) -> List[DBQuestion]:

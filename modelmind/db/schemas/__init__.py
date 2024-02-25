@@ -12,7 +12,7 @@ DBIdentifier = DBIdentifierUUID | DBIdentifierStr
 
 
 class DBObject(BaseModel, ABC):
-    @property
+    @classmethod
     def id_name(self) -> str:
         return "id"
 
@@ -22,7 +22,7 @@ class DBObject(BaseModel, ABC):
 
 
 class DBObjectCreate(BaseModel):
-    id: DBIdentifierUUID = Field(default_factory=uuid4)
+    id: DBIdentifier = Field(default_factory=lambda: str(uuid4()))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
