@@ -19,3 +19,7 @@ class EngineFactory:
             return cls.engine_map[EngineName(engine_name)]
         except KeyError:
             raise ValueError(f"Engine {engine_name} not supported yet.")
+
+    @classmethod
+    def get_available_engine_names(cls) -> list[str]:
+        return list(cls.engine_map.keys())

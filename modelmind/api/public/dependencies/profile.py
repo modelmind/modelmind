@@ -25,7 +25,8 @@ async def get_profile(profile_id: str = Depends(get_profile_id)) -> DBProfile:
 
 async def get_or_create_profile(profile_id: str = Depends(get_profile_id)) -> DBProfile:
     if profile_id is None:
-        return await ProfilesDAO.create_profile()
+        profile_uuid = await ProfilesDAO.create_profile()
+        return await ProfilesDAO.get_from_id(str(profile_uuid))
     else:
         try:
             return await ProfilesDAO.get_from_id(profile_id)

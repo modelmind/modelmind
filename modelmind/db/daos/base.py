@@ -1,24 +1,49 @@
+import logging
 from abc import ABC
-from typing import Any, AsyncIterable, Dict, Generic, List, Type, TypeVar
+from time import perf_counter
+from typing import Any, AsyncIterator, Dict, Generic, List, Literal, Optional, Type, TypeVar
+from uuid import UUID
+
+from google.cloud.firestore import (
+    AsyncClient,
+    AsyncCollectionReference,
+    AsyncDocumentReference,
+    DocumentSnapshot,
+    FieldFilter,
+    Query,
+)
+from google.cloud.firestore_v1.types import write
 
 from modelmind.db.exceptions.base import DBObjectNotFound
 from modelmind.db.firestore import firestore_client as db
-from modelmind.db.schemas import DBIdentifier
+from modelmind.db.schemas import DBIdentifier, DBIdentifierUUID, DBIdentifierStr
 from modelmind.db.utils.type_adapter import TypeAdapter
-from google.cloud.firestore import AsyncCollectionReference, DocumentReference, DocumentSnapshot
-from pydantic import BaseModel
+from modelmind.db.schemas import DBObject
 
 # Generic type for documents stored in Firestore
-T = TypeVar("T", bound=BaseModel)
+T = TypeVar("T", bound=DBObject)
 
 
 class FirestoreDAO(Generic[T], ABC):
-    _collection_name: str = ""
+
+    """
+    Opiniated base class to manage models persistence in Firestore.
+
+    -> A firestore collection represents a model, and the documents in the collection represent instances of the model.
+
+    # Serialization
+    -> Input is not validated to allow more flexibility (partial updates), but should be validated by child class.
+    -> Output is always validated to ensure that the document data is consistent with the model.
+        -> Schema changes in the firestore document will break the validation
+    """
+
+    _collection_name: str = "default"
     # Specify the type of the Pydantic model for deserialization
     model: Type[T]
 
+
     @classmethod
-    def db(cls) -> AsyncIterable:
+    def db(cls) -> AsyncClient:
         """Get a reference to the Firestore database."""
         return db
 
@@ -28,46 +53,171 @@ class FirestoreDAO(Generic[T], ABC):
         Determine the collection name. Use the class name if _collection_name is not explicitly set.
         """
         if not cls._collection_name:
-            return cls.__name__.split("DAO")[0].lower()
+            return cls.__name__.lower()
         return cls._collection_name
 
     @classmethod
     def collection(cls) -> AsyncCollectionReference:
         """Get a reference to the Firestore collection."""
-        return db.collection(cls.collection_name())
+        return db.collection(cls._collection_name)
+
+    @classmethod
+    def validate(cls, document_id: DBIdentifier, data: Any) -> T:
+        """Validate the input data and return the model."""
+        return cls.model.model_validate({DBObject.id_name: document_id, **data})
 
     @classmethod
     async def get(cls, document_id: DBIdentifier) -> T:
         """Fetch a single document and parse it into the model."""
-        doc_ref: DocumentReference = cls.collection().document(document_id)
+        doc_ref: AsyncDocumentReference = cls.collection().document(str(document_id))
         doc: DocumentSnapshot = await doc_ref.get()
         if not doc.exists:
-            raise DBObjectNotFound(f"Document with ID {document_id} not found in {cls.collection_name}.")
-        return cls.model.model_validate(doc.to_dict())
+            logging.debug(f"Document with ID {document_id} not found in {cls.collection_name()}.")
+            raise DBObjectNotFound(f"Document with ID {document_id} not found in {cls.collection_name()}.")
+        logging.debug(f"Document with ID {document_id} retrieved from {cls.collection_name()}.")
+        return cls.validate(document_id, doc.to_dict())
 
     @classmethod
-    async def add(cls, document_data: Dict[str, Any]) -> T:
+    async def add(cls, document_data: Dict[str, Any], document_id: Optional[DBIdentifier] = None) -> T:
         """Add a new document to the collection."""
-        doc_ref: DocumentReference = cls.collection().document()
-        await doc_ref.set(document_data)
-        return cls.model.model_validate(document_data)
+        update_time, doc_ref = await cls.collection().add(document_data, str(document_id))
+        logging.debug(f"Document {doc_ref.id} added to collection {cls.collection_name()} at {update_time}")
+        return cls.validate(document_id or doc_ref.id, document_data)
 
     @classmethod
     async def update(cls, document_id: DBIdentifier, data: Dict[str, Any]) -> None:
         """Update an existing document."""
-        doc_ref: DocumentReference = cls.collection().document(document_id)
-        await doc_ref.update(data)
+        doc_ref: AsyncDocumentReference = cls.collection().document(str(document_id))
+        write_result: write.WriteResult = doc_ref.update(data)
+        logging.debug(
+            f"Document with ID {document_id} from {cls.collection_name()} updated at {write_result.update_time}"
+        )
 
     @classmethod
     async def delete(cls, document_id: DBIdentifier) -> None:
         """Delete a document from the collection."""
-        await cls.collection().document(document_id).delete()
+        timestamp = await cls.collection().document(str(document_id)).delete()
+        logging.debug(f"Document with ID {document_id} from {cls.collection_name()} deleted at {timestamp}")
 
     @classmethod
-    async def query(cls, query_params: List) -> List[T]:
-        """Query the collection based on provided parameters."""
+    async def list(
+        cls,
+        limit: Optional[int] = None,
+        order_by: Optional[str] = None,
+        direction: Literal["ASCENDING"] | Literal["DESCENDING"] = Query.ASCENDING,
+    ) -> List[T]:
+        """
+        List all documents in the collection.
+        """
         query: AsyncCollectionReference = cls.collection()
-        for param in query_params:
-            query = query.where(*param)
-        docs: list[DocumentSnapshot] = await query.get()
-        return TypeAdapter.validate(List[T], [doc.to_dict() for doc in docs])
+        if order_by:
+            query = query.order_by(order_by, direction=direction)
+
+        if limit:
+            query = query.limit(limit)
+
+        docs: AsyncIterator[DocumentSnapshot] = query.stream()
+
+        result: List[T] = []
+
+        start = perf_counter()
+
+        async for doc in docs:
+            result.append(cls.validate(doc.id, doc.to_dict()))
+            logging.debug(f"Document with ID {doc.id} retrieved from {cls.collection_name()}.")
+
+        logging.info(f"Query took {perf_counter() - start} seconds.")
+        return TypeAdapter.validate(List[T], result)
+
+    @classmethod
+    async def search(
+        cls,
+        filters: List[FieldFilter],
+        limit: Optional[int] = None,
+        order_by: Optional[str] = None,
+        direction: Literal["ASCENDING"] | Literal["DESCENDING"] = Query.ASCENDING,
+    ) -> List[T]:
+        """
+        Query the collection based on provided parameters.
+        """
+
+        query: AsyncCollectionReference = cls.collection()
+        for filter in filters:
+            query = query.where(filter=filter)
+
+        if order_by:
+            query = query.order_by(order_by, direction=direction)
+
+        if limit:
+            query = query.limit(limit)
+
+        docs: AsyncIterator[DocumentSnapshot] = query.stream()
+
+        result: List[T] = []
+
+        start = perf_counter()
+
+        async for doc in docs:
+            result.append(cls.validate(doc.id, doc.to_dict()))
+            logging.debug(f"Document with ID {doc.id} retrieved from {cls.collection_name()}.")
+
+        logging.info(f"Query took {perf_counter() - start} seconds.")
+        return TypeAdapter.validate(List[T], result)
+
+    @classmethod
+    async def search_as_dicts(
+        cls,
+        filters: Optional[List[FieldFilter]] = None,
+        limit: Optional[int] = None,
+        order_by: Optional[str] = None,
+        direction: Literal["ASCENDING"] | Literal["DESCENDING"] = Query.ASCENDING,
+    ) -> Dict[DBIdentifier, T]:
+        """
+        Query the collection based on provided parameters and return as dictionaries with document_id as key.
+        """
+
+        query: AsyncCollectionReference = cls.collection()
+        if filters:
+            for filter in filters:
+                query = query.where(filter=filter)
+
+        if order_by:
+            query = query.order_by(order_by, direction=direction)
+
+        if limit:
+            query = query.limit(limit)
+
+        docs: AsyncIterator[DocumentSnapshot] = query.stream()
+
+        result: Dict[DBIdentifier, T] = {}
+
+        start = perf_counter()
+
+        async for doc in docs:
+            result[doc.id] = cls.validate(doc.id, doc.to_dict())
+            logging.debug(f"Document with ID {doc.id} retrieved from {cls.collection_name()}.")
+
+        logging.info(f"Query took {perf_counter() - start} seconds.")
+        return result
+
+    @classmethod
+    async def batch_set(cls, data: Dict[DBIdentifier, Dict[str, Any]], merge: bool = True) -> None:
+        """
+        Batch set multiple documents in the collection.
+        """
+        batch = db.batch()
+        for doc_id, doc_data in data.items():
+            doc_ref = cls.collection().document(doc_id)
+            batch.set(doc_ref, doc_data, merge=merge)
+
+        start = perf_counter()
+
+        write_results: list[write.WriteResult] = await batch.commit()
+        logging.info(f"Batch set took {perf_counter() - start} seconds.")
+
+        for i, write_result in enumerate(write_results):
+            logging.debug(
+                f"Document with ID {write_result.update_time} from {cls.collection_name()} updated at {write_result.update_time}"
+            )
+            if not write_result.update_time:
+                raise Exception(f"Document with ID {write_result.update_time} from {cls.collection_name()} not updated")

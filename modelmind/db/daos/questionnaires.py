@@ -1,11 +1,12 @@
 from typing import List, Optional
 
-from modelmind.db.exceptions.questionnaires import QuestionnaireNotFound
+from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
+
+from modelmind.db.exceptions.questionnaires import DBQuestionnaireNotFound
 from modelmind.db.schemas import DBIdentifierUUID
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.questions import DBQuestion
 from modelmind.db.utils.type_adapter import TypeAdapter
-from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
 
 from .base import FirestoreDAO
 
@@ -19,7 +20,7 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         doc: DocumentSnapshot = await cls.collection().document(str(questionnaire_id)).get()
         if doc.exists:
             return DBQuestionnaire.model_validate(doc.to_dict())
-        raise QuestionnaireNotFound()
+        raise DBQuestionnaireNotFound()
 
     @classmethod
     async def get_from_name(cls, name: str) -> DBQuestionnaire:
@@ -27,7 +28,7 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         docs: list[DocumentSnapshot] = await query.get()
         for doc in docs:
             return DBQuestionnaire.model_validate(doc.to_dict())
-        raise QuestionnaireNotFound()
+        raise DBQuestionnaireNotFound()
 
     @classmethod
     async def get_questions(

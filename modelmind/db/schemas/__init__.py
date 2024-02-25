@@ -10,13 +10,18 @@ DBIdentifier = DBIdentifierUUID | DBIdentifierStr
 
 
 class DBObject(BaseModel):
+
+    @property
+    def id_name(self) -> str:
+        return "id"
+
     id: DBIdentifier
     created_at: datetime
     updated_at: datetime
 
 
 class DBObjectCreate(DBObject):
-    id: DBIdentifierUUID = Field(default_factory=uuid4)
+    id: DBIdentifier = Field(default_factory=lambda: str(uuid4()))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 

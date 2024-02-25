@@ -1,5 +1,5 @@
 from .base import DBObjectNotFound
 
 
-class QuestionnaireNotFound(DBObjectNotFound):
+class DBQuestionnaireNotFound(DBObjectNotFound):
     pass
