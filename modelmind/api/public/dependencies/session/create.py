@@ -9,9 +9,10 @@ from modelmind.db.schemas import DBIdentifier
 from modelmind.db.schemas.sessions import DBCreateSession, SessionStatus
 
 
-def create_jwt_session_token(session_id: DBIdentifier) -> str:
+def create_jwt_session_token(session_id: DBIdentifier, profile_id: DBIdentifier) -> str:
     payload = {
-        "sub": str(session_id),
+        "session": str(session_id),
+        "profile": str(profile_id),
         "exp": datetime.utcnow() + timedelta(days=1),
     }
     return jwt.encode(payload, settings.jwt.secret_key, algorithm=settings.jwt.algorithm)

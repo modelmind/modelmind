@@ -11,7 +11,7 @@ from modelmind.db.schemas.sessions import DBSession
 def get_session_id_from_token(x_session_token: str = Header(...)) -> DBIdentifier:
     try:
         payload = jwt.decode(x_session_token, settings.jwt.secret_key, algorithms=[settings.jwt.algorithm])
-        return payload.get("sub")
+        return payload.get("session")
     except jwt.PyJWTError:
         raise HTTPException(status_code=403, detail="Invalid token")
 

@@ -12,6 +12,7 @@ from modelmind.api.public.dependencies.session.create import create_jwt_session_
 from modelmind.api.public.dependencies.session.get import get_session_from_token
 from modelmind.api.public.dependencies.session.verify import session_status_completed, session_status_in_progress
 from modelmind.api.public.schemas.analytics import AnalyticsResponse
+from modelmind.api.public.schemas.profiles import ProfileSessionResponse
 from modelmind.api.public.schemas.questionnaires import NextQuestionsResponse
 from modelmind.api.public.schemas.results import ResultsResponse
 from modelmind.db.daos.results import ResultsDAO
@@ -32,11 +33,11 @@ async def questionnaire_session_start(
     language: str = Depends(validate_requested_language),
     questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_name),
     profile: DBProfile = Depends(get_or_create_profile),
-) -> Response:
+) -> ProfileSessionResponse:
     session_id = await create_session(profile.id, questionnaire.id, language, {})
-    session_token = create_jwt_session_token(session_id)
+    session_token = create_jwt_session_token(session_id, profile.id)
     response.headers["x-session-token"] = session_token
-    return Response(status_code=200)
+    return ProfileSessionResponse(session_token=session_token, profile_id=str(profile.id), session_id=str(session_id))
 
 
 @router.post(
