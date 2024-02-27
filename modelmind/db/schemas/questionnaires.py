@@ -1,4 +1,4 @@
-from . import DBObject
+from . import DBObject, DBObjectCreate
 
 
 class DBQuestionnaire(DBObject):
@@ -6,3 +6,12 @@ class DBQuestionnaire(DBObject):
     engine: str
 
     config: dict
+
+
+class CreateQuestionnaire(DBObjectCreate):
+    name: str
+    engine: str
+
+    config: dict
+
+    questions: list[dict]

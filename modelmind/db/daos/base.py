@@ -208,19 +208,55 @@ class FirestoreDAO(Generic[T], ABC):
         return result
 
     @classmethod
-    async def batch_set(cls, data: Dict[DBIdentifier, Dict[str, Any]], merge: bool = True) -> None:
+    async def batch_set(
+        cls,
+        data: Dict[DBIdentifier, Dict[str, Any]],
+        merge: bool = True,
+        collection_ref: Optional[AsyncCollectionReference] = None,
+    ) -> None:
         """
         Batch set multiple documents in the collection.
         """
         batch = db.batch()
         for doc_id, doc_data in data.items():
-            doc_ref = cls.collection().document(doc_id)
+            if collection_ref:
+                doc_ref = collection_ref.document(doc_id)
+            else:
+                doc_ref = cls.collection().document(doc_id)
             batch.set(doc_ref, doc_data, merge=merge)
 
         start = perf_counter()
 
         write_results: list[write.WriteResult] = await batch.commit()
         logging.info(f"Batch set took {perf_counter() - start} seconds.")
+
+        for i, write_result in enumerate(write_results):
+            logging.debug(
+                f"Document with ID {write_result.update_time} from {cls.collection_name()}"
+                f"updated at {write_result.update_time}"
+            )
+            if not write_result.update_time:
+                raise Exception(f"Document with ID {write_result.update_time} from {cls.collection_name()} not updated")
+
+    @classmethod
+    async def batch_add(
+        cls, data: List[Dict[str, Any]], collection_ref: Optional[AsyncCollectionReference] = None
+    ) -> None:
+        """
+        Batch add multiple documents to the collection.
+        """
+        batch = db.batch()
+        for doc_data in data:
+            if collection_ref:
+                doc_ref = collection_ref.document()
+            else:
+                doc_ref = cls.collection().document()
+            batch.set(doc_ref, doc_data)
+
+        start = perf_counter()
+
+        write_results: list[write.WriteResult] = await batch.commit()
+        logging.info(f"Batch add took {perf_counter() - start} seconds.")
 
         for i, write_result in enumerate(write_results):
             logging.debug(

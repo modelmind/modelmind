@@ -13,7 +13,7 @@ from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.questions import DBQuestion
 from modelmind.db.schemas.sessions import DBSession
 from modelmind.models.questionnaires.base import Questionnaire
-from modelmind.models.questions.schemas import Question, ScaleQuestion
+from modelmind.models.questions.schemas import Question
 
 
 async def get_questionnaire_by_name(
@@ -80,25 +80,6 @@ async def initialize_questionnaire_from_session(
     # BaseQuestion is abstract, so we need to convert to the correct subclass
     questions = [Question(**question.model_dump()) for question in db_questions]
 
-    dummy_questions = [
-        Question(
-            id=f"q{i}",
-            category="P-IE",
-            question=ScaleQuestion(
-                type="scale",
-                text=f"Scale Question {i}",
-                min=1,
-                max=5,
-                interval=1.0,
-                low_label="Low",
-                high_label="High",
-            ),
-            language="en",
-            required=True,
-        )
-        for i in range(1, 6)
-    ]
-
-    engine = EngineFactory.create_engine(db_questionnaire.engine, questions=dummy_questions, config=None)
+    engine = EngineFactory.create_engine(db_questionnaire.engine, questions=questions, config=None)
 
     return Questionnaire(name=db_questionnaire.name, engine=engine, questions=questions)

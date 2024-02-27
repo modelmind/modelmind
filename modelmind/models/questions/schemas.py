@@ -41,6 +41,7 @@ class Question(BaseModel):
     language: str
     required: bool = True
 
+    # TODO: may remove this and only use unique id
     @property
     def key(self) -> QuestionKey:
         return f"{self.category}{KEY_DELIMITER}{self.id}"

@@ -1,12 +1,7 @@
-from pydantic import ConfigDict
-
-from . import DBIdentifier, DBObject
+from pydantic import BaseModel, ConfigDict
 
 
-class DBQuestion(DBObject):
-    questionnaire_id: DBIdentifier
+class DBQuestion(BaseModel):
     language: str
-
-    text: str
 
     model_config = ConfigDict(extra="allow")

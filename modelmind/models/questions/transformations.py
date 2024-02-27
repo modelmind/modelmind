@@ -51,7 +51,7 @@ def create_question_from_string_dict(question_data: Dict[str, str]) -> Question:
                 high_label=question_data["high_label"],
             )
         else:
-            raise ValueError(f"Invalid question type: {question_type}")
+            raise ValueError(f"Invalid question type: {question_type} from {question_data}")
 
         # Return the instantiated Question object
         return Question(
@@ -67,12 +67,25 @@ def create_question_from_string_dict(question_data: Dict[str, str]) -> Question:
         raise e
 
 
-def create_questions_from_csv(csv_reader: Iterator) -> List[Question]:
+def create_questions_from_csv(
+    csv_reader: Iterator, auto_generate_ids: bool = False, ignore_invalid: bool = False
+) -> List[Question]:
     questions = []
 
+    auto_id = 1
+
     for row in csv_reader:
-        question = create_question_from_string_dict(row)
-        if question:
-            questions.append(question)
+        if auto_generate_ids:
+            row["id"] = str(auto_id)
+            auto_id += 1
+
+        try:
+            question = create_question_from_string_dict(row)
+            if question:
+                questions.append(question)
+        except Exception as e:
+            if not ignore_invalid:
+                raise e
+            auto_id -= 1
 
     return questions

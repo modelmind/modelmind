@@ -5,7 +5,7 @@ from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
 
 from modelmind.db.exceptions.questionnaires import DBQuestionnaireNotFound
 from modelmind.db.schemas import DBIdentifier
-from modelmind.db.schemas.questionnaires import DBQuestionnaire
+from modelmind.db.schemas.questionnaires import CreateQuestionnaire, DBQuestionnaire
 from modelmind.db.schemas.questions import DBQuestion
 
 from .base import FieldFilter, FirestoreDAO
@@ -61,3 +61,16 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         async for question in questions_iterator:
             languages.add(question.get("language"))
         return list(languages)
+
+    @classmethod
+    async def create_questionnaire(self, create_questionnaire: CreateQuestionnaire) -> DBQuestionnaire:
+        try:
+            questionnaire = await self.add(create_questionnaire.model_dump(exclude={"questions"}))
+            questions = self.questions_collection(questionnaire.id)
+
+            await self.batch_add(create_questionnaire.questions, questions)
+
+            return questionnaire
+
+        except Exception as e:
+            raise e
