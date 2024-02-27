@@ -18,6 +18,7 @@ from .questions import PersonyQuestion
 
 
 class PersonyEngineV1(Engine[PersonyQuestion]):
+
     class Config(BaseModel):
         neutral_addition: int = 1
         questions_count: dict[str, int] = {
@@ -46,12 +47,13 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
                 return cls.ATTITUDE
             raise InvalidQuestionCategory(f"Question category {question_category} not supported.")
 
-    def __init__(self, questions: list[PersonyQuestion], config: "Config") -> None:
+    def __init__(self, questions: list[PersonyQuestion], config: "Config" = Config()) -> None:
+        super().__init__(questions)
         self.questions = questions
-        self.config = config
-        self._question_step_mapping = self._create_question_step_mapping(questions)
+        self.config = config or self.Config()
+        self.question_step_mapping = self._create_question_step_mapping(questions)
         self.analyzer = PersonyAnalyzer(
-            config=PersonyAnalyzer.Config(neutral_addition=config.neutral_addition),
+            config=PersonyAnalyzer.Config(neutral_addition=self.config.neutral_addition),
             question_key_mapping=self.question_key_mapping,
         )
 

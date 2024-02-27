@@ -6,13 +6,15 @@ from modelmind.api.public.dependencies.daos.providers import questionnaires_dao_
 from modelmind.api.public.dependencies.session.get import get_session_from_token
 from modelmind.api.public.exceptions.questionnaires import QuestionnaireNotFoundException
 from modelmind.community.engines.engine_factory import EngineFactory
+from modelmind.community.engines.persony.dimensions import PersonyDimension
 from modelmind.db.daos.questionnaires import QuestionnairesDAO
 from modelmind.db.exceptions.questionnaires import DBQuestionnaireNotFound
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.questions import DBQuestion
 from modelmind.db.schemas.sessions import DBSession
 from modelmind.models.questionnaires.base import Questionnaire
-from modelmind.models.questions.base import Question
+from modelmind.models.questions.base import Question, ScaleQuestion
+import logging
 
 
 async def get_questionnaire_by_name(
@@ -24,6 +26,7 @@ async def get_questionnaire_by_name(
     except DBQuestionnaireNotFound:
         raise QuestionnaireNotFoundException(name)
     except Exception as e:
+        logging.error(f"Failed to fetch questionnaire {name}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -49,6 +52,7 @@ async def get_questionnaire_from_session(
     except DBQuestionnaireNotFound:
         raise QuestionnaireNotFoundException(str(session.questionnaire_id))
     except Exception as e:
+        logging.error(f"Failed to fetch questionnaire {session.questionnaire_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -65,6 +69,7 @@ async def get_questions_from_session(
         # TODO: Cache this
         return await questionnaires_dao.get_questions(questionnaire.id, language)
     except Exception as e:
+        logging.error(f"Failed to fetch questions for questionnaire {questionnaire.id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch questions: {str(e)}")
 
 
@@ -76,6 +81,25 @@ async def initialize_questionnaire_from_session(
     # BaseQuestion is abstract, so we need to convert to the correct subclass
     questions = [Question(**question.model_dump()) for question in db_questions]
 
-    engine = EngineFactory.get_engine(db_questionnaire.engine)(questions)
+    dummy_questions = [
+    Question(
+        id=f"q{i}",
+        category="P-IE",
+        question=ScaleQuestion(
+            type="scaleQuestion",
+            text=f"Scale Question {i}",
+            min=1,
+            max=5,
+            interval=1.0,
+            lowLabel="Low",
+            highLabel="High"
+        ),
+        language="en",
+        required=True
+    ) for i in range(1, 6)
+]
+
+    engine = EngineFactory.create_engine(db_questionnaire.engine, questions=dummy_questions, config=None)
+
 
     return Questionnaire(name=db_questionnaire.name, engine=engine, questions=questions)

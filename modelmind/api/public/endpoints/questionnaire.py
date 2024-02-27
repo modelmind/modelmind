@@ -36,8 +36,14 @@ async def questionnaire_session_start(
 ) -> ProfileSessionResponse:
     session_id = await create_session(profile.id, questionnaire.id, language, {})
     session_token = create_jwt_session_token(session_id, profile.id)
-    response.headers["x-session-token"] = session_token
-    return ProfileSessionResponse(session_token=session_token, profile_id=str(profile.id), session_id=str(session_id))
+    response.set_cookie(
+        key="MM_PROFILE_ID",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+    )
+    return ProfileSessionResponse(profile_id=str(profile.id), session_id=str(session_id))
 
 
 @router.post(

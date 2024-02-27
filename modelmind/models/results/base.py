@@ -1,14 +1,14 @@
 from abc import ABC
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from modelmind.models.questions import QuestionKey
 
 ResultData = dict[QuestionKey, Any]
 
 
-class BaseResult(BaseModel, ABC):
+class BaseResult(ABC):
     data: ResultData = Field(default_factory=dict)
 
     def __init__(self, data: ResultData, **kwargs):

@@ -43,7 +43,7 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         if language:
             questions = questions.where("language", "==", language)
 
-        questions_iterator: AsyncIterator[DocumentSnapshot] = await questions.stream()
+        questions_iterator: AsyncIterator[DocumentSnapshot] = questions.stream()
 
         db_questions: list[DBQuestion] = []
         async for question in questions_iterator:
@@ -56,7 +56,7 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         # TODO: optimize this, maybe we can store the available languages in the questionnaire document
         questions = self.questions_collection(questionnaire_id)
 
-        questions_iterator: AsyncIterator[DocumentSnapshot] = await questions.stream()
+        questions_iterator: AsyncIterator[DocumentSnapshot] = questions.stream()
         languages = set()
         async for question in questions_iterator:
             languages.add(question.get("language"))

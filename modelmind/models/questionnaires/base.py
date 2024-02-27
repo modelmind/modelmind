@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel
-
 from modelmind.models.analytics.base import Analytics
 from modelmind.models.engines.base import BaseEngine, Engine
 from modelmind.models.questions.base import BaseQuestion, Question
@@ -13,7 +11,7 @@ EngineType = TypeVar("EngineType", bound=BaseEngine)
 ResultType = TypeVar("ResultType", bound=BaseResult)
 
 
-class BaseQuestionnaire(BaseModel, Generic[QuestionType, EngineType, ResultType], ABC):
+class BaseQuestionnaire(Generic[QuestionType, EngineType, ResultType], ABC):
     name: str
     engine: EngineType
     questions: list[QuestionType]
@@ -40,7 +38,7 @@ class BaseQuestionnaire(BaseModel, Generic[QuestionType, EngineType, ResultType]
 
 class Questionnaire(BaseQuestionnaire[Question, Engine, Result]):
     def __init__(self, name: str, engine: Engine, questions: list[Question]) -> None:
-        pass
+        super().__init__(name, engine, questions)
 
     async def next_questions(
         self,

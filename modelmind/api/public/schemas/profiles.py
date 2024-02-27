@@ -11,6 +11,5 @@ class Profile(BaseModel):
 
 
 class ProfileSessionResponse(BaseResponse):
-    session_token: str
     session_id: str
     profile_id: str

@@ -1,4 +1,3 @@
-from modelmind.models.analytics.base import Analytics
 
 from .base import BaseResponse
 
@@ -7,4 +6,4 @@ from .base import BaseResponse
 
 
 class AnalyticsResponse(BaseResponse):
-    analytics: list[Analytics]
+    analytics: list[dict]

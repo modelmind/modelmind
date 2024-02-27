@@ -4,7 +4,7 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel, Field
 
 
-class BaseAnalytics(BaseModel, ABC):
+class BaseAnalytics(ABC):
     class BaseItem(BaseModel):
         ...
 
