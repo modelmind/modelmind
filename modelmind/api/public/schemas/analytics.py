@@ -1,4 +1,4 @@
-
+from modelmind.models.analytics.schemas import Analytics
 from .base import BaseResponse
 
 # TODO: we may want to decouple the response schema from the domain model
@@ -6,4 +6,4 @@ from .base import BaseResponse
 
 
 class AnalyticsResponse(BaseResponse):
-    analytics: list[dict]
+    analytics: list[Analytics]

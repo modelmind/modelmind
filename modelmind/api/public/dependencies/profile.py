@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 import jwt
-from fastapi import Depends, Header, HTTPException, Request
+from fastapi import Depends, HTTPException, Request
 
 from modelmind.config import settings
 from modelmind.db.daos.profiles import ProfilesDAO

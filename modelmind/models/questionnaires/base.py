@@ -2,11 +2,12 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
 from modelmind.models.analytics.base import Analytics
+from modelmind.models.analytics.transformations import combine_analytics_to_schema
 from modelmind.models.engines.base import BaseEngine, Engine
-from modelmind.models.questions.base import BaseQuestion, Question
+from modelmind.models.questions.schemas import Question
 from modelmind.models.results.base import BaseResult, Result
 
-QuestionType = TypeVar("QuestionType", bound=BaseQuestion)
+QuestionType = TypeVar("QuestionType", bound=Question)
 EngineType = TypeVar("EngineType", bound=BaseEngine)
 ResultType = TypeVar("ResultType", bound=BaseResult)
 
@@ -55,4 +56,4 @@ class Questionnaire(BaseQuestionnaire[Question, Engine, Result]):
     def get_analytics(self, results: Result) -> list[Analytics]:
         analytics_list = self.engine.get_analytics(results)
 
-        return Analytics.combine(analytics_list)
+        return combine_analytics_to_schema(analytics_list)

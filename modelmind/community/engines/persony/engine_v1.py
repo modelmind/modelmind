@@ -18,7 +18,6 @@ from .questions import PersonyQuestion
 
 
 class PersonyEngineV1(Engine[PersonyQuestion]):
-
     class Config(BaseModel):
         neutral_addition: int = 1
         questions_count: dict[str, int] = {

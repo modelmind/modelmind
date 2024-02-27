@@ -1,6 +1,8 @@
-from typing import Any
-from fastapi import Body, Depends, HTTPException
 import logging
+from typing import Any
+
+from fastapi import Body, Depends, HTTPException
+
 from modelmind.api.public.dependencies.session.get import get_session_from_token
 from modelmind.db.daos.results import ResultsDAO
 from modelmind.db.schemas.sessions import DBSession

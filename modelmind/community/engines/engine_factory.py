@@ -2,7 +2,7 @@ from enum import StrEnum
 from typing import Any, Optional, Type
 
 from modelmind.models.engines.base import Engine
-from modelmind.models.questions.base import Question
+from modelmind.models.questions.schemas import Question
 
 from .persony import PersonyEngineV1
 
@@ -22,11 +22,12 @@ class EngineFactory:
             raise ValueError(f"Engine {engine_name} not supported yet.")
 
     @classmethod
-    def create_engine(cls, engine_name: str, questions: list[Question], config: Optional[dict[str, Any]] = None) -> Engine:
+    def create_engine(
+        cls, engine_name: str, questions: list[Question], config: Optional[dict[str, Any]] = None
+    ) -> Engine:
         engine_class = cls.get_engine(engine_name)
 
         return engine_class(questions=questions, config=config)
-
 
     @classmethod
     def get_available_engine_names(cls) -> list[str]:

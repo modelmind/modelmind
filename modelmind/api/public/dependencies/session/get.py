@@ -1,5 +1,5 @@
 import jwt
-from fastapi import Depends, Header, HTTPException, Request
+from fastapi import Depends, HTTPException, Request
 
 from modelmind.config import settings
 from modelmind.db.daos.sessions import SessionsDAO
@@ -23,7 +23,7 @@ def get_session_id_from_token(request: Request) -> DBIdentifier:
 async def get_session_from_id(session_id: DBIdentifier) -> DBSession:
     try:
         return await SessionsDAO.get(session_id)
-    except SessionNotFound as e:
+    except SessionNotFound:
         raise HTTPException(status_code=403, detail="Forbidden")
 
 

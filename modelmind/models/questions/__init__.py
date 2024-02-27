@@ -1,4 +1,4 @@
-from .base import Question, QuestionCategory, QuestionID, QuestionKey
+from .schemas import Question, QuestionCategory, QuestionID, QuestionKey
 
 __all__ = [
     "Question",

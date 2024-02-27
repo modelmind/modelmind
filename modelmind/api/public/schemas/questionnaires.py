@@ -1,4 +1,4 @@
-from modelmind.models.questions.base import Question
+from modelmind.models.questions.schemas import Question
 
 from .base import BaseResponse
 

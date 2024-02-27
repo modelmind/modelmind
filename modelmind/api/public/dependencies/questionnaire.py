@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from fastapi import Depends, HTTPException, Path
@@ -6,15 +7,13 @@ from modelmind.api.public.dependencies.daos.providers import questionnaires_dao_
 from modelmind.api.public.dependencies.session.get import get_session_from_token
 from modelmind.api.public.exceptions.questionnaires import QuestionnaireNotFoundException
 from modelmind.community.engines.engine_factory import EngineFactory
-from modelmind.community.engines.persony.dimensions import PersonyDimension
 from modelmind.db.daos.questionnaires import QuestionnairesDAO
 from modelmind.db.exceptions.questionnaires import DBQuestionnaireNotFound
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.questions import DBQuestion
 from modelmind.db.schemas.sessions import DBSession
 from modelmind.models.questionnaires.base import Questionnaire
-from modelmind.models.questions.base import Question, ScaleQuestion
-import logging
+from modelmind.models.questions.schemas import Question, ScaleQuestion
 
 
 async def get_questionnaire_by_name(
@@ -82,24 +81,24 @@ async def initialize_questionnaire_from_session(
     questions = [Question(**question.model_dump()) for question in db_questions]
 
     dummy_questions = [
-    Question(
-        id=f"q{i}",
-        category="P-IE",
-        question=ScaleQuestion(
-            type="scaleQuestion",
-            text=f"Scale Question {i}",
-            min=1,
-            max=5,
-            interval=1.0,
-            lowLabel="Low",
-            highLabel="High"
-        ),
-        language="en",
-        required=True
-    ) for i in range(1, 6)
-]
+        Question(
+            id=f"q{i}",
+            category="P-IE",
+            question=ScaleQuestion(
+                type="scale",
+                text=f"Scale Question {i}",
+                min=1,
+                max=5,
+                interval=1.0,
+                low_label="Low",
+                high_label="High",
+            ),
+            language="en",
+            required=True,
+        )
+        for i in range(1, 6)
+    ]
 
     engine = EngineFactory.create_engine(db_questionnaire.engine, questions=dummy_questions, config=None)
-
 
     return Questionnaire(name=db_questionnaire.name, engine=engine, questions=questions)

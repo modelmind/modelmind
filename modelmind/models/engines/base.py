@@ -2,16 +2,25 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 from modelmind.models.analytics.base import BaseAnalytics
-from modelmind.models.questions.base import Question
+from modelmind.models.questions.schemas import Question
 from modelmind.models.results.base import QuestionKey, Result
 
 QuestionType = TypeVar("QuestionType", bound=Question)
 
 
 class BaseEngine(Generic[QuestionType], ABC):
+    question_key_mapping: Dict[QuestionKey, QuestionType]
 
     def __init__(self, questions: list[QuestionType]) -> None:
+        self.question_key_mapping: Dict[QuestionKey, QuestionType] = self._createquestion_key_mapping(questions)
         super().__init__()
+
+    def _createquestion_key_mapping(self, questions: List[QuestionType]) -> Dict[QuestionKey, QuestionType]:
+        """Create a mapping question_key to -> Question"""
+        return {question.key: question for question in questions}
+
+    def get_question_from_key(self, key: QuestionKey) -> QuestionType | None:
+        return self.question_key_mapping.get(key, None)
 
     @abstractmethod
     def is_completed(self, current_result: Result) -> bool:
@@ -23,18 +32,11 @@ class BaseEngine(Generic[QuestionType], ABC):
 
 
 class Engine(BaseEngine, Generic[QuestionType]):
-
     _analytics: list[BaseAnalytics]
-    question_key_mapping: Dict[QuestionKey, QuestionType]
 
     def __init__(self, questions: list[QuestionType], config: Optional[Any] = None) -> None:
         super().__init__(questions)
         self._analytics: list[BaseAnalytics] = []
-        self.question_key_mapping: Dict[QuestionKey, QuestionType] = self._createquestion_key_mapping(questions)
-
-    def _createquestion_key_mapping(self, questions: List[QuestionType]) -> Dict[QuestionKey, QuestionType]:
-        """Preprocess the questions list to create a key to question mapping."""
-        return {question.key: question for question in questions}
 
     def is_completed(self, current_result: Result) -> bool:
         return current_result.is_empty()

@@ -1,4 +1,3 @@
-from abc import ABC, abstractproperty
 from typing import Literal, Union
 
 from pydantic import BaseModel, Field
@@ -10,14 +9,8 @@ QuestionKey = str
 QuestionCategory = str
 
 
-class BaseQuestion(BaseModel, ABC):
-    @abstractproperty
-    def key(self) -> QuestionKey:
-        raise NotImplementedError
-
-
 class ChoiceQuestion(BaseModel):
-    type: Literal["choiceQuestion"]
+    type: Literal["choice"]
     text: str
     multiple: bool
     display: Literal["radio", "checkbox", "dropdown"]
@@ -26,26 +19,26 @@ class ChoiceQuestion(BaseModel):
 
 
 class TextQuestion(BaseModel):
-    type: Literal["textQuestion"]
+    type: Literal["text"]
     text: str
 
 
 class ScaleQuestion(BaseModel):
-    type: Literal["scaleQuestion"]
+    type: Literal["scale"]
     text: str
     min: int
     max: int
     interval: float
-    lowLabel: str
-    highLabel: str
+    low_label: str
+    high_label: str
 
 
-class Question(BaseQuestion):
+class Question(BaseModel):
     id: QuestionID
     category: QuestionCategory
     question: Union[ChoiceQuestion, TextQuestion, ScaleQuestion] = Field(..., discriminator="type")
 
-    language: str | None = None
+    language: str
     required: bool = True
 
     @property

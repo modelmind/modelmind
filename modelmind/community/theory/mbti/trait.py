@@ -1,6 +1,7 @@
 from enum import StrEnum
 
-from modelmind.models.analytics.base import Analytics, BaseAnalytics
+from modelmind.models.analytics.base import BaseAnalytics
+from modelmind.models.analytics.schemas import Analytics
 
 from .types import MBTIType
 
@@ -98,7 +99,7 @@ class MBTITraitsAnalytics(BaseAnalytics):
     @property
     def categories(self) -> dict[MBTITrait, list[str]]:
         return {
-            MBTITrait.I: ["a"],
+            MBTITrait.I: ["introversion"],
             MBTITrait.E: ["extraversion"],
             MBTITrait.N: ["intuition"],
             MBTITrait.S: ["sensing"],
@@ -173,7 +174,7 @@ class MBTITraitsAnalytics(BaseAnalytics):
     def perceiving(self, value: int) -> None:
         self.P = value
 
-    def to_analytics_representation(self) -> "Analytics":
+    def to_schema(self) -> "Analytics":
         items = [
             Analytics.ScoreItem(
                 name=trait.value,

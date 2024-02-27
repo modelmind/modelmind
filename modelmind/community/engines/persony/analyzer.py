@@ -17,11 +17,14 @@ class PersonyAnalyzer:
     def __init__(self, config: Config, question_key_mapping: dict[QuestionKey, PersonyQuestion]) -> None:
         self.config = config
         self.question_key_mapping = question_key_mapping
+        self.init_analytics()
+
+    def init_analytics(self) -> None:
         self.base_mbti_analytics = MBTITraitsAnalytics(complexity=MBTITraitsAnalytics.Complexity.basic)
         self.advanced_mbti_analytics = MBTITraitsAnalytics(complexity=MBTITraitsAnalytics.Complexity.advanced)
         self.jung_analytics = JungFunctionsAnalytics()
 
-    def add_traits_and_functions(self, dimension: PersonyDimension, value: int) -> None:
+    def _add_traits_and_functions(self, dimension: PersonyDimension, value: int) -> None:
         if value < 0:
             self._handle_negative_value(dimension, value)
         elif value > 0:
@@ -59,12 +62,14 @@ class PersonyAnalyzer:
     def calculate_analytics(self, current_result: Result) -> list[BaseAnalytics]:
         """Build the analytics for the current result."""
 
+        self.init_analytics()
+
         for question_key, value in current_result.data.items():
             question = self.question_key_mapping.get(question_key)
             if question is None:
                 continue
 
             dimension = PersonyDimension(question.category)
-            self.add_traits_and_functions(dimension, value)
+            self._add_traits_and_functions(dimension, value)
 
         return [self.base_mbti_analytics, self.advanced_mbti_analytics, self.jung_analytics]

@@ -36,6 +36,10 @@ class JungFunctionsAnalytics(BaseAnalytics):
         return [i / sum(e_x) for i in e_x]
 
     @property
+    def model_fields(self) -> List[str]:
+        return [str(func) for func in JungFunction]
+
+    @property
     def normalized_functions(self) -> dict[str, float]:
         function_values = [
             self.Ni,
@@ -82,7 +86,7 @@ class JungFunctionsAnalytics(BaseAnalytics):
             JungFunction.Fe: ["feeling", "extroverted", "rational"],
         }
 
-    def to_analytics_representation(self) -> "Analytics":
+    def to_schema(self) -> "Analytics":
         items = [
             Analytics.ScoreItem(
                 name=func.value,
