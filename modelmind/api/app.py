@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
@@ -14,6 +15,7 @@ from .middleware import setup_middlewares
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # On startup
     print("Starting up")
+
     app.build_middleware_stack()
     yield
     # On shutdown
@@ -28,6 +30,20 @@ def main() -> FastAPI:
 
     :return: application.
     """
+
+    sentry_sdk.init(
+        dsn=settings.sentry.dsn,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        traces_sample_rate=settings.sentry.traces_sample_rate,
+        # Set profiles_sample_rate to 1.0 to profile 100%
+        # of sampled transactions.
+        # We recommend adjusting this value in production.
+        profiles_sample_rate=settings.sentry.profiles_sample_rate,
+    )
+
+    print("Sentry DSN:", settings.sentry.dsn)
+
     app = FastAPI(
         title=PACKAGE_NAME,
         version="0.1.0",

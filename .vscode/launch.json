@@ -14,7 +14,8 @@
                 "--reload"
             ],
             "jinja": true,
-            "justMyCode": true
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

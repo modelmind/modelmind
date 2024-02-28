@@ -1,19 +1,7 @@
-import sentry_sdk
 import typer
 import uvicorn
 
 from modelmind.config import PACKAGE_NAME, settings
-
-sentry_sdk.init(
-    dsn=settings.sentry.dsn,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    traces_sample_rate=settings.sentry.traces_sample_rate,
-    # Set profiles_sample_rate to 1.0 to profile 100%
-    # of sampled transactions.
-    # We recommend adjusting this value in production.
-    profiles_sample_rate=settings.sentry.profiles_sample_rate,
-)
 
 cli = typer.Typer(name="Lab {PACKAGE_NAME} Api")
 

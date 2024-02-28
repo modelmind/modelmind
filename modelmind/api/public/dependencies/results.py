@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from fastapi import Body, Depends, HTTPException
 
@@ -9,10 +8,9 @@ from modelmind.db.schemas.sessions import DBSession
 from modelmind.models.results.base import Result
 
 
-def get_result(data: Any = Body(..., description="The current results data of the questionnaire")) -> Result:
+def get_result(data: dict = Body(..., description="The current results data of the questionnaire")) -> Result:
     try:
-        print("data=", data)
-        return Result(data={})
+        return Result(data=data)
     except Exception as e:
         logging.error(f"Failed to create result: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

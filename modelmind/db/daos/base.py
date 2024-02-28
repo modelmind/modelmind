@@ -94,7 +94,7 @@ class FirestoreDAO(Generic[T], ABC):
     async def update(cls, document_id: DBIdentifier, data: Dict[str, Any]) -> None:
         """Update an existing document."""
         doc_ref: AsyncDocumentReference = cls.document_ref(document_id)
-        write_result: write.WriteResult = doc_ref.update(data)
+        write_result: write.WriteResult = await doc_ref.update(data)
         logging.debug(
             f"Document with ID {document_id} from {cls.collection_name()} updated at {write_result.update_time}"
         )
