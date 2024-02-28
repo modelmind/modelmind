@@ -1,10 +1,10 @@
 import logging
 from typing import Optional
 
-import jwt
 from fastapi import Depends, HTTPException, Request
 
-from modelmind.config import settings
+from modelmind.api.public.dependencies.session.get import get_jwt_payload_from_token
+from modelmind.api.public.exceptions.jwt import JWTExpiredException, JWTMissingException
 from modelmind.db.daos.profiles import ProfilesDAO
 from modelmind.db.exceptions.profiles import DBProfileNotFound
 from modelmind.db.schemas import DBIdentifier
@@ -12,15 +12,13 @@ from modelmind.db.schemas.profiles import DBProfile
 
 
 def get_profile_id_from_token(request: Request) -> Optional[DBIdentifier]:
-    session_token = request.cookies.get("MM_PROFILE_ID")
-
-    if session_token is None:
-        return None
     try:
-        payload = jwt.decode(session_token, settings.jwt.secret_key, algorithms=[settings.jwt.algorithm])
+        payload = get_jwt_payload_from_token(request)
         return payload.get("profile")
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    except JWTMissingException:
+        return None
+    except JWTExpiredException:
+        return None
 
 
 async def get_profile(profile_id: DBIdentifier | None = Depends(get_profile_id_from_token)) -> DBProfile:

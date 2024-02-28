@@ -31,6 +31,7 @@ class ScaleQuestion(BaseModel):
     interval: float
     low_label: str
     high_label: str
+    shuffle: bool = True
 
 
 class Question(BaseModel):
