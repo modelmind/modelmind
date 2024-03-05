@@ -1,3 +1,4 @@
+import random
 from enum import StrEnum
 from typing import Dict, List, Optional
 
@@ -74,7 +75,9 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
     def is_completed(self, current_result: Result) -> bool:
         return self.get_current_step(current_result) == self.Step.COMPLETED
 
-    async def infer_next_questions(self, current_result: Result, max_questions: Optional[int]) -> List[Question]:
+    async def infer_next_questions(
+        self, current_result: Result, max_questions: Optional[int], shuffle: bool = True
+    ) -> List[Question]:
         self.build_analytics(current_result)
 
         advanced_mbti_analytics = self.analyzer.advanced_mbti_analytics
@@ -84,6 +87,9 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
         current_step = self.get_current_step(current_result)
 
         questions = self.select_remaining_questions_from_step(current_step, current_result, current_dominants)
+
+        if shuffle:
+            random.shuffle(questions)
 
         if not max_questions:
             max_questions = self.config.max_questions

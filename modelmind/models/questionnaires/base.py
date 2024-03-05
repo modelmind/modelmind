@@ -43,12 +43,7 @@ class Questionnaire(BaseQuestionnaire[Question, Engine, Result]):
     async def next_questions(
         self, results: Result, max_questions: Optional[int] = None, shuffle: bool = True
     ) -> list[Question]:
-        questions = await self.engine.infer_next_questions(results, max_questions)
-        if shuffle:
-            import random
-
-            random.shuffle(questions)
-        return questions
+        return await self.engine.infer_next_questions(results, max_questions, shuffle)
 
     def is_completed(
         self,

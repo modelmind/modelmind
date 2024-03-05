@@ -27,7 +27,9 @@ class BaseEngine(Generic[QuestionType], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def infer_next_questions(self, current_result: Result, max_questions: Optional[int]) -> list[Question]:
+    async def infer_next_questions(
+        self, current_result: Result, max_questions: Optional[int], shuffle: bool = True
+    ) -> list[Question]:
         raise NotImplementedError
 
 
@@ -41,7 +43,9 @@ class Engine(BaseEngine, Generic[QuestionType]):
     def is_completed(self, current_result: Result) -> bool:
         return current_result.is_empty()
 
-    async def infer_next_questions(self, current_result: Result, max_questions: Optional[int]) -> list[Question]:
+    async def infer_next_questions(
+        self, current_result: Result, max_questions: Optional[int], shuffle: bool = True
+    ) -> list[Question]:
         return []
 
     def _build_analytics(self, results: Result) -> list[BaseAnalytics]:
