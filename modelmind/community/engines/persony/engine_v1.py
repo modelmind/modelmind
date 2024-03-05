@@ -26,6 +26,7 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
             "TEMPERAMENT": 16,
             "ATTITUDE": 8,
         }
+        max_questions: int = 8
 
     class Step(StrEnum):
         PREFERENCES = "PREFERENCES"
@@ -73,7 +74,7 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
     def is_completed(self, current_result: Result) -> bool:
         return self.get_current_step(current_result) == self.Step.COMPLETED
 
-    async def infer_next_questions(self, current_result: Result) -> list[Question]:
+    async def infer_next_questions(self, current_result: Result, max_questions: Optional[int]) -> List[Question]:
         self.build_analytics(current_result)
 
         advanced_mbti_analytics = self.analyzer.advanced_mbti_analytics
@@ -84,7 +85,10 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
 
         questions = self.select_remaining_questions_from_step(current_step, current_result, current_dominants)
 
-        return TypeAdapter.validate(List[Question], questions)
+        if not max_questions:
+            max_questions = self.config.max_questions
+
+        return TypeAdapter.validate(List[Question], questions[:max_questions])
 
     def get_current_step(self, current_result: Result) -> Step:
         counts = self.get_questions_counts_by_step(current_result)

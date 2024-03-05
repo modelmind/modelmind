@@ -22,11 +22,11 @@ async def get_questionnaire_by_name(
     try:
         # TODO: Cache this
         return await questionnaires_dao.get_from_name(name)
-    except DBQuestionnaireNotFound:
-        raise QuestionnaireNotFoundException(name)
+    except DBQuestionnaireNotFound as e:
+        raise QuestionnaireNotFoundException(name) from e
     except Exception as e:
-        logging.error(f"Failed to fetch questionnaire {name}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error("Failed to fetch questionnaire %s: %s", name, str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 def validate_requested_language(

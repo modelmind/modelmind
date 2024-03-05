@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
 from modelmind.api import monitoring_router, public_v1_router
-from modelmind.config import PACKAGE_NAME, settings
+from modelmind.config import PACKAGE_NAME, Environment, settings
 
 from .middleware import setup_middlewares
 
@@ -40,9 +40,11 @@ def main() -> FastAPI:
         # of sampled transactions.
         # We recommend adjusting this value in production.
         profiles_sample_rate=settings.sentry.profiles_sample_rate,
+        environment=settings.environment.value,
+        debug=settings.environment == Environment.DEV,
+        attach_stacktrace=True,
+        enable_tracing=True,
     )
-
-    print("Sentry DSN:", settings.sentry.dsn)
 
     app = FastAPI(
         title=PACKAGE_NAME,

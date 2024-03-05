@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Generic, Optional, TypeVar
 
 from modelmind.models.analytics.base import Analytics
 from modelmind.models.analytics.transformations import combine_analytics_to_schema
@@ -24,8 +24,7 @@ class BaseQuestionnaire(Generic[QuestionType, EngineType, ResultType], ABC):
 
     @abstractmethod
     async def next_questions(
-        self,
-        results: ResultType,
+        self, results: ResultType, max_questions: Optional[int] = None, shuffle: bool = True
     ) -> list[QuestionType]:
         raise NotImplementedError
 
@@ -42,10 +41,14 @@ class Questionnaire(BaseQuestionnaire[Question, Engine, Result]):
         super().__init__(name, engine, questions)
 
     async def next_questions(
-        self,
-        results: Result,
+        self, results: Result, max_questions: Optional[int] = None, shuffle: bool = True
     ) -> list[Question]:
-        return await self.engine.infer_next_questions(results)
+        questions = await self.engine.infer_next_questions(results, max_questions)
+        if shuffle:
+            import random
+
+            random.shuffle(questions)
+        return questions
 
     def is_completed(
         self,
