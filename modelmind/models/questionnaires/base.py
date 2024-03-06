@@ -55,3 +55,6 @@ class Questionnaire(BaseQuestionnaire[Question, Engine, Result]):
         analytics_list = self.engine.get_analytics(results)
 
         return combine_analytics_to_schema(analytics_list)
+
+    async def get_remaining_questions_count(self, results: Result) -> int:
+        return await self.engine.calculate_remaining_questions_count(results)

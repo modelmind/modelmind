@@ -39,8 +39,7 @@ class SentrySettings(BaseSettings):
 class JWTSettings(BaseSettings):
     secret_key: str = "secret"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
-    refresh_token_expire_minutes: int = 60 * 24 * 7
+    session_timeout_minutes: int = 60 * 24 * 30  # 30 days
 
 
 class Server(BaseModel):

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from modelmind.models.questions.schemas import Question
 
 from .base import BaseResponse
@@ -8,4 +10,6 @@ from .base import BaseResponse
 
 class NextQuestionsResponse(BaseResponse):
     questions: list[Question]
-    completed: bool
+    completed: int
+    remaining: int
+    result_id: Optional[str] = None

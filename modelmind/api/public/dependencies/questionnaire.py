@@ -83,3 +83,12 @@ async def initialize_questionnaire_from_session(
     engine = EngineFactory.create_engine(db_questionnaire.engine, questions=questions, config=None)
 
     return Questionnaire(name=db_questionnaire.name, engine=engine, questions=questions)
+
+
+async def initialize_questionnaire_from_name(
+    db_questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_name),
+    questionnaires_dao: QuestionnairesDAO = Depends(questionnaires_dao_provider),
+    language: str = Depends(validate_requested_language),
+) -> Questionnaire:
+    db_questions = await get_questions_from_session(db_questionnaire, questionnaires_dao, language)
+    return await initialize_questionnaire_from_session(db_questionnaire, db_questions)

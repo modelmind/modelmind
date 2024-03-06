@@ -48,10 +48,13 @@ class Engine(BaseEngine, Generic[QuestionType]):
     ) -> list[Question]:
         return []
 
-    def _build_analytics(self, results: Result) -> list[BaseAnalytics]:
+    def build_analytics(self, results: Result) -> list[BaseAnalytics]:
         return []
 
     def get_analytics(self, results: Result) -> list[BaseAnalytics]:
         if not self._analytics:
-            self._analytics = self._build_analytics(results)
+            self._analytics = self.build_analytics(results)
         return self._analytics
+
+    async def calculate_remaining_questions_count(self, results: Result) -> int:
+        return 0

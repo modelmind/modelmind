@@ -96,6 +96,15 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
 
         return TypeAdapter.validate(List[Question], questions[:max_questions])
 
+    async def calculate_remaining_questions_count(self, current_result: Result) -> int:
+        counts = self.get_questions_counts_by_step(current_result)
+        remaining = 0
+        for step in self.Step:
+            if step == self.Step.COMPLETED:
+                continue
+            remaining += self.config.questions_count[step] - counts.get(step, 0)
+        return remaining
+
     def get_current_step(self, current_result: Result) -> Step:
         counts = self.get_questions_counts_by_step(current_result)
 

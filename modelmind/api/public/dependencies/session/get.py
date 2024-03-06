@@ -21,8 +21,9 @@ def get_jwt_payload_from_token(request: Request) -> dict:
         if payload["exp"] < datetime.utcnow().timestamp():
             raise JWTExpiredException()
         return payload
-    except jwt.PyJWTError:
-        raise JWTInvalidException()
+    except jwt.PyJWTError as e:
+        print(e)
+        raise JWTInvalidException() from e
 
 
 def get_session_id_from_token(request: Request) -> DBIdentifier:

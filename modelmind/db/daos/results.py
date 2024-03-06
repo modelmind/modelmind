@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from modelmind.db.schemas import DBIdentifier
-from modelmind.db.schemas.results import CreateResult, DBResult
+from modelmind.db.schemas.results import CreateResult, DBResult, UpdateResultVisibility
 
 from .base import FieldFilter, FirestoreDAO
 
@@ -40,6 +40,14 @@ class ResultsDAO(FirestoreDAO[DBResult]):
     async def get_from_id(self, result_id: DBIdentifier) -> DBResult:
         try:
             return await self.get(result_id)
+        except Exception as e:
+            # TODO: custom exception
+            raise e
+
+    @classmethod
+    async def update_visibility(self, result_id: DBIdentifier, data: UpdateResultVisibility) -> None:
+        try:
+            await self.update(result_id, data.model_dump())
         except Exception as e:
             # TODO: custom exception
             raise e
