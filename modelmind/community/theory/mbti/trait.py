@@ -51,14 +51,14 @@ class MBTITraitsAnalytics(BaseAnalytics):
     def percentages(self) -> dict[MBTITrait, float]:
         if not self._percentages:
             self._percentages = {
-                MBTITrait.I: (self.I / (self.I + self.E)) * 100,
-                MBTITrait.E: (self.E / (self.I + self.E)) * 100,
-                MBTITrait.N: (self.N / (self.N + self.S)) * 100,
-                MBTITrait.S: (self.S / (self.N + self.S)) * 100,
-                MBTITrait.T: (self.T / (self.T + self.F)) * 100,
-                MBTITrait.F: (self.F / (self.T + self.F)) * 100,
-                MBTITrait.J: (self.J / (self.J + self.P)) * 100,
-                MBTITrait.P: (self.P / (self.J + self.P)) * 100,
+                MBTITrait.I: (self.I / (self.I + self.E)) * 100 if self.I + self.E > 0 else 0,
+                MBTITrait.E: (self.E / (self.I + self.E)) * 100 if self.I + self.E > 0 else 0,
+                MBTITrait.N: (self.N / (self.N + self.S)) * 100 if self.N + self.S > 0 else 0,
+                MBTITrait.S: (self.S / (self.N + self.S)) * 100 if self.N + self.S > 0 else 0,
+                MBTITrait.T: (self.T / (self.T + self.F)) * 100 if self.T + self.F > 0 else 0,
+                MBTITrait.F: (self.F / (self.T + self.F)) * 100 if self.T + self.F > 0 else 0,
+                MBTITrait.J: (self.J / (self.J + self.P)) * 100 if self.J + self.P > 0 else 0,
+                MBTITrait.P: (self.P / (self.J + self.P)) * 100 if self.J + self.P > 0 else 0,
             }
         return self._percentages
 
@@ -91,10 +91,21 @@ class MBTITraitsAnalytics(BaseAnalytics):
 
         # Normalize the probabilities so they sum to 1
         total = sum(probabilities.values())
-        for mbti in probabilities:
-            probabilities[mbti] /= total
 
+        for mbti in probabilities:
+            if total > 0:
+                probabilities[mbti] /= total
+            else:
+                probabilities[mbti] = 0
         return probabilities
+
+    def biased_probabilities(self, mbti_probabilities: dict[str, float], bias: int = 2) -> dict[str, float]:
+        # Step 1: Apply power transformation
+        transformed_probs = {k: v**bias for k, v in mbti_probabilities.items()}
+        # Step 2: Sum all the transformed probabilities
+        total_sum = sum(transformed_probs.values())
+        # Step 3: Normalize the transformed probabilities
+        return {k: v / total_sum for k, v in transformed_probs.items()}
 
     @property
     def categories(self) -> dict[MBTITrait, list[str]]:
@@ -185,9 +196,12 @@ class MBTITraitsAnalytics(BaseAnalytics):
             for trait in MBTITrait
         ]
 
+        mbti_probabilities = self.compute_mbti_probabilities()
+
         extra = {
             "dominants": self.dominants.value,
-            "probabilities": self.compute_mbti_probabilities(),
+            "probabilities": mbti_probabilities,
+            "biased_probabilities": self.biased_probabilities(mbti_probabilities),
             "complexity": self.complexity.value,
         }
 

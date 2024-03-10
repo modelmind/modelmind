@@ -67,6 +67,8 @@ class JungFunctionsAnalytics(BaseAnalytics):
     @property
     def percentages(self) -> dict[str, float]:
         total = sum(getattr(self, func) for func in self.model_fields)
+        if total == 0:
+            return {func: 0 for func in self.model_fields}
         return {func: (getattr(self, func) / total) * 100 for func in self.model_fields}
 
     def add(self, function: JungFunction, value: int) -> None:

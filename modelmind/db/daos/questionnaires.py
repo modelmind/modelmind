@@ -1,5 +1,5 @@
 import logging
-from typing import AsyncIterator, List, Optional
+from typing import Any, AsyncIterator, List, Optional
 
 from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
 
@@ -74,3 +74,8 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
 
         except Exception as e:
             raise e
+
+    @classmethod
+    async def add_questions(self, questionnaire_id: DBIdentifier, questions: List[dict[str, Any]]) -> None:
+        questions_collection = self.questions_collection(questionnaire_id)
+        await self.batch_add(questions, questions_collection)

@@ -30,6 +30,7 @@ mock-firestore = "^0.11.0"
 black = "23.11.0"
 pytest-cov = "^4.1.0"
 ipykernel = "^6.29.2"
+numpy = "^1.26.4"
 
 
 [tool.mypy]

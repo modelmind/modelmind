@@ -11,6 +11,13 @@ from modelmind.db.schemas.sessions import DBSession, SessionStatus
 from .get import get_session_from_token
 
 
+async def session_not_expired(session: DBSession = Depends(get_session_from_token)) -> DBSession:
+    if session.status != SessionStatus.EXPIRED:
+        return session
+    else:
+        raise SessionExpiredException(str(session.id))
+
+
 async def session_status_in_progress(session: DBSession = Depends(get_session_from_token)) -> DBSession:
     if session.status == SessionStatus.IN_PROGRESS:
         return session
