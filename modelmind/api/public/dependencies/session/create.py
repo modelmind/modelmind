@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
 import jwt
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 
+from modelmind.api.public.dependencies.daos.providers import sessions_dao_provider
 from modelmind.config import settings
 from modelmind.db.daos.sessions import SessionsDAO
 from modelmind.db.schemas import DBIdentifier
@@ -19,11 +20,15 @@ def create_jwt_session_token(session_id: DBIdentifier, profile_id: DBIdentifier)
 
 
 async def create_session(
-    profile_id: DBIdentifier, questionnaire_id: DBIdentifier, language: str, metadata: dict
+    profile_id: DBIdentifier,
+    questionnaire_id: DBIdentifier,
+    language: str,
+    metadata: dict,
+    sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
 ) -> DBIdentifier:
     try:
         return (
-            await SessionsDAO.create(
+            await sessions_dao.create(
                 DBCreateSession(
                     profile_id=profile_id,
                     questionnaire_id=questionnaire_id,

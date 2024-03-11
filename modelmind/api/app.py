@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -30,6 +31,8 @@ def main() -> FastAPI:
 
     :return: application.
     """
+
+    logging.basicConfig(level=settings.server.log_level)
 
     sentry_sdk.init(
         dsn=settings.sentry.dsn,

@@ -1,7 +1,7 @@
 import logging
 from typing import Any, AsyncIterator, List, Optional
 
-from google.cloud.firestore import AsyncCollectionReference, DocumentSnapshot
+from google.cloud.firestore import AsyncClient, AsyncCollectionReference, DocumentSnapshot
 
 from modelmind.db.exceptions.questionnaires import DBQuestionnaireNotFound
 from modelmind.db.schemas import DBIdentifier
@@ -15,11 +15,12 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
     _collection_name = "questionnaires"
     model = DBQuestionnaire
 
-    @classmethod
+    def __init__(self, client: AsyncClient) -> None:
+        super().__init__(client)
+
     def questions_collection(self, questionnaire_id: DBIdentifier) -> AsyncCollectionReference:
         return self.document_ref(questionnaire_id).collection("questions")
 
-    @classmethod
     async def get_from_id(self, questionnaire_id: DBIdentifier) -> DBQuestionnaire:
         try:
             print("Searching for questionnaire with id", questionnaire_id)
@@ -27,7 +28,6 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         except Exception:
             raise DBQuestionnaireNotFound("Questionnaire with id %s not found" % questionnaire_id)
 
-    @classmethod
     async def get_from_name(self, name: str) -> DBQuestionnaire:
         try:
             print("Searching for questionnaire with name", name)
@@ -36,7 +36,6 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         except Exception:
             raise DBQuestionnaireNotFound("Questionnaire with name %s not found" % name)
 
-    @classmethod
     async def get_questions(self, questionnaire_id: DBIdentifier, language: Optional[str] = None) -> List[DBQuestion]:
         questions = self.questions_collection(questionnaire_id)
 
@@ -51,7 +50,6 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
 
         return db_questions
 
-    @classmethod
     async def get_available_languages(self, questionnaire_id: DBIdentifier) -> List[str]:
         # TODO: optimize this, maybe we can store the available languages in the questionnaire document
         questions = self.questions_collection(questionnaire_id)
@@ -62,7 +60,6 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
             languages.add(question.get("language"))
         return list(languages)
 
-    @classmethod
     async def create_questionnaire(self, create_questionnaire: CreateQuestionnaire) -> DBQuestionnaire:
         try:
             questionnaire = await self.add(create_questionnaire.model_dump(exclude={"questions"}))
@@ -75,7 +72,6 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         except Exception as e:
             raise e
 
-    @classmethod
     async def add_questions(self, questionnaire_id: DBIdentifier, questions: List[dict[str, Any]]) -> None:
         questions_collection = self.questions_collection(questionnaire_id)
         await self.batch_add(questions, questions_collection)

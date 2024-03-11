@@ -2,6 +2,7 @@ import logging
 
 from fastapi import Body, Depends, HTTPException, Query
 
+from modelmind.api.public.dependencies.daos.providers import results_dao_provider
 from modelmind.api.public.dependencies.session.get import get_session_from_token
 from modelmind.db.daos.results import ResultsDAO
 from modelmind.db.schemas.results import DBResult
@@ -17,17 +18,21 @@ def get_result(data: dict = Body(..., description="The current results data of t
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def get_result_from_id(result_id: str = Query(..., description="The result id")) -> DBResult:
+async def get_result_from_id(
+    result_id: str = Query(..., description="The result id"), results_dao: ResultsDAO = Depends(results_dao_provider)
+) -> DBResult:
     try:
-        return await ResultsDAO.get(result_id)
+        return await results_dao.get(result_id)
     except Exception as e:
         logging.error(f"Failed to fetch result {result_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def get_result_from_session(session: DBSession = Depends(get_session_from_token)) -> DBResult:
+async def get_result_from_session(
+    session: DBSession = Depends(get_session_from_token), results_dao: ResultsDAO = Depends(results_dao_provider)
+) -> DBResult:
     try:
-        return await ResultsDAO.get_result_from_session_id(session.id)
+        return await results_dao.get_result_from_session_id(session.id)
     except Exception as e:
         logging.error(f"Failed to fetch result from session {session.id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

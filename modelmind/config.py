@@ -26,8 +26,9 @@ class LogLevel(str, Enum):  # noqa: WPS600
     FATAL = "fatal"
 
 
-class FirebaseSettings(BaseSettings):
+class FirestoreSettings(BaseSettings):
     prefix: str = ""
+    database: str = ""
 
 
 class SentrySettings(BaseSettings):
@@ -50,8 +51,6 @@ class Server(BaseModel):
     service: str | None = None
     tag: str | None = None
     workers: int = 1
-    include_my_account_router: bool = False
-    include_runner_router: bool = False
 
     @property
     def prefix(self) -> str:
@@ -84,7 +83,7 @@ class Settings(BaseSettings):
         env_nested_delimiter="__",
     )
 
-    firebase: FirebaseSettings = FirebaseSettings()
+    firestore: FirestoreSettings = FirestoreSettings()
     sentry: SentrySettings = SentrySettings()
     jwt: JWTSettings = JWTSettings()
 

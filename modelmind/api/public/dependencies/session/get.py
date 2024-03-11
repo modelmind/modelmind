@@ -3,6 +3,7 @@ from datetime import datetime
 import jwt
 from fastapi import Depends, HTTPException, Request
 
+from modelmind.api.public.dependencies.daos.providers import sessions_dao_provider
 from modelmind.api.public.exceptions.jwt import JWTExpiredException, JWTInvalidException, JWTMissingException
 from modelmind.config import settings
 from modelmind.db.daos.sessions import SessionsDAO
@@ -30,9 +31,11 @@ def get_session_id_from_token(request: Request) -> DBIdentifier:
     return get_jwt_payload_from_token(request)["session"]
 
 
-async def get_session_from_id(session_id: DBIdentifier) -> DBSession:
+async def get_session_from_id(
+    session_id: DBIdentifier, sessions_dao: SessionsDAO = Depends(sessions_dao_provider)
+) -> DBSession:
     try:
-        return await SessionsDAO.get(session_id)
+        return await sessions_dao.get(session_id)
     except SessionNotFound:
         raise HTTPException(status_code=403, detail="Forbidden")
 

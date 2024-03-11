@@ -11,7 +11,9 @@
             "module": "uvicorn",
             "args": [
                 "modelmind.api.app:main",
-                "--reload"
+                "--reload",
+                "--port",
+                "8080"
             ],
             "jinja": true,
             "justMyCode": true,

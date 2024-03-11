@@ -1,5 +1,7 @@
 from typing import List, Optional
 
+from google.cloud.firestore import AsyncClient
+
 from modelmind.db.schemas import DBIdentifier
 from modelmind.db.schemas.results import CreateResult, DBResult, UpdateResultVisibility
 
@@ -10,7 +12,9 @@ class ResultsDAO(FirestoreDAO[DBResult]):
     _collection_name = "results"
     model = DBResult
 
-    @classmethod
+    def __init__(self, client: AsyncClient) -> None:
+        super().__init__(client)
+
     async def save(self, result: CreateResult) -> DBResult:
         try:
             return await self.add(result.model_dump())
@@ -18,7 +22,6 @@ class ResultsDAO(FirestoreDAO[DBResult]):
             # TODO: custom exception
             raise e
 
-    @classmethod
     async def get_result_from_session_id(self, session_id: DBIdentifier) -> DBResult:
         try:
             return (await self.search(filters=[FieldFilter("session_id", "==", session_id)], limit=1))[0]
@@ -26,7 +29,6 @@ class ResultsDAO(FirestoreDAO[DBResult]):
             # TODO: custom exception
             raise e
 
-    @classmethod
     async def get_results_from_questionnaire(
         self, questionnaire_id: DBIdentifier, limit: Optional[int] = None
     ) -> List[DBResult]:
@@ -36,7 +38,6 @@ class ResultsDAO(FirestoreDAO[DBResult]):
             # TODO: custom exception
             raise e
 
-    @classmethod
     async def get_from_id(self, result_id: DBIdentifier) -> DBResult:
         try:
             return await self.get(result_id)
@@ -44,7 +45,6 @@ class ResultsDAO(FirestoreDAO[DBResult]):
             # TODO: custom exception
             raise e
 
-    @classmethod
     async def update_visibility(self, result_id: DBIdentifier, data: UpdateResultVisibility) -> None:
         try:
             await self.update(result_id, data.model_dump())

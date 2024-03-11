@@ -18,7 +18,7 @@ repos:
     hooks:
       - id: format-tf
         name: format-tf
-        entry: sh -c 'terraform fmt --check tf/'
+        entry: sh -c 'terraform fmt --check terraform/'
         language: system
         pass_filenames: false
   - repo: local
