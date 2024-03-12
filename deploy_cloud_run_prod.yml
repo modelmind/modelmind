@@ -67,8 +67,6 @@ steps:
       - SENTRY__DSN=${_SENTRY__DSN}
       - --set-secrets
       - JWT__SECRET_KEY=${_JWT__SECRET_KEY}
-      - --vpc-connector=${_VPC_CONNECTOR}
-      - --vpc-egress=all-traffic
       - --cpu-boost
       - --cpu=2
       - --memory=1Gi
