@@ -61,6 +61,10 @@ steps:
       - --set-secrets JWT__SECRET_KEY=${_JWT__SECRET_KEY}
       - --vpc-connector=${_VPC_CONNECTOR}
       - --vpc-egress=all-traffic
+      - --cpu-boost
+      - --cpu=2
+      - --memory=1Gi
+
 
   - id: "Update Traffic to prod"
     name: "${_CLOUD_SDK_IMAGE}"
