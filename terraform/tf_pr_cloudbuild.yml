@@ -1,0 +1,58 @@
+steps:
+  - id: 'branch name'
+    name: 'alpine:3.16.0'
+    entrypoint: ash
+    args:
+      - '-c'
+      - |
+        echo "***********************"
+        echo "Pull request from $_HEAD_BRANCH to $_BASE_BRANCH"
+        echo "***********************"
+  - id: 'tf init'
+    name: 'hashicorp/terraform:1.4.6'
+    dir: "tf"
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        echo "**TERRAFORM INIT in $PROJECT_ID **"
+        terraform init -no-color
+
+  - id: 'tf fmt check'
+    name: 'hashicorp/terraform:1.4.6'
+    dir: "tf"
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform fmt --check
+
+  - id: 'tf validate'
+    name: 'hashicorp/terraform:1.4.6'
+    entrypoint: 'sh'
+    dir: "tf"
+    args:
+      - '-c'
+      - |
+        terraform validate -no-color
+
+
+  - id: 'tf plan'
+    name: 'hashicorp/terraform:1.4.6'
+    entrypoint: 'sh'
+    dir: "tf"
+    args:
+      - '-c'
+      - |
+        terraform plan -no-color \
+        -var project_id=$PROJECT_ID \
+        -var project_number=$PROJECT_NUMBER \
+
+timeout: 600s
+
+substitutions:
+  _LOGS_CB_BUCKET: ""
+
+logsBucket: "${_LOGS_CB_BUCKET}"
+options:
+  logging: GCS_ONLY
