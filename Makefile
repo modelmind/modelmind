@@ -40,7 +40,6 @@ watch:            ## Run tests on every change.
 .PHONY: export
 poetry-export:          ## Export poetry requirements to requirements.txt.
 	poetry export --without-hashes --without dev -f requirements.txt -o requirements.txt
-	poetry export --without-hashes --only dev -f requirements.txt -o requirements-dev.txt
 
 
 .PHONY: update
