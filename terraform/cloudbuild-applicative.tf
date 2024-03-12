@@ -14,7 +14,7 @@ resource "google_cloudbuild_trigger" "on-push-prod-api" {
   }
   substitutions = {
     "_LOGS_GCS_BUCKET" : "${local.log_bucket_name}/${local.on_push_prod_api}"
-    "_TARGET_SERVICE_IMAGE" : "europe-west1-docker.pkg.dev/${var.project_id}/docker/${local.app_name}-api"
+    "_TARGET_SERVICE_IMAGE" : "europe-docker.pkg.dev/${var.project_id}/docker/${local.app_name}-api"
     "_SERVICE_NAME" : google_cloud_run_v2_service.cloud_run_api.name
     "_REGION" : "europe-west1"
     "_DOCKER_IMAGE" : "gcr.io/cloud-builders/docker:latest"
