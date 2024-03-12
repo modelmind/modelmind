@@ -38,27 +38,35 @@ steps:
       - run
       - deploy
       - ${_SERVICE_NAME}
-      - --platform managed
-      - --region ${_REGION}
-      - --image ${_TARGET_SERVICE_IMAGE}:${SHORT_SHA}
-      - --args run
-      - --tag ${_CLOUDRUN_TAG}
+      - --platform=managed
+      - --region=${_REGION}
+      - --image=${_TARGET_SERVICE_IMAGE}:${SHORT_SHA}
+      - --args=run
+      - --tag=${_CLOUDRUN_TAG}
       - --allow-unauthenticated
-      - --ingress all
-      - --service-account ${_SA_EMAIL}
-      - --port ${_PORT}
-      - --execution-environment gen1
-      - --timeout "60"
-      - --command ${_COMMAND}
-      - --args ${_ARGS}
-      - --set-env-vars SERVER__PORT=${_PORT}
-      - --set-env-vars SERVER__RELOAD=false
-      - --set-env-vars SERVER__SERVICE=${_SERVER__SERVICE}
-      - --set-env-vars SERVER__TAG=${_CLOUDRUN_TAG}
-      - --set-env-vars SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
-      - --set-env-vars FIRESTORE__DATABASE=${_FIRESTORE__DATABASE}
-      - --set-secrets SENTRY__DSN=${_SENTRY__DSN}
-      - --set-secrets JWT__SECRET_KEY=${_JWT__SECRET_KEY}
+      - --ingress=all
+      - --service-account=${_SA_EMAIL}
+      - --port=${_PORT}
+      - --execution-environment=gen1
+      - --timeout="60"
+      - --command=${_COMMAND}
+      - --args=${_ARGS}
+      - --set-env-vars
+      - SERVER__PORT=${_PORT}
+      - --set-env-vars
+      - SERVER__RELOAD=false
+      - --set-env-vars
+      - SERVER__SERVICE=${_SERVER__SERVICE}
+      - --set-env-vars
+      - SERVER__TAG=${_CLOUDRUN_TAG}
+      - --set-env-vars
+      - SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
+      - --set-env-vars
+      - FIRESTORE__DATABASE=${_FIRESTORE__DATABASE}
+      - --set-secrets
+      - SENTRY__DSN=${_SENTRY__DSN}
+      - --set-secrets
+      - JWT__SECRET_KEY=${_JWT__SECRET_KEY}
       - --vpc-connector=${_VPC_CONNECTOR}
       - --vpc-egress=all-traffic
       - --cpu-boost
