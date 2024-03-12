@@ -56,8 +56,6 @@ steps:
       - --set-env-vars
       - SERVER__RELOAD=false
       - --set-env-vars
-      - SERVER__SERVICE=${_SERVER__SERVICE}
-      - --set-env-vars
       - SERVER__TAG=${_CLOUDRUN_TAG}
       - --set-env-vars
       - SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
