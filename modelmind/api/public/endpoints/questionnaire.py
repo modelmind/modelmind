@@ -73,7 +73,7 @@ async def questionnaire_session_questions_next(
             CreateResult(session_id=session.id, questionnaire_id=session.questionnaire_id, data=current_result.data)
         )
         await profiles_dao.add_result(session.profile_id, db_result.id)
-
+        # TODO: send to Discord
         return NextQuestionsResponse(
             questions=[], completed=current_result.answered_questions_count(), remaining=0, result_id=str(db_result.id)
         )

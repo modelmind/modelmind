@@ -58,6 +58,10 @@ steps:
       - --set-env-vars
       - SERVER__TAG=${_CLOUDRUN_TAG}
       - --set-env-vars
+      - SERVER__WORKERS=2
+      - --set-env-vars
+      - ENVIRONMENT=${_ENVIRONMENT}
+      - --set-env-vars
       - SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
       - --set-env-vars
       - FIRESTORE__DATABASE=${_FIRESTORE__DATABASE}
@@ -65,6 +69,8 @@ steps:
       - SENTRY__DSN=${_SENTRY__DSN}
       - --set-secrets
       - JWT__SECRET_KEY=${_JWT__SECRET_KEY}
+      - --set-secrets
+      - DISCORD__NOTIFICATIONS_WEBHOOK_URL=${_DISCORD__NOTIFICATIONS_WEBHOOK_URL}
       - --cpu-boost
       - --cpu=2
       - --memory=1Gi

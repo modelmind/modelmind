@@ -32,3 +32,15 @@ resource "google_secret_manager_secret" "mm_sentry_dsn" {
     }
   }
 }
+
+resource "google_secret_manager_secret" "discord_notifications_webhook_url" {
+  secret_id = "discord_notifications_webhook_url"
+
+  replication {
+    user_managed {
+      replicas {
+        location = "europe-west1"
+      }
+    }
+  }
+}

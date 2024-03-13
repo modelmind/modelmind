@@ -37,6 +37,12 @@ class SentrySettings(BaseSettings):
     profiles_sample_rate: float = 1.0
 
 
+class DiscordSettings(BaseSettings):
+    guild_id: int = 1118283948016017449
+    notifications_channel_id: int = 1217594301324726292
+    notifications_webhook_url: str = ""
+
+
 class JWTSettings(BaseSettings):
     secret_key: str = "secret"
     algorithm: str = "HS256"
@@ -86,6 +92,7 @@ class Settings(BaseSettings):
     firestore: FirestoreSettings = FirestoreSettings()
     sentry: SentrySettings = SentrySettings()
     jwt: JWTSettings = JWTSettings()
+    discord: DiscordSettings = DiscordSettings()
 
 
 settings = Settings()
