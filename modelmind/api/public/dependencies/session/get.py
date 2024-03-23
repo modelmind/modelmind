@@ -40,8 +40,11 @@ async def get_session_from_id(
         raise HTTPException(status_code=403, detail="Forbidden")
 
 
-async def get_session_from_token(session_id: DBIdentifier = Depends(get_session_id_from_token)) -> DBSession:
+async def get_session_from_token(
+    session_id: DBIdentifier = Depends(get_session_id_from_token),
+    sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
+) -> DBSession:
     try:
-        return await get_session_from_id(session_id)
+        return await get_session_from_id(session_id, sessions_dao)
     except ValueError:
         raise HTTPException(status_code=403, detail="Forbidden")

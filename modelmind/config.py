@@ -39,8 +39,9 @@ class SentrySettings(BaseSettings):
 
 class DiscordSettings(BaseSettings):
     guild_id: int = 1118283948016017449
+    webhook_base_url: str = "https://discord.com/api/webhooks"
     notifications_channel_id: int = 1217594301324726292
-    notifications_webhook_url: str = ""
+    notifications_webhook_id: str = ""
 
 
 class JWTSettings(BaseSettings):

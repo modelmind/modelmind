@@ -24,7 +24,7 @@ class HttpxClient(ABC):
         self._headers = self._default_headers
 
     @staticmethod
-    def _raise_on_4xx_5xx(response: httpx.Response) -> None:
+    async def _raise_on_4xx_5xx(response: httpx.Response) -> None:
         response.raise_for_status()
 
     @property

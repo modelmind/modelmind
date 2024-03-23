@@ -241,7 +241,7 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
                     :max_questions
                 ]
             )
-        elif MBTITrait.N + MBTITrait.N + MBTITrait.J in dominants:
+        elif MBTITrait.N + MBTITrait.F + MBTITrait.J in dominants:
             return (
                 self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_INJ, current_result)[:max_questions]
                 + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_EFJ, current_result)[

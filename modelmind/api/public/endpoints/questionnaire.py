@@ -1,10 +1,14 @@
+import asyncio
+
 from fastapi import APIRouter, Depends, HTTPException, Response
 
+from modelmind.api.public.commands.send_result_notification import SendResultNotificationCommand
 from modelmind.api.public.dependencies.daos.providers import (
     profiles_dao_provider,
     results_dao_provider,
     sessions_dao_provider,
 )
+from modelmind.api.public.dependencies.notifier import get_event_notifier
 from modelmind.api.public.dependencies.profile import get_or_create_profile, get_profile
 from modelmind.api.public.dependencies.questionnaire import (
     get_questionnaire_by_name,
@@ -29,6 +33,7 @@ from modelmind.db.schemas.results import CreateResult, DBResult, ResultVisibilit
 from modelmind.db.schemas.sessions import DBSession
 from modelmind.models.questionnaires.base import Questionnaire
 from modelmind.models.results.base import Result
+from modelmind.services.event_notifier import EventNotifier
 
 router = APIRouter(prefix="/questionnaire")
 
@@ -40,8 +45,9 @@ async def questionnaire_session_start(
     questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_name),
     profile: DBProfile = Depends(get_or_create_profile),
     profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
+    sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
 ) -> ProfileSessionResponse:
-    session_id = await create_session(profile.id, questionnaire.id, language, {})
+    session_id = await create_session(profile.id, questionnaire.id, language, {}, sessions_dao)
     await profiles_dao.add_session(profile.id, session_id)
     session_token = create_jwt_session_token(session_id, profile.id)
     response.set_cookie(
@@ -64,6 +70,7 @@ async def questionnaire_session_questions_next(
     sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
     results_dao: ResultsDAO = Depends(results_dao_provider),
     profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
+    notifier: EventNotifier = Depends(get_event_notifier),
 ) -> NextQuestionsResponse:
     """Get the next questions for the current session and result"""
 
@@ -74,6 +81,12 @@ async def questionnaire_session_questions_next(
         )
         await profiles_dao.add_result(session.profile_id, db_result.id)
         # TODO: send to Discord
+
+        send_result_notifcation = SendResultNotificationCommand(
+            questionnaire, current_result, notifier, session.profile_id, profiles_dao
+        )
+        asyncio.create_task(send_result_notifcation.run())
+
         return NextQuestionsResponse(
             questions=[], completed=current_result.answered_questions_count(), remaining=0, result_id=str(db_result.id)
         )

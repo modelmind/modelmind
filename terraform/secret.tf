@@ -33,8 +33,8 @@ resource "google_secret_manager_secret" "mm_sentry_dsn" {
   }
 }
 
-resource "google_secret_manager_secret" "discord_notifications_webhook_url" {
-  secret_id = "discord_notifications_webhook_url"
+resource "google_secret_manager_secret" "discord_notifications_webhook_id" {
+  secret_id = "discord_notifications_webhook_id"
 
   replication {
     user_managed {

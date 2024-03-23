@@ -1,7 +1,7 @@
 from google.cloud.firestore import ArrayUnion, AsyncClient
 
 from modelmind.db.exceptions.profiles import DBProfileCreationFailed, DBProfileNotFound
-from modelmind.db.schemas.profiles import CreateProfile, DBIdentifier, DBProfile
+from modelmind.db.schemas.profiles import Biographics, CreateProfile, DBIdentifier, DBProfile
 
 from .base import FirestoreDAO
 
@@ -34,5 +34,11 @@ class ProfilesDAO(FirestoreDAO[DBProfile]):
     async def add_session(self, profile_id: DBIdentifier, session_id: DBIdentifier) -> None:
         try:
             await self.document_ref(profile_id).update({"sessions": ArrayUnion([session_id])})
+        except Exception as e:
+            raise e
+
+    async def update_biographics(self, profile_id: DBIdentifier, biographics: Biographics) -> None:
+        try:
+            await self.update(profile_id, {"biographics": biographics})
         except Exception as e:
             raise e

@@ -51,8 +51,8 @@ resource "google_secret_manager_secret_iam_member" "binding_mm_sentry_dsn" {
   member    = "serviceAccount:${google_service_account.cloud_run_api_sa.email}"
 }
 
-resource "google_secret_manager_secret_iam_member" "binding_discord_notifications_webhook_url" {
-  secret_id = google_secret_manager_secret.discord_notifications_webhook_url.name
+resource "google_secret_manager_secret_iam_member" "binding_discord_notifications_webhook_id" {
+  secret_id = google_secret_manager_secret.discord_notifications_webhook_id.name
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.cloud_run_api_sa.email}"
 }

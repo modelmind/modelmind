@@ -33,10 +33,10 @@ def create_question_from_string_dict(question_data: Dict[str, str]) -> Question:
             question = ChoiceQuestion(
                 type="choice",
                 text=question_data["text"],
-                multiple=question_data.get("multiple", "False") == "True",
+                multiple=question_data.get("multiple", "False").lower() == "true",
                 display=cast(Literal["radio", "checkbox", "dropdown"], question_data["display"]),
                 options=question_data["options"].split("|"),  # Assuming options are separated by '|'
-                shuffle=question_data.get("shuffle", "False") == "True",
+                shuffle=question_data.get("shuffle", "False").lower() == "true",
             )
         elif question_type == "text":
             question = TextQuestion(type="text", text=question_data["text"])
@@ -49,6 +49,7 @@ def create_question_from_string_dict(question_data: Dict[str, str]) -> Question:
                 interval=float(question_data["interval"]),
                 low_label=question_data["low_label"],
                 high_label=question_data["high_label"],
+                shuffle=question_data.get("shuffle", "False").lower() == "true",
             )
         else:
             raise ValueError(f"Invalid question type: {question_type} from {question_data}")
@@ -59,7 +60,7 @@ def create_question_from_string_dict(question_data: Dict[str, str]) -> Question:
             category=question_data["category"],
             question=question,
             language=question_data["language"],
-            required=question_data.get("required", "True") == "True",
+            required=question_data.get("required", "True").lower() == "true",
         )
 
     except ValidationError as e:
@@ -86,6 +87,7 @@ def create_questions_from_csv(
         except Exception as e:
             if not ignore_invalid:
                 raise e
+            print(f"Error creating question: {e}")
             auto_id -= 1
 
     return questions

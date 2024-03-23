@@ -151,7 +151,6 @@ class FirestoreDAO(Generic[T], ABC):
         start = perf_counter()
 
         async for doc in docs:
-            print("doc", doc.id, doc.to_dict())
             result.append(self.validate(doc.id, doc.to_dict()))
             logging.debug(f"Document with ID {doc.id} retrieved from {self.collection_name()}.")
 
