@@ -12,6 +12,7 @@ def initialize_firestore_client() -> firestore.AsyncClient:
 
         return MockFirestore()
     logging.info("Initializing Firestore client with database: %s", settings.firestore.database)
+    print("Initializing Firestore client with database:", settings.firestore.database)
     return firestore.AsyncClient(database=settings.firestore.database)
 
 

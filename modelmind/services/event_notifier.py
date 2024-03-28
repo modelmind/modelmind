@@ -1,4 +1,4 @@
-from modelmind.clients.discord.schemas import WebhookBody
+from modelmind.clients.discord.schemas import Embed, Field, WebhookBody
 from modelmind.clients.discord.webhook import DiscordWebhookClient
 from modelmind.db.schemas.profiles import Biographics
 from modelmind.models.analytics.schemas import Analytics
@@ -11,16 +11,16 @@ class EventNotifier:
     def format_analytics_to_message(
         self, questionnaire_name: str, analytics: list[Analytics], biographics: Biographics
     ) -> WebhookBody:
-        embeds = []
+        embeds: list[Embed] = []
 
         def format_analytics_item(item: Analytics.ScoreItem) -> str:
             return f"**{item.name}**: Value: **{item.value}**, Percentage: **{item.percentage:.2f}**%"
 
-        def format_fields(analytics: Analytics) -> list[dict]:
+        def format_fields(analytics: Analytics) -> list[Field]:
             return [
                 {
                     "name": key,
-                    "value": value,
+                    "value": str(value),
                     "inline": True,
                 }
                 for key, value in analytics.extra.items()
@@ -28,12 +28,12 @@ class EventNotifier:
             ]
 
         def format_content(biographics: Biographics) -> str:
-            mbti_type = biographics.get("personality", {}).get("mbti", {}).get("type", "Unknown")
-            mbti_confidence = biographics.get("personality", {}).get("mbti", {}).get("confidence", None)
+            mbti_type = biographics.get("personality", {}).get("mbti", {}).get("type", "Unknown")  # type: ignore
+            mbti_confidence = biographics.get("personality", {}).get("mbti", {}).get("confidence", None)  # type: ignore
             return f"**{mbti_type}** ({mbti_confidence}) - {biographics.get('age')}yo - {biographics.get('gender')}"
 
         descriptions = []
-        fields = []
+        fields: list[Field] = []
 
         for analysis in analytics:
             sorted_items = sorted(analysis.items, key=lambda x: x.value, reverse=True)
@@ -49,8 +49,7 @@ class EventNotifier:
             }
         )
 
-        webhook_body = {"username": questionnaire_name, "embeds": embeds}
-        return webhook_body
+        return {"username": questionnaire_name, "embeds": embeds}
 
     async def new_result(self, questionnaire_name: str, analytics: list[Analytics], biographics: Biographics) -> None:
         body = self.format_analytics_to_message(questionnaire_name, analytics, biographics)

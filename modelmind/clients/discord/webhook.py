@@ -10,4 +10,4 @@ class DiscordWebhookClient(HttpxClient):
         super().__init__(base_url, timeout)
 
     async def send_embed_message(self, webhook_body: WebhookBody) -> None:
-        return await self.request("POST", f"{self.webhook_id}", json=webhook_body)
+        await self.request("POST", f"{self.webhook_id}", json=webhook_body)
