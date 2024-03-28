@@ -38,7 +38,7 @@ class PersonalityBiographics(TypedDict, total=False):
 
 class Biographics(TypedDict, total=False):
     age: Optional[int]
-    genre: Optional[str]
+    gender: Optional[str]
     occupation: Optional[str]
     education: Optional[str]
     country: Optional[str]
