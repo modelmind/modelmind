@@ -24,7 +24,7 @@ resource "google_cloudbuild_trigger" "on-push-prod-api" {
     "_CLOUDRUN_TAG" : "prod"
     "_SERVER__LOG_LEVEL" : "info"
     "_ENVIRONMENT" : "prod"
-    "_FIRESTORE__DATABASE" : "eu-prod"
+    "_FIRESTORE__DATABASE" : "(default)"
     "_SENTRY__DSN" : "${google_secret_manager_secret.mm_sentry_dsn.name}:latest"
     "_JWT__SECRET_KEY" : "${google_secret_manager_secret.mm_jwt_secret_key.name}:latest"
     "_DISCORD__NOTIFICATIONS_WEBHOOK_ID" : "${google_secret_manager_secret.discord_notifications_webhook_id.name}:latest"
