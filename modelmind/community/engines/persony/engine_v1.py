@@ -25,7 +25,7 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
             "PREFERENCES": 32,
             "LIFESTYLE": 16,
             "TEMPERAMENT": 16,
-            "ATTITUDE": 8,
+            "ATTITUDE": 16,
         }
         max_questions: int = 8
 
@@ -132,7 +132,7 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
             max_questions = self.config.questions_count[self.Step.TEMPERAMENT] // 2
             questions = self._get_temperament_questions(current_result, current_dominants, max_questions)
         elif step == self.Step.ATTITUDE:
-            max_questions = self.config.questions_count[self.Step.ATTITUDE] // 2
+            max_questions = self.config.questions_count[self.Step.ATTITUDE] // 4
             questions = self._get_attitude_questions(current_result, current_dominants, max_questions)
         else:
             questions = []
@@ -234,59 +234,61 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
     def _get_attitude_questions(
         self, current_result: Result, dominants: MBTIType, max_questions: Optional[int] = None
     ) -> List[PersonyQuestion]:
-        if MBTITrait.N + MBTITrait.T + MBTITrait.J in dominants:
+        if MBTITrait.N + MBTITrait.T + MBTITrait.J in dominants or MBTITrait.S + MBTITrait.F + MBTITrait.P in dominants:
             return (
                 self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_INJ, current_result)[:max_questions]
                 + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ETJ, current_result)[
                     :max_questions
                 ]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ESP, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_IFP, current_result)[
+                    :max_questions
+                ]
             )
-        elif MBTITrait.N + MBTITrait.F + MBTITrait.J in dominants:
+        elif (
+            MBTITrait.N + MBTITrait.F + MBTITrait.J in dominants or MBTITrait.S + MBTITrait.T + MBTITrait.P in dominants
+        ):
             return (
                 self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_INJ, current_result)[:max_questions]
                 + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_EFJ, current_result)[
                     :max_questions
                 ]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ESP, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ITP, current_result)[
+                    :max_questions
+                ]
             )
-        elif MBTITrait.S + MBTITrait.T + MBTITrait.J in dominants:
+        elif (
+            MBTITrait.S + MBTITrait.T + MBTITrait.J in dominants or MBTITrait.N + MBTITrait.F + MBTITrait.P in dominants
+        ):
             return (
                 self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ISJ, current_result)[:max_questions]
                 + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ETJ, current_result)[
                     :max_questions
                 ]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ENP, current_result)[
+                    :max_questions
+                ]
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_IFP, current_result)[
+                    :max_questions
+                ]
             )
-        elif MBTITrait.S + MBTITrait.F + MBTITrait.J in dominants:
+        elif (
+            MBTITrait.S + MBTITrait.F + MBTITrait.J in dominants or MBTITrait.N + MBTITrait.T + MBTITrait.P in dominants
+        ):
             return (
                 self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ISJ, current_result)[:max_questions]
                 + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_EFJ, current_result)[
                     :max_questions
                 ]
-            )
-        elif MBTITrait.N + MBTITrait.T + MBTITrait.P in dominants:
-            return (
-                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ITP, current_result)[:max_questions]
                 + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ENP, current_result)[
                     :max_questions
                 ]
-            )
-        elif MBTITrait.N + MBTITrait.F + MBTITrait.P in dominants:
-            return (
-                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_IFP, current_result)[:max_questions]
-                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ENP, current_result)[
-                    :max_questions
-                ]
-            )
-        elif MBTITrait.S + MBTITrait.T + MBTITrait.P in dominants:
-            return (
-                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ITP, current_result)[:max_questions]
-                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ESP, current_result)[
-                    :max_questions
-                ]
-            )
-        elif MBTITrait.S + MBTITrait.F + MBTITrait.P in dominants:
-            return (
-                self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_IFP, current_result)[:max_questions]
-                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ESP, current_result)[
+                + self._get_remaining_questions_by_category(PersonyDimension.ATTITUDE_ITP, current_result)[
                     :max_questions
                 ]
             )
