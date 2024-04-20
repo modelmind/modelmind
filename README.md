@@ -22,7 +22,7 @@
       </a> ·
       <a href="https://discord.com/">
          <strong>Discord</strong>
-      </a> 
+      </a>
    </div>
    </br>
       <img src="https://img.shields.io/badge/License-MIT-red.svg?style=flat-square" alt="MIT License">
@@ -35,6 +35,16 @@
 
 ## Iterative Improvement
 
+
+
+## Makefile
+
+This project uses Makefile. Please use `make install` to setup packages dependencies.
+
+## Google Cloud CLI
+
+
+## Terraform
 
 
 ## Poetry
@@ -97,6 +107,12 @@ persony_admin
 ```
 
 ## Configuration
+
+This application use google cloud services such as __firestore__
+You must install gcloud CLI.
+https://cloud.google.com/sdk/docs/install#deb
+
+
 
 This application can be configured with environment variables.
 
