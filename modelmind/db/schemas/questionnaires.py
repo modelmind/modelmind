@@ -1,4 +1,7 @@
-from . import DBObject, DBObjectCreate
+from pydantic import Field
+from shortuuid import uuid
+
+from . import DBIdentifier, DBObject, DBObjectCreate
 
 
 class DBQuestionnaire(DBObject):
@@ -9,6 +12,8 @@ class DBQuestionnaire(DBObject):
 
 
 class CreateQuestionnaire(DBObjectCreate):
+    id: DBIdentifier = Field(default_factory=lambda: str(uuid()[:8]))
+
     name: str
     engine: str
 
