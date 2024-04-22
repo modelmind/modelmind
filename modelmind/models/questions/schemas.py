@@ -2,8 +2,6 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
-KEY_DELIMITER = "#"
-
 QuestionID = str
 QuestionKey = str
 QuestionCategory = str
@@ -44,4 +42,4 @@ class Question(BaseModel):
 
     @property
     def key(self) -> QuestionKey:
-        return f"{KEY_DELIMITER}{self.id}"
+        return f"{self.id}"
