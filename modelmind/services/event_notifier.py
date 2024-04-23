@@ -30,7 +30,9 @@ class EventNotifier:
         def format_content(biographics: Biographics) -> str:
             mbti_type = biographics.get("personality", {}).get("mbti", {}).get("type", "Unknown")  # type: ignore
             mbti_confidence = biographics.get("personality", {}).get("mbti", {}).get("confidence", None)  # type: ignore
-            return f"**{mbti_type}** ({mbti_confidence}) - {biographics.get('age')}yo - {biographics.get('gender')}"
+            return (
+                f"**{mbti_type}** ({mbti_confidence}) - {biographics.get('birth_year')} - {biographics.get('gender')}"
+            )
 
         descriptions = []
         fields: list[Field] = []
