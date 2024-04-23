@@ -105,7 +105,7 @@ class MBTITraitsAnalytics(BaseAnalytics):
         # Step 2: Sum all the transformed probabilities
         total_sum = sum(transformed_probs.values())
         # Step 3: Normalize the transformed probabilities
-        return {k: v / total_sum for k, v in transformed_probs.items()}
+        return {k: v / total_sum for k, v in transformed_probs.items() if total_sum > 0}
 
     @property
     def categories(self) -> dict[MBTITrait, list[str]]:
