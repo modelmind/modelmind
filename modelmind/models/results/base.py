@@ -23,8 +23,6 @@ class BaseResult(ABC):
     def list_answered_questions_keys(self) -> list[QuestionKey]:
         return [k for k, v in self.data.items() if v is not None]
 
-    # TODO: get category from question key, delimeter is #
-
 
 class Result(BaseResult):
     def __init__(self, data: ResultData, **kwargs):

@@ -1,8 +1,12 @@
+from datetime import datetime
+from typing import Optional
+from uuid import uuid4
+
 from google.cloud.firestore import AsyncClient
 
 from modelmind.db.exceptions.sessions import SessionNotFound
 from modelmind.db.schemas import DBIdentifier
-from modelmind.db.schemas.sessions import DBCreateSession, DBSession, DBUpdateSession, SessionStatus
+from modelmind.db.schemas.sessions import DBSession, DBUpdateSession, SessionStatus
 
 from .base import FirestoreDAO
 
@@ -14,9 +18,36 @@ class SessionsDAO(FirestoreDAO[DBSession]):
     def __init__(self, client: AsyncClient) -> None:
         super().__init__(client)
 
-    async def create(self, session: DBCreateSession) -> DBSession:
+    async def create(
+        self,
+        profile_id: DBIdentifier,
+        questionnaire_id: DBIdentifier,
+        status: SessionStatus,
+        language: str,
+        id: Optional[DBIdentifier] = None,
+        metadata: Optional[dict] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+    ) -> DBSession:
+        if not id:
+            id = str(uuid4())
+        if not created_at:
+            created_at = datetime.now()
+        if not updated_at:
+            updated_at = datetime.now()
         try:
-            return await self.add(session.model_dump())
+            return await self.add(
+                {
+                    "id": id,
+                    "profile_id": profile_id,
+                    "questionnaire_id": questionnaire_id,
+                    "status": status,
+                    "language": language,
+                    "metadata": metadata,
+                    "created_at": created_at,
+                    "updated_at": updated_at,
+                }
+            )
         except Exception as e:
             # TODO: custom exception
             raise e

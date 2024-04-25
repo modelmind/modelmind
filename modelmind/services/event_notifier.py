@@ -1,3 +1,5 @@
+from typing import Optional
+
 from modelmind.clients.discord.schemas import Embed, Field, WebhookBody
 from modelmind.clients.discord.webhook import DiscordWebhookClient
 from modelmind.db.schemas.profiles import Biographics
@@ -8,6 +10,25 @@ class EventNotifier:
     def __init__(self, discord_notifications_webhook_client: DiscordWebhookClient) -> None:
         self.discord_notifications_client = discord_notifications_webhook_client
 
+    def extract_dominants(self, analytics: list[Analytics]) -> str:
+        # related to persony test
+        # TODO: find a better way to separate this business logic
+        return "/".join(
+            analytic.extra.get("dominants", "")
+            for analytic in analytics
+            if analytic.extra.get("complexity") == "advanced"
+        )
+
+    def get_persony_color(self, predicted_dominants: str, target_dominants: Optional[str] = None) -> int:
+        # related to persony test
+        # TODO: find a better way to separate this business logic
+        if predicted_dominants == target_dominants:
+            return 0x00FF00
+        elif not target_dominants:
+            return 0x34B7EB
+        else:
+            return 0xFF0000
+
     def format_analytics_to_message(
         self, questionnaire_name: str, analytics: list[Analytics], biographics: Biographics
     ) -> WebhookBody:
@@ -16,7 +37,7 @@ class EventNotifier:
         def format_analytics_item(item: Analytics.ScoreItem) -> str:
             return f"**{item.name}**: Value: **{item.value}**, Percentage: **{item.percentage:.2f}**%"
 
-        def format_fields(analytics: Analytics) -> list[Field]:
+        def format_extra_fields(analytics: Analytics) -> list[Field]:
             return [
                 {
                     "name": key,
@@ -27,7 +48,7 @@ class EventNotifier:
                 if isinstance(value, (int, float, str))
             ]
 
-        def format_content(biographics: Biographics) -> str:
+        def format_biographics(biographics: Biographics) -> str:
             mbti_type = biographics.get("personality", {}).get("mbti", {}).get("type", "Unknown")  # type: ignore
             mbti_confidence = biographics.get("personality", {}).get("mbti", {}).get("confidence", None)  # type: ignore
             return (
@@ -38,16 +59,20 @@ class EventNotifier:
         fields: list[Field] = []
 
         for analysis in analytics:
-            sorted_items = sorted(analysis.items, key=lambda x: x.value, reverse=True)
+            sorted_items = sorted(analysis.items, key=lambda x: x.percentage or x.value, reverse=True)
             descriptions.append("\n".join(format_analytics_item(item) for item in sorted_items))
-            fields.extend(format_fields(analysis))
+
+        fields.append({"name": "Biographics", "value": format_biographics(biographics), "inline": False})
+
+        # TODO: remove this business logic
+        target_dominants = biographics.get("personality", {}).get("mbti", {}).get("type", None)  # type: ignore
 
         embeds.append(
             {
-                "title": format_content(biographics),
+                "title": self.extract_dominants(analytics),
                 "description": "\n\n".join(descriptions),
                 "fields": fields,
-                "color": 3447003,
+                "color": self.get_persony_color(self.extract_dominants(analytics), target_dominants),
             }
         )
 
