@@ -10,7 +10,7 @@ help:             ## Show the help.
 install:          ## Install the project in dev mode.
 	poetry install
 	pre-commit install --hook-type pre-commit --hook-type pre-push
-
+# INSTALL NPM + firebase (functions)
 
 .PHONY: format
 format:           ## Format code using black & isort.

@@ -1,4 +1,3 @@
-import logging
 from abc import ABC
 from time import perf_counter
 from typing import Any, AsyncIterator, Dict, Generic, List, Literal, Optional, Type, TypeVar
@@ -15,6 +14,7 @@ from google.cloud.firestore_v1.types import write
 
 from modelmind.db.exceptions.base import DBObjectNotFound
 from modelmind.db.schemas import DBIdentifier, DBObject
+from modelmind.logger import log
 
 # Generic type for documents stored in Firestore
 T = TypeVar("T", bound=DBObject)
@@ -61,7 +61,7 @@ class FirestoreDAO(Generic[T], ABC):
         try:
             return self.model.model_validate({DBObject.id_name(): document_id, **data})
         except Exception as e:
-            logging.error(f"Validation failed for document with ID {document_id} in {self.collection_name()}. {e}")
+            log.error(f"Validation failed for document with ID {document_id} in {self.collection_name()}. {e}")
             raise e
 
     async def get(self, document_id: DBIdentifier) -> T:
@@ -69,30 +69,28 @@ class FirestoreDAO(Generic[T], ABC):
         doc_ref: AsyncDocumentReference = self.document_ref(document_id)
         doc: DocumentSnapshot = await doc_ref.get()
         if not doc.exists:
-            logging.debug(f"Document with ID {document_id} not found in {self.collection_name()}.")
+            log.debug(f"Document with ID {document_id} not found in {self.collection_name()}.")
             raise DBObjectNotFound(f"Document with ID {document_id} not found in {self.collection_name()}.")
-        logging.debug(f"Document with ID {document_id} retrieved from {self.collection_name()}.")
+        log.debug(f"Document with ID {document_id} retrieved from {self.collection_name()}.")
         return self.validate(document_id, doc.to_dict())
 
     async def add(self, document_data: Dict[str, Any], document_id: Optional[DBIdentifier] = None) -> T:
         """Add a new document to the collection."""
         document_id = str(document_id) if document_id else document_data.get(DBObject.id_name())
         update_time, doc_ref = await self.collection().add(document_data, document_id)
-        logging.debug(f"Document {doc_ref.id} added to collection {self.collection_name()} at {update_time}")
+        log.debug(f"Document {doc_ref.id} added to collection {self.collection_name()} at {update_time}")
         return self.validate(document_id or doc_ref.id, document_data)
 
     async def update(self, document_id: DBIdentifier, data: Dict[str, Any]) -> None:
         """Update an existing document."""
         doc_ref: AsyncDocumentReference = self.document_ref(document_id)
         write_result: write.WriteResult = await doc_ref.update(data)
-        logging.debug(
-            f"Document with ID {document_id} from {self.collection_name()} updated at {write_result.update_time}"
-        )
+        log.debug(f"Document with ID {document_id} from {self.collection_name()} updated at {write_result.update_time}")
 
     async def delete(self, document_id: DBIdentifier) -> None:
         """Delete a document from the collection."""
         timestamp = await self.document_ref(document_id).delete()
-        logging.debug(f"Document with ID {document_id} from {self.collection_name()} deleted at {timestamp}")
+        log.debug(f"Document with ID {document_id} from {self.collection_name()} deleted at {timestamp}")
 
     async def list(
         self,
@@ -118,9 +116,9 @@ class FirestoreDAO(Generic[T], ABC):
 
         async for doc in docs:
             result.append(self.validate(doc.id, doc.to_dict()))
-            logging.debug(f"Document with ID {doc.id} retrieved from {self.collection_name()}.")
+            log.debug(f"Document with ID {doc.id} retrieved from {self.collection_name()}.")
 
-        logging.info(f"Query took {perf_counter() - start} seconds.")
+        log.info(f"Query took {perf_counter() - start} seconds.")
         return result
 
     async def search(
@@ -152,9 +150,9 @@ class FirestoreDAO(Generic[T], ABC):
 
         async for doc in docs:
             result.append(self.validate(doc.id, doc.to_dict()))
-            logging.debug(f"Document with ID {doc.id} retrieved from {self.collection_name()}.")
+            log.debug(f"Document with ID {doc.id} retrieved from {self.collection_name()}.")
 
-        logging.info(f"Query took {perf_counter() - start} seconds.")
+        log.info(f"Query took {perf_counter() - start} seconds.")
         return result
 
     async def search_as_dicts(
@@ -187,9 +185,9 @@ class FirestoreDAO(Generic[T], ABC):
 
         async for doc in docs:
             result[doc.id] = self.validate(doc.id, doc.to_dict())
-            logging.debug(f"Document with ID {doc.id} retrieved from {self.collection_name()}.")
+            log.debug(f"Document with ID {doc.id} retrieved from {self.collection_name()}.")
 
-        logging.info(f"Query took {perf_counter() - start} seconds.")
+        log.info(f"Query took {perf_counter() - start} seconds.")
         return result
 
     async def batch_set(
@@ -212,10 +210,10 @@ class FirestoreDAO(Generic[T], ABC):
         start = perf_counter()
 
         write_results: list[write.WriteResult] = await batch.commit()
-        logging.info(f"Batch set took {perf_counter() - start} seconds.")
+        log.info(f"Batch set took {perf_counter() - start} seconds.")
 
         for i, write_result in enumerate(write_results):
-            logging.debug(
+            log.debug(
                 f"Document with ID {write_result.update_time} from {self.collection_name()}"
                 f"updated at {write_result.update_time}"
             )
@@ -241,10 +239,10 @@ class FirestoreDAO(Generic[T], ABC):
         start = perf_counter()
 
         write_results: list[write.WriteResult] = await batch.commit()
-        logging.info(f"Batch add took {perf_counter() - start} seconds.")
+        log.info(f"Batch add took {perf_counter() - start} seconds.")
 
         for i, write_result in enumerate(write_results):
-            logging.debug(
+            log.debug(
                 f"Document with ID {write_result.update_time} from {self.collection_name()}"
                 f"updated at {write_result.update_time}"
             )

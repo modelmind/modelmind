@@ -26,6 +26,11 @@ class LogLevel(str, Enum):  # noqa: WPS600
     FATAL = "fatal"
 
 
+class LoggingSettings(BaseModel):
+    level: LogLevel = LogLevel.DEBUG
+    logger_name: str = f"{PACKAGE_NAME}_logger"
+
+
 class FirestoreSettings(BaseSettings):
     prefix: str = ""
     database: str = ""
@@ -53,7 +58,6 @@ class JWTSettings(BaseSettings):
 class Server(BaseModel):
     port: int = 8080
     host: str = "0.0.0.0"
-    log_level: str = LogLevel.DEBUG.value
     reload: bool = False
     service: str | None = None
     tag: str | None = None
@@ -83,6 +87,7 @@ class Settings(BaseSettings):
 
     server: Server = Server()
     environment: Environment = Environment.DEV
+    logging: LoggingSettings = LoggingSettings()
 
     model_config = SettingsConfigDict(
         env_file=(".env", ".env.local", ".env.dev", ".env.prod"),

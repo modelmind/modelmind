@@ -5,9 +5,11 @@ from typing import AsyncGenerator
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 from modelmind.api import monitoring_router, public_v1_router
 from modelmind.config import PACKAGE_NAME, Environment, settings
+from modelmind.logger import log
 
 from .middleware import setup_middlewares
 
@@ -15,12 +17,12 @@ from .middleware import setup_middlewares
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # On startup
-    print("Starting up")
+    log.info("Starting up")
 
     app.build_middleware_stack()
     yield
     # On shutdown
-    print("Shutting down")
+    log.info("Shutting down")
 
 
 def main() -> FastAPI:
@@ -32,8 +34,7 @@ def main() -> FastAPI:
     :return: application.
     """
 
-    logging.basicConfig(level=settings.server.log_level)
-
+    log.info("Initializing Sentry SDK...")
     sentry_sdk.init(
         dsn=settings.sentry.dsn,
         # Set traces_sample_rate to 1.0 to capture 100%
@@ -47,7 +48,10 @@ def main() -> FastAPI:
         debug=settings.environment == Environment.DEV,
         attach_stacktrace=True,
         enable_tracing=True,
+        integrations=[LoggingIntegration(level=logging.DEBUG, event_level=logging.ERROR)],
+        default_integrations=True,
     )
+    log.info("Sentry SDK initialized")
 
     app = FastAPI(
         title=PACKAGE_NAME,
@@ -58,12 +62,16 @@ def main() -> FastAPI:
         default_response_class=UJSONResponse,
         lifespan=lifespan,
     )
+    log.info("FastAPI application created")
 
     # Main router for the API.
     app.include_router(router=public_v1_router, prefix=settings.server.prefix)
+    log.info("Public API v1 router included")
     app.include_router(router=monitoring_router, prefix=settings.server.prefix)
+    log.info("Monitoring router included")
 
     # see middleware.py
     setup_middlewares(app)
+    log.info("Middlewares set up")
 
     return app

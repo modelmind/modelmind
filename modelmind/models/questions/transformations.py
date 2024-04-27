@@ -91,3 +91,13 @@ def create_questions_from_csv(
             auto_id -= 1
 
     return questions
+
+
+def generate_schema_fields(questions: list[Question]) -> list[Dict[str, str]]:
+    fields = []
+    for question in questions:
+        field = {}
+        field["name"] = question.id
+        field["type"] = question.question.answer_type
+        fields.append(field)
+    return fields

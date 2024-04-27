@@ -3,14 +3,14 @@ import uvicorn
 
 from modelmind.config import PACKAGE_NAME, settings
 
-cli = typer.Typer(name="Lab {PACKAGE_NAME} Api")
+cli = typer.Typer(name="{PACKAGE_NAME} Api")
 
 
 @cli.command()
 def run(
     port: int = settings.server.port,
     host: str = settings.server.host,
-    log_level: str = settings.server.log_level,
+    log_level: str = settings.logging.level.value,
     reload: bool = settings.server.reload,
     workers: int = settings.server.workers,
 ) -> None:
