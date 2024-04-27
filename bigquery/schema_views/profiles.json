@@ -1,0 +1,55 @@
+{
+    "fields": [
+        {
+            "name": "id",
+            "type": "string"
+        },
+        {
+            "name": "updated_at",
+            "type": "timestamp"
+        },
+        {
+            "name": "created_at",
+            "type": "timestamp"
+        },
+        {
+            "name": "results",
+            "type": "array"
+        },
+        {
+            "fields": [
+                {
+                    "name": "age",
+                    "type": "number"
+                },
+                {
+                    "name": "gender",
+                    "type": "string"
+
+                },
+                {
+                "fields": [
+                    {
+                        "fields": [
+                            {
+                                "name": "confidence",
+                                "type": "number"
+                            },
+                            {
+                                "name": "type",
+                                "type": "string"
+                            }
+                        ],
+                        "name": "mbti",
+                        "type": "map"
+                    }
+                ],
+                    "name": "personality",
+                    "type": "map"
+                }
+            ],
+            "name": "biographics",
+            "type": "map"
+        }
+    ]
+}

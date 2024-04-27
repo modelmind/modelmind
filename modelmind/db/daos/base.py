@@ -223,17 +223,18 @@ class FirestoreDAO(Generic[T], ABC):
                 )
 
     async def batch_add(
-        self, data: List[Dict[str, Any]], collection_ref: Optional[AsyncCollectionReference] = None
+        self,
+        data: List[Dict[str, Any]],
+        collection_ref: Optional[AsyncCollectionReference] = None,
+        doc_ids: Optional[List[str]] = None,
     ) -> None:
         """
         Batch add multiple documents to the collection.
         """
         batch = self.db.batch()
-        for doc_data in data:
-            if collection_ref:
-                doc_ref = collection_ref.document()
-            else:
-                doc_ref = self.collection().document()
+        collection_ref = collection_ref or self.collection()
+        for doc_data, doc_id in zip(data, doc_ids or [None] * len(data)):  # type: ignore
+            doc_ref = collection_ref.document(doc_id) if doc_id else collection_ref.document()
             batch.set(doc_ref, doc_data)
 
         start = perf_counter()

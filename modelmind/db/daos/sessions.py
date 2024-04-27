@@ -26,15 +26,9 @@ class SessionsDAO(FirestoreDAO[DBSession]):
         language: str,
         id: Optional[DBIdentifier] = None,
         metadata: Optional[dict] = None,
-        created_at: Optional[datetime] = None,
-        updated_at: Optional[datetime] = None,
     ) -> DBSession:
         if not id:
             id = str(uuid4())
-        if not created_at:
-            created_at = datetime.now()
-        if not updated_at:
-            updated_at = datetime.now()
         try:
             return await self.add(
                 {
@@ -44,8 +38,8 @@ class SessionsDAO(FirestoreDAO[DBSession]):
                     "status": status,
                     "language": language,
                     "metadata": metadata,
-                    "created_at": created_at,
-                    "updated_at": updated_at,
+                    "created_at": datetime.now(),
+                    "updated_at": datetime.now(),
                 }
             )
         except Exception as e:
