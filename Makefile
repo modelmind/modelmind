@@ -14,6 +14,7 @@ install:          ## Install the project in dev mode.
 
 .PHONY: format
 format:           ## Format code using black & isort.
+	autoflake --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports --recursive $(module_name)/
 	isort $(module_name)/
 	black -l 120 $(module_name)/
 	black -l 120 tests/
