@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any, List, Optional
+from uuid import uuid4
 
 from google.cloud.firestore import AsyncClient
 
@@ -19,7 +20,10 @@ class ResultsDAO(FirestoreDAO[DBResult]):
     async def create(
         self, questionnaire_id: DBIdentifier, session_id: DBIdentifier, data: dict[str, Any], label: str
     ) -> DBResult:
+        result_id = str(uuid4())
+
         result_data = {
+            "id": result_id,
             "questionnaire_id": questionnaire_id,
             "session_id": session_id,
             "data": data,
