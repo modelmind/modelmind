@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import Field
 
@@ -25,5 +25,8 @@ class BaseResult(ABC):
 
 
 class Result(BaseResult):
-    def __init__(self, data: ResultData, **kwargs):
+    label: Optional[str] = None
+
+    def __init__(self, data: ResultData, label: Optional[str] = None, **kwargs):
         super().__init__(data=data, **kwargs)
+        self.label = label

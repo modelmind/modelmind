@@ -76,9 +76,12 @@ async def questionnaire_session_questions_next(
 
     if questionnaire.is_completed(current_result):
         await sessions_dao.update_status(session.id, SessionStatus.COMPLETED)
-        label = questionnaire.get_result_label(current_result)
+        current_result.label = questionnaire.get_result_label(current_result)
         db_result = await results_dao.create(
-            session_id=session.id, questionnaire_id=session.questionnaire_id, data=current_result.data, label=label
+            session_id=session.id,
+            questionnaire_id=session.questionnaire_id,
+            data=current_result.data,
+            label=current_result.label,
         )
         await profiles_dao.add_result(session.profile_id, db_result.id)
         # TODO: send to Discord

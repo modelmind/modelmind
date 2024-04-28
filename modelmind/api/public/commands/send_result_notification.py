@@ -26,4 +26,6 @@ class SendResultNotificationCommand(Command[None]):
         analytics = self.questionnaire.get_analytics(self.results)
         db_profile = await self.profiles_dao.get_from_id(self.profile_id)
 
-        await self.event_notifier.new_result(self.questionnaire.name, analytics, db_profile.biographics)
+        await self.event_notifier.new_result(
+            self.questionnaire.name, self.results.label, analytics, db_profile.biographics
+        )

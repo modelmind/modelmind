@@ -10,16 +10,8 @@ class EventNotifier:
     def __init__(self, discord_notifications_webhook_client: DiscordWebhookClient) -> None:
         self.discord_notifications_client = discord_notifications_webhook_client
 
-    def extract_dominants(self, analytics: list[Analytics]) -> str:
-        # related to persony test
-        # TODO: find a better way to separate this business logic
-        return "/".join(
-            analytic.extra.get("dominants", "")
-            for analytic in analytics
-            if analytic.extra.get("complexity") == "advanced"
-        )
-
-    def get_persony_color(self, predicted_dominants: str, target_dominants: Optional[str] = None) -> int:
+    @staticmethod
+    def get_persony_color(predicted_dominants: str, target_dominants: Optional[str] = None) -> int:
         # related to persony test
         # TODO: find a better way to separate this business logic
         if predicted_dominants == target_dominants:
@@ -30,7 +22,7 @@ class EventNotifier:
             return 0xFF0000
 
     def format_analytics_to_message(
-        self, questionnaire_name: str, analytics: list[Analytics], biographics: Biographics
+        self, questionnaire_name: str, label: str | None, analytics: list[Analytics], biographics: Biographics
     ) -> WebhookBody:
         embeds: list[Embed] = []
 
@@ -69,15 +61,17 @@ class EventNotifier:
 
         embeds.append(
             {
-                "title": self.extract_dominants(analytics),
+                "title": label or "N/A",
                 "description": "\n\n".join(descriptions),
                 "fields": fields,
-                "color": self.get_persony_color(self.extract_dominants(analytics), target_dominants),
+                "color": self.get_persony_color(label or "", target_dominants),
             }
         )
 
         return {"username": questionnaire_name, "embeds": embeds}
 
-    async def new_result(self, questionnaire_name: str, analytics: list[Analytics], biographics: Biographics) -> None:
-        body = self.format_analytics_to_message(questionnaire_name, analytics, biographics)
+    async def new_result(
+        self, questionnaire_name: str, label: str | None, analytics: list[Analytics], biographics: Biographics
+    ) -> None:
+        body = self.format_analytics_to_message(questionnaire_name, label, analytics, biographics)
         await self.discord_notifications_client.send_embed_message(body)
