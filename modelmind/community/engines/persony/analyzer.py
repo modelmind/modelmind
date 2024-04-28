@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from modelmind.community.engines.persony.dimensions import PersonyDimension
 from modelmind.community.theory.jung.functions import JungFunctionsAnalytics
 from modelmind.community.theory.mbti.trait import MBTITraitsAnalytics
+from modelmind.community.theory.mbti.types import MBTIType
+from modelmind.logger import log
 from modelmind.models.analytics.base import BaseAnalytics
 from modelmind.models.questions import QuestionKey
 from modelmind.models.results import Result
@@ -67,9 +69,42 @@ class PersonyAnalyzer:
         for question_key, value in current_result.data.items():
             question = self.question_key_mapping.get(question_key)
             if question is None:
+                log.warning("Analyzer: question with key %s not found", question_key)
                 continue
 
             dimension = PersonyDimension(question.category)
             self._add_traits_and_functions(dimension, value)
 
         return [self.base_mbti_analytics, self.advanced_mbti_analytics, self.jung_analytics]
+
+    @staticmethod
+    def find_base_analytics(analytics: list[BaseAnalytics]) -> MBTITraitsAnalytics | None:
+        """Find the base MBTI analytics in the list of analytics."""
+        for analytic in analytics:
+            if (
+                isinstance(analytic, MBTITraitsAnalytics)
+                and analytic.complexity == MBTITraitsAnalytics.Complexity.basic
+            ):
+                return analytic
+        return None
+
+    @staticmethod
+    def find_advanced_analytics(analytics: list[BaseAnalytics]) -> MBTITraitsAnalytics | None:
+        """Find the advanced MBTI analytics in the list of analytics."""
+        for analytic in analytics:
+            if (
+                isinstance(analytic, MBTITraitsAnalytics)
+                and analytic.complexity == MBTITraitsAnalytics.Complexity.advanced
+            ):
+                return analytic
+        return None
+
+    def calculate_dominants(self, current_result: Result) -> MBTIType:
+        """Get the dominant MBTI type from the current result."""
+
+        analytics = self.calculate_analytics(current_result)
+        advanced_analytics = self.find_advanced_analytics(analytics)
+        if advanced_analytics:
+            return advanced_analytics.dominants
+        else:
+            raise ValueError("Advanced MBTI analytics not found")

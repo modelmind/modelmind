@@ -105,6 +105,9 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
             remaining += self.config.questions_count[step] - counts.get(step, 0)
         return remaining
 
+    def calculate_result_label(self, current_result: Result) -> str:
+        return self.analyzer.calculate_dominants(current_result)
+
     def get_current_step(self, current_result: Result) -> Step:
         counts = self.get_questions_counts_by_step(current_result)
 

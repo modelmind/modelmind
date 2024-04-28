@@ -1,9 +1,10 @@
-from typing import List, Optional
+from datetime import datetime
+from typing import Any, List, Optional
 
 from google.cloud.firestore import AsyncClient
 
 from modelmind.db.schemas import DBIdentifier
-from modelmind.db.schemas.results import CreateResult, DBResult, UpdateResultVisibility
+from modelmind.db.schemas.results import DBResult, UpdateResultVisibility
 
 from .base import FieldFilter, FirestoreDAO
 
@@ -15,9 +16,20 @@ class ResultsDAO(FirestoreDAO[DBResult]):
     def __init__(self, client: AsyncClient) -> None:
         super().__init__(client)
 
-    async def save(self, result: CreateResult) -> DBResult:
+    async def create(
+        self, questionnaire_id: DBIdentifier, session_id: DBIdentifier, data: dict[str, Any], label: str
+    ) -> DBResult:
+        result_data = {
+            "questionnaire_id": questionnaire_id,
+            "session_id": session_id,
+            "data": data,
+            "label": label,
+            "created_at": datetime.now(),
+            "updated_at": datetime.now(),
+        }
+
         try:
-            return await self.add(result.model_dump())
+            return await self.add(result_data)
         except Exception as e:
             # TODO: custom exception
             raise e

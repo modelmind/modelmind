@@ -19,9 +19,6 @@ class BaseEngine(Generic[QuestionType], ABC):
         """Create a mapping question_key to -> Question"""
         return {question.key: question for question in questions}
 
-    def get_question_from_key(self, key: QuestionKey) -> QuestionType | None:
-        return self.question_key_mapping.get(key, None)
-
     @abstractmethod
     def is_completed(self, current_result: Result) -> bool:
         raise NotImplementedError
@@ -55,6 +52,9 @@ class Engine(BaseEngine, Generic[QuestionType]):
         if not self._analytics:
             self._analytics = self.build_analytics(results)
         return self._analytics
+
+    def calculate_result_label(self, results: Result) -> str:
+        return ""
 
     async def calculate_remaining_questions_count(self, results: Result) -> int:
         return 0

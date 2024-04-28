@@ -29,7 +29,7 @@ from modelmind.db.daos.results import ResultsDAO
 from modelmind.db.daos.sessions import SessionsDAO, SessionStatus
 from modelmind.db.schemas.profiles import DBProfile
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
-from modelmind.db.schemas.results import CreateResult, DBResult, ResultVisibility
+from modelmind.db.schemas.results import DBResult, ResultVisibility
 from modelmind.db.schemas.sessions import DBSession
 from modelmind.models.questionnaires.base import Questionnaire
 from modelmind.models.results.base import Result
@@ -76,8 +76,9 @@ async def questionnaire_session_questions_next(
 
     if questionnaire.is_completed(current_result):
         await sessions_dao.update_status(session.id, SessionStatus.COMPLETED)
-        db_result = await results_dao.save(
-            CreateResult(session_id=session.id, questionnaire_id=session.questionnaire_id, data=current_result.data)
+        label = questionnaire.get_result_label(current_result)
+        db_result = await results_dao.create(
+            session_id=session.id, questionnaire_id=session.questionnaire_id, data=current_result.data, label=label
         )
         await profiles_dao.add_result(session.profile_id, db_result.id)
         # TODO: send to Discord
