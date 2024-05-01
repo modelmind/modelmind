@@ -50,8 +50,7 @@ class JungFunctionsAnalytics(BaseAnalytics):
     def add(self, function: JungFunction, value: int, max_value: int) -> None:
         if function in JungFunction:
             self.values[function] += value
-            if max_value > self.max_values[function]:
-                self.max_values[function] = max_value
+            self.max_values[function] += max_value
 
     @property
     def categories(self) -> dict[JungFunction, List[str]]:
