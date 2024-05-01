@@ -1,4 +1,3 @@
-import math
 from enum import StrEnum
 from typing import List
 
@@ -15,6 +14,10 @@ class JungFunction(StrEnum):
     Fi = "Fi"
     Fe = "Fe"
 
+    @classmethod
+    def list(cls) -> List[str]:
+        return [func.value for func in cls]
+
 
 class JungFunctionsAnalytics(BaseAnalytics):
     Ni: int = 0
@@ -27,53 +30,28 @@ class JungFunctionsAnalytics(BaseAnalytics):
     Fe: int = 0
 
     def __init__(self) -> None:
-        pass
-
-    @staticmethod
-    def _softmax(x: List[int]) -> List[float]:
-        """Compute softmax values for each sets of scores in x."""
-        e_x = [math.exp(i) for i in x]
-        return [i / sum(e_x) for i in e_x]
+        self.values = {func: 0 for func in JungFunction}
+        self.max_values = {func: 0 for func in JungFunction}
 
     @property
-    def model_fields(self) -> List[str]:
-        return [str(func) for func in JungFunction]
-
-    @property
-    def normalized_functions(self) -> dict[str, float]:
-        function_values = [
-            self.Ni,
-            self.Ne,
-            self.Si,
-            self.Se,
-            self.Ti,
-            self.Te,
-            self.Fi,
-            self.Fe,
-        ]
-        softmax_values = self._softmax(function_values)
-
-        return {
-            "Ni": softmax_values[0] * 100,
-            "Ne": softmax_values[1] * 100,
-            "Si": softmax_values[2] * 100,
-            "Se": softmax_values[3] * 100,
-            "Ti": softmax_values[4] * 100,
-            "Te": softmax_values[5] * 100,
-            "Fi": softmax_values[6] * 100,
-            "Fe": softmax_values[7] * 100,
-        }
+    def global_percentages(self) -> dict[str, float]:
+        total = sum(self.values.values())
+        if total == 0:
+            return {func.name: 0 for func in JungFunction}
+        return {func.name: (self.values[func] / total) * 100 for func in JungFunction}
 
     @property
     def percentages(self) -> dict[str, float]:
-        total = sum(getattr(self, func) for func in self.model_fields)
-        if total == 0:
-            return {func: 0 for func in self.model_fields}
-        return {func: (getattr(self, func) / total) * 100 for func in self.model_fields}
+        return {
+            func.name: (self.values[func] / self.max_values[func] * 100 if self.max_values[func] > 0 else 0)
+            for func in JungFunction
+        }
 
-    def add(self, function: JungFunction, value: int) -> None:
-        if function in self.model_fields:
-            setattr(self, function, getattr(self, function) + value)
+    def add(self, function: JungFunction, value: int, max_value: int) -> None:
+        if function in JungFunction:
+            self.values[function] += value
+            if max_value > self.max_values[function]:
+                self.max_values[function] = max_value
 
     @property
     def categories(self) -> dict[JungFunction, List[str]]:
@@ -92,7 +70,7 @@ class JungFunctionsAnalytics(BaseAnalytics):
         items = [
             Analytics.ScoreItem(
                 name=func.value,
-                value=getattr(self, func.value),
+                value=self.values[func],
                 percentage=self.percentages[func.value],
                 categories=self.categories[func],
             )
@@ -100,8 +78,8 @@ class JungFunctionsAnalytics(BaseAnalytics):
         ]
 
         extra = {
-            "percentages": self.percentages,
-            "normalized_functions": self.normalized_functions,
+            "global_percentages": self.global_percentages,
+            "max_values": self.max_values,
         }
 
         return Analytics(
