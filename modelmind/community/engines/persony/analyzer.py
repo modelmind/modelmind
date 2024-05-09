@@ -41,12 +41,16 @@ class PersonyAnalyzer:
             self.advanced_mbti_analytics.add(dimension.low_trait, abs(value))
         if dimension.low_function:
             self.jung_analytics.add(dimension.low_function, abs(value), max_value=max_value)
+        if dimension.high_function:
+            self.jung_analytics.add(dimension.high_function, 0, max_value=max_value)
 
     def _handle_positive_value(self, dimension: PersonyDimension, value: int, max_value: int) -> None:
         if dimension.high_trait:
             if not dimension.has_function:
                 self.base_mbti_analytics.add(dimension.high_trait, value)
             self.advanced_mbti_analytics.add(dimension.high_trait, value)
+        if dimension.low_function:
+            self.jung_analytics.add(dimension.low_function, 0, max_value=max_value)
         if dimension.high_function:
             self.jung_analytics.add(dimension.high_function, value, max_value=max_value)
 
