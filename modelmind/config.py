@@ -52,7 +52,7 @@ class DiscordSettings(BaseSettings):
 class JWTSettings(BaseSettings):
     secret_key: str = "secret"
     algorithm: str = "HS256"
-    session_timeout_minutes: int = 60 * 24 * 30  # 30 days
+    session_timeout_minutes: int = 60 * 24 * 365 * 2
 
 
 class Server(BaseModel):
