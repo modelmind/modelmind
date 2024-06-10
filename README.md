@@ -122,10 +122,9 @@ $ tree "persony_admin"
 │   └── schema_views               # Configuration and views for BigQuery data analysis
 ├── functions
 │   └── src                        # Source code for serverless functions
-├── htmlcov                        # HTML coverage reports for test coverage
 ├── modelmind
 │   ├── _mocker                    # Utilities for mocking data and functionalities in tests
-│   ├── api                        # API endpoints and related logic
+│   ├── api                        # API endpoints, presentation, permissions, dependencies
 │   ├── clients                    # Integrations with third-party APIs
 │   ├── community                  # Domain knowledge external to core questionnaires
 │   │   ├── engines
@@ -135,10 +134,10 @@ $ tree "persony_admin"
 │   │       └── mbti               # MBTI personality theory implementation
 │   ├── db                         # Persistence layer and database interactions
 │   ├── models                     # Core business logic and data manipulation
-│   │   ├── analytics              # Statistical calculations based on questionnaire results
-│   │   ├── engines                # Algorithms for selecting and managing questions
-│   │   ├── questionnaires         # Structure and management of questionnaires
-│   │   ├── questions              # Handling of individual questions
+│   │   ├── analytics              # Calculations based on questionnaire results
+│   │   ├── engines                # Logic for selecting questions from a questionnaire
+│   │   ├── questionnaires         # (Main) Core questionnaire models
+│   │   ├── questions              # Questions models that belong to a questionnaire
 │   │   └── results                # Management of results from questionnaires
 │   ├── services                   # Auxiliary services, including event notification
 │   │   └── event_notifier         # Service to handle event notifications within the system
