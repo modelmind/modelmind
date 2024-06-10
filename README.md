@@ -1,5 +1,5 @@
 <div align="center">
-   <a href="https://langfuse.com">
+   <a href="https://modelmind.me">
       <h1>🫧 Modelmind </h1>
    </a>
  <div>
@@ -7,7 +7,7 @@
       Building the most accurate and reliable personality test.
    </h3>
     <div>
-     Understand yourself - grow together
+     - Find your path -
    </div>
    </br>
    <div>
@@ -17,7 +17,7 @@
       <a href="">
          <strong>Methodology</strong>
       </a> ·
-      <a href="https://langfuse.com/idea">
+      <a href="https://github.com/modelmind/modelmind/discussions">
          <strong>Suggestions</strong>
       </a> ·
       <a href="https://discord.com/">
@@ -31,143 +31,133 @@
 </br>
 
 
-# Overview
+## Project Setup and Management
 
-## Iterative Improvement
+This project is managed using a Makefile. The Makefile simplifies the setup and management of various tasks, including installing dependencies, linting, testing, and more.
 
+## Initial Setup
 
+To set up the project for the first time, you need to perform some initial steps:
 
-## Makefile
+1. **Install Poetry**: Poetry is used for dependency management. You can install it by following the instructions at [https://python-poetry.org/docs/#installation](https://python-poetry.org/docs/#installation).
 
-This project uses Makefile. Please use `make install` to setup packages dependencies.
+2. **Install Google Cloud CLI**: This project uses Google Cloud services, so you need to install the Google Cloud CLI. Instructions can be found [here](https://cloud.google.com/sdk/docs/install#deb).
 
-## Google Cloud CLI
+3. **Install Make**: Make sure `make` is installed on your system. On most Unix-based systems, it should be available by default. For Windows, you can use tools like `choco` or `scoop` to install `make`.
 
+4. **Environment Variables**: Create a `.env` file in the root directory and add the necessary environment variables. An example `.env` file:
 
-## Terraform
+    ```bash
+    JWT__SECRET_KEY="secret"
+    FIRESTORE__DATABASE="eu-dev"
+    DISCORD__NOTIFICATIONS_WEBHOOK_ID="1233757003848511704/6_WKmKdgcHFpXbwXkgM1lKWhggqloHg30VvcdD4kd-hEqQK45xDGhndTt7TXvmq3rgt1"
+    ```
 
+## Using the Makefile
 
-## Poetry
+Once the initial setup is complete, you can use the Makefile to manage the project.
 
-This project uses poetry. It's a modern dependency management
-tool.
+### Install Dependencies
 
-To run the project use this set of commands:
-
-```bash
-poetry install
-poetry run python -m modelmind
-```
-
-This will start the server on the configured host.
-
-You can find swagger documentation at `/api/docs`.
-
-You can read more about poetry here: https://python-poetry.org/
-
-## Docker
-
-You can start the project with docker using this command:
+To install all necessary dependencies and set up pre-commit hooks, run:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . up --build
+make install
 ```
 
-If you want to develop in docker with autoreload add `-f deploy/docker-compose.dev.yml` to your docker command.
-Like this:
+### Pre-commit Hooks
+
+Pre-commit hooks are used to check your code before committing. By default, the following tools are configured:
+
+- **black**: Formats your code.
+- **mypy**: Validates types.
+- **isort**: Sorts imports in all files.
+- **flake8**: Spots possible bugs.
+
+To install the pre-commit hooks, use the `make install` command as mentioned above.
+
+### Linting and Formatting
+
+To lint and format your code, run:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up --build
+make lint
+make format
 ```
 
-This command exposes the web application on port 8000, mounts current directory and enables autoreload.
+### Running Tests
 
-But you have to rebuild image every time you modify `poetry.lock` or `pyproject.toml` with this command:
+To run tests and generate a coverage report, use:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . build
+make test
 ```
 
-## Project structure
+### Watching for Changes
+
+To run tests automatically on every change, run:
+
+```bash
+make watch
+```
+
+### Updating Dependencies
+
+To update poetry dependencies and export them to `requirements.txt`, run:
+
+```bash
+make poetry-update
+```
+
+Simple export without updating dependencies:
+```bash
+make poetry-export
+```
+
+## Project Structure
 
 ```bash
 $ tree "persony_admin"
-persony_admin
-├── conftest.py  # Fixtures for all tests.
-├── __main__.py  # Startup script. Starts uvicorn.
-├── services  # Package for different external services such as rabbit or redis etc.
-├── settings.py  # Main configuration settings for project.
-├── static  # Static content.
-├── tests  # Tests for project.
-└── web  # Package contains web server. Handlers, startup config.
-    ├── api  # Package with all handlers.
-    │   └── router.py  # Main router.
-    ├── application.py  # FastAPI application configuration.
-    └── lifetime.py  # Contains actions to perform on startup and shutdown.
+.
+├── bigquery
+│   └── schema_views               # Configuration and views for BigQuery data analysis
+├── functions
+│   └── src                        # Source code for serverless functions
+├── htmlcov                        # HTML coverage reports for test coverage
+├── modelmind
+│   ├── _mocker                    # Utilities for mocking data and functionalities in tests
+│   ├── api                        # API endpoints and related logic
+│   ├── clients                    # Integrations with third-party APIs
+│   ├── community                  # Domain knowledge external to core questionnaires
+│   │   ├── engines
+│   │   │   └── persony            # Custom engine using community-based knowledge
+│   │   └── theory
+│   │       ├── jung               # Jungian personality theory implementation
+│   │       └── mbti               # MBTI personality theory implementation
+│   ├── db                         # Persistence layer and database interactions
+│   ├── models                     # Core business logic and data manipulation
+│   │   ├── analytics              # Statistical calculations based on questionnaire results
+│   │   ├── engines                # Algorithms for selecting and managing questions
+│   │   ├── questionnaires         # Structure and management of questionnaires
+│   │   ├── questions              # Handling of individual questions
+│   │   └── results                # Management of results from questionnaires
+│   ├── services                   # Auxiliary services, including event notification
+│   │   └── event_notifier         # Service to handle event notifications within the system
+│   └── utils                      # Utility functions and helpers
+├── terraform                      # Infrastructure as code configurations
+└── tests
+    ├── endpoints                  # Tests for API endpoints
+    └── models                     # Tests for core business logic and models
 ```
 
-## Configuration
+## Infrastructure
 
-This application use google cloud services such as __firestore__
-You must install gcloud CLI.
-https://cloud.google.com/sdk/docs/install#deb
+This project uses Terraform for managing infrastructure as code on Google Cloud. We also use a Cloud Build trigger (`deploy_cloud_run_prod.yml`) for CI/CD to deploy our application to Google Cloud Run.
 
+## Additional Resources
 
+- **Poetry**: Read more about Poetry [here](https://python-poetry.org/).
+- **Pre-commit**: Learn more about pre-commit [here](https://pre-commit.com/).
+- **Pydantic BaseSettings**: Read more about the BaseSettings class [here](https://pydantic-docs.helpmanual.io/usage/settings/).
 
-This application can be configured with environment variables.
-
-You can create `.env` file in the root directory and place all
-environment variables here.
-
-All environment variables should start with "PERSONY_ADMIN_" prefix.
-
-For example if you see in your "persony_admin/settings.py" a variable named like
-`random_parameter`, you should provide the "PERSONY_ADMIN_RANDOM_PARAMETER"
-variable to configure the value. This behaviour can be changed by overriding `env_prefix` property
-in `persony_admin.settings.Settings.Config`.
-
-An example of .env file:
-```bash
-PERSONY_ADMIN_RELOAD="True"
-PERSONY_ADMIN_PORT="8000"
-PERSONY_ADMIN_ENVIRONMENT="dev"
-```
-
-You can read more about BaseSettings class here: https://pydantic-docs.helpmanual.io/usage/settings/
-
-## Pre-commit
-
-To install pre-commit simply run inside the shell:
-```bash
-pre-commit install
-```
-
-pre-commit is very useful to check your code before publishing it.
-It's configured using .pre-commit-config.yaml file.
-
-By default it runs:
-* black (formats your code);
-* mypy (validates types);
-* isort (sorts imports in all files);
-* flake8 (spots possible bugs);
-
-
-You can read more about pre-commit here: https://pre-commit.com/
-
-
-## Running tests
-
-If you want to run it in docker, simply run:
-
-```bash
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . run --build --rm api pytest -vv .
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . down
-```
-
-For running tests on your local machine.
-
-
-2. Run the pytest.
-```bash
-pytest -vv .
-```
+---
