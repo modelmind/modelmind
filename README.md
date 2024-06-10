@@ -11,10 +11,10 @@
    </div>
    </br>
    <div>
-      <a href="">
+      <a href="https://modelmind.me/theory">
          <strong>Theory</strong>
       </a> ·
-      <a href="">
+      <a href="https://modelmind.me/methodology">
          <strong>Methodology</strong>
       </a> ·
       <a href="https://github.com/modelmind/modelmind/discussions">
@@ -41,7 +41,7 @@ To set up the project for the first time, you need to perform some initial steps
 
 1. **Install Poetry**: Poetry is used for dependency management. You can install it by following the instructions at [https://python-poetry.org/docs/#installation](https://python-poetry.org/docs/#installation).
 
-2. **Install Google Cloud CLI**: This project uses Google Cloud services, so you need to install the Google Cloud CLI. Instructions can be found [here](https://cloud.google.com/sdk/docs/install#deb).
+2. **Install Google Cloud CLI**: This project uses Google Cloud services (such as Firestore), so you need to install the Google Cloud CLI. Instructions can be found [here](https://cloud.google.com/sdk/docs/install#deb).
 
 3. **Install Make**: Make sure `make` is installed on your system. On most Unix-based systems, it should be available by default. For Windows, you can use tools like `choco` or `scoop` to install `make`.
 
@@ -50,7 +50,6 @@ To set up the project for the first time, you need to perform some initial steps
     ```bash
     JWT__SECRET_KEY="secret"
     FIRESTORE__DATABASE="eu-dev"
-    DISCORD__NOTIFICATIONS_WEBHOOK_ID="1233757003848511704/6_WKmKdgcHFpXbwXkgM1lKWhggqloHg30VvcdD4kd-hEqQK45xDGhndTt7TXvmq3rgt1"
     ```
 
 ## Using the Makefile
