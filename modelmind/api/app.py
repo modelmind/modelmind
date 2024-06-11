@@ -4,28 +4,39 @@ from typing import AsyncGenerator
 
 import sentry_sdk
 from fastapi import FastAPI
+from fastapi.datastructures import State
 from fastapi.responses import UJSONResponse
+from google.cloud import firestore
 from sentry_sdk.integrations.logging import LoggingIntegration
 
 from modelmind.api import monitoring_router, public_v1_router
+from modelmind.api.public.dependencies.daos.firestore import initialize_firestore_client
 from modelmind.config import PACKAGE_NAME, Environment, settings
 from modelmind.logger import log
 
 from .middleware import setup_middlewares
 
 
+class ModelMindState(State):
+    firestore: firestore.AsyncClient
+
+
+class ModelMindAPI(FastAPI):
+    state: ModelMindState
+
+
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: ModelMindAPI) -> AsyncGenerator[None, None]:
     # On startup
     log.info("Starting up")
-
+    app.state.firestore = initialize_firestore_client()
     app.build_middleware_stack()
     yield
     # On shutdown
     log.info("Shutting down")
 
 
-def main() -> FastAPI:
+def main() -> ModelMindAPI:
     """
     Get FastAPI application.
 
@@ -53,7 +64,7 @@ def main() -> FastAPI:
     )
     log.info("Sentry SDK initialized")
 
-    app = FastAPI(
+    app = ModelMindAPI(
         title=PACKAGE_NAME,
         version="0.1.0",
         docs_url=f"{settings.server.prefix}/docs",

@@ -1,6 +1,7 @@
 import sys
 from typing import Optional
 
+from fastapi import Request
 from google.cloud import firestore
 
 from modelmind.config import settings
@@ -14,12 +15,9 @@ def initialize_firestore_client(database: Optional[str] = None) -> firestore.Asy
         return MockFirestore()
 
     selected_database = database or settings.firestore.database
-    log.info("Initializing Firestore client with database:", selected_database)
+    log.info("Initializing Firestore client with database: %s" % selected_database)
     return firestore.AsyncClient(database=selected_database)
 
 
-firestore_client = initialize_firestore_client()
-
-
-def get_firestore_client() -> firestore.AsyncClient:
-    return firestore_client
+def get_firestore_client(request: Request) -> firestore.AsyncClient:
+    return request.app.state.firestore
