@@ -23,13 +23,13 @@ from modelmind.api.public.dependencies.session.verify import session_status_comp
 from modelmind.api.public.schemas.analytics import AnalyticsResponse
 from modelmind.api.public.schemas.profiles import ProfileSessionResponse
 from modelmind.api.public.schemas.questionnaires import NextQuestionsResponse
-from modelmind.api.public.schemas.results import ResultsResponse
+from modelmind.api.public.schemas.results import ResultsResponse, ResultVisibility
 from modelmind.db.daos.profiles import ProfilesDAO
 from modelmind.db.daos.results import ResultsDAO
 from modelmind.db.daos.sessions import SessionsDAO, SessionStatus
 from modelmind.db.schemas.profiles import DBProfile
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
-from modelmind.db.schemas.results import DBResult, ResultVisibility
+from modelmind.db.schemas.results import DBResult
 from modelmind.db.schemas.sessions import DBSession
 from modelmind.models.questionnaires.base import Questionnaire
 from modelmind.models.results.base import Result
@@ -106,7 +106,12 @@ async def questionnaire_session_questions_next(
 async def questionnaire_session_results(
     db_result: DBResult = Depends(get_result_from_session),
 ) -> ResultsResponse:
-    return ResultsResponse(id=str(db_result.id), data=db_result.data, created_at=db_result.created_at)
+    return ResultsResponse(
+        id=str(db_result.id),
+        data=db_result.data,
+        created_at=db_result.created_at,
+        visibility=ResultVisibility(db_result.visibility),
+    )
 
 
 @router.get("/results", response_model=ResultsResponse)
@@ -114,10 +119,15 @@ async def get_questionnaire_results(
     db_result: DBResult = Depends(get_result_from_id),
     db_profile: DBProfile = Depends(get_profile),
 ) -> ResultsResponse:
-    if db_result.visibility != ResultVisibility.PUBLIC and db_result.id not in db_profile.results:
+    if db_result.visibility != DBResult.Visibility.PUBLIC and db_result.id not in db_profile.results:
         raise HTTPException(status_code=403, detail="Not allowed to access this result")
 
-    return ResultsResponse(id=str(db_result.id), data=db_result.data, created_at=db_result.created_at)
+    return ResultsResponse(
+        id=str(db_result.id),
+        data=db_result.data,
+        created_at=db_result.created_at,
+        visibility=ResultVisibility(db_result.visibility),
+    )
 
 
 @router.post("/{name}/{language}/analytics", response_model=AnalyticsResponse)

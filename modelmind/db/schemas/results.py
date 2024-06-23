@@ -1,11 +1,6 @@
 from enum import StrEnum
 
-from . import DBIdentifier, DBObject, DBOBjectUpdate
-
-
-class ResultVisibility(StrEnum):
-    PUBLIC = "public"
-    PRIVATE = "private"
+from . import DBIdentifier, DBObject
 
 
 class DBResult(DBObject):
@@ -14,13 +9,9 @@ class DBResult(DBObject):
 
     data: dict
 
-    visibility: ResultVisibility = ResultVisibility.PRIVATE
+    class Visibility(StrEnum):
+        PUBLIC = "public"
+        PRIVATE = "private"
+
+    visibility: Visibility = Visibility.PRIVATE
     label: str
-
-
-class UpdateResultPublicKey(DBOBjectUpdate):
-    user_hash: str | None = None
-
-
-class UpdateResultVisibility(DBOBjectUpdate):
-    visibility: ResultVisibility

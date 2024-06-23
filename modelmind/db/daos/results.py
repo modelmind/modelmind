@@ -5,7 +5,7 @@ from uuid import uuid4
 from google.cloud.firestore import AsyncClient
 
 from modelmind.db.schemas import DBIdentifier
-from modelmind.db.schemas.results import DBResult, UpdateResultVisibility
+from modelmind.db.schemas.results import DBResult
 
 from .base import FieldFilter, FirestoreDAO
 
@@ -61,9 +61,9 @@ class ResultsDAO(FirestoreDAO[DBResult]):
             # TODO: custom exception
             raise e
 
-    async def update_visibility(self, result_id: DBIdentifier, data: UpdateResultVisibility) -> None:
+    async def update_visibility(self, result_id: DBIdentifier, visibility: DBResult.Visibility) -> None:
         try:
-            await self.update(result_id, data.model_dump())
+            await self.update(result_id, {"visibility": visibility})
         except Exception as e:
             # TODO: custom exception
             raise e
