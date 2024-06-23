@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Path
 
 from modelmind.api.public.dependencies.daos.providers import results_dao_provider
-from modelmind.api.public.dependencies.profile import get_profile
+from modelmind.api.public.dependencies.profile import get_profile_optional
 from modelmind.api.public.dependencies.results import get_result_from_path, is_result_owner
 from modelmind.api.public.schemas.results import ResultsResponse, ResultVisibility
 from modelmind.db.daos.results import ResultsDAO
@@ -14,9 +14,11 @@ router = APIRouter(prefix="/results")
 @router.get("/{result_id}", response_model=ResultsResponse)
 async def get_public_result(
     db_result: DBResult = Depends(get_result_from_path),
-    db_profile: DBProfile = Depends(get_profile),
+    db_profile: DBProfile | None = Depends(get_profile_optional),
 ) -> ResultsResponse:
-    if db_result.visibility != ResultVisibility.PUBLIC and db_result.id not in db_profile.results:
+    if db_result.visibility != ResultVisibility.PUBLIC and (
+        db_result.id not in db_profile.results if db_profile else True
+    ):
         raise HTTPException(status_code=403, detail="Not allowed to access this result")
 
     return ResultsResponse(

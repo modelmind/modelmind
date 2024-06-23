@@ -38,6 +38,22 @@ async def get_profile(
             raise HTTPException(status_code=500, detail=str(e))
 
 
+async def get_profile_optional(
+    profile_id: DBIdentifier | None = Depends(get_profile_id_from_token),
+    profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
+) -> Optional[DBProfile]:
+    if profile_id is None:
+        return None
+    else:
+        try:
+            return await profiles_dao.get_from_id(profile_id)
+        except DBProfileNotFound:
+            return None
+        except Exception as e:
+            logging.error(f"Error getting profile: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+
 async def get_or_create_profile(
     profile_id: DBIdentifier | None = Depends(get_profile_id_from_token),
     profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
