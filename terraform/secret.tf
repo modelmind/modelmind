@@ -44,3 +44,15 @@ resource "google_secret_manager_secret" "discord_notifications_webhook_id" {
     }
   }
 }
+
+resource "google_secret_manager_secret" "mm_jwt_next_secret" {
+  secret_id = "mm_jwt_next_secret"
+
+  replication {
+    user_managed {
+      replicas {
+        location = "europe-west1"
+      }
+    }
+  }
+}

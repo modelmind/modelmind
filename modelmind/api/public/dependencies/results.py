@@ -57,4 +57,4 @@ async def is_result_owner(
     db_result: DBResult = Depends(get_result_from_path), db_profile: DBProfile = Depends(get_profile)
 ) -> None:
     if db_result.id not in db_profile.results:
-        raise HTTPException(status_code=403, detail="Not allowed to access this result")
+        raise HTTPException(status_code=403, detail="You are not owner of this result.")

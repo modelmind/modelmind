@@ -1,7 +1,11 @@
+import json
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 import jwt
 from fastapi import Depends, HTTPException, Request
+from hkdf import Hkdf
+from jose.jwe import decrypt
 
 from modelmind.api.public.dependencies.daos.providers import sessions_dao_provider
 from modelmind.api.public.exceptions.jwt import JWTExpiredException, JWTInvalidException, JWTMissingException
@@ -10,6 +14,35 @@ from modelmind.db.daos.sessions import SessionsDAO
 from modelmind.db.exceptions.sessions import SessionNotFound
 from modelmind.db.schemas import DBIdentifier
 from modelmind.db.schemas.sessions import DBSession
+from modelmind.logger import log
+
+
+def __next_encryption_key(secret: str) -> bytes:
+    return Hkdf("", bytes(secret, "utf-8")).expand(b"NextAuth.js Generated Encryption Key", 32)
+
+
+def decode_next_jwe(token: str, secret: str) -> Dict[str, Any]:
+    decrypted = decrypt(token, __next_encryption_key(secret))
+
+    if decrypted:
+        return json.loads(bytes.decode(decrypted, "utf-8"))
+    else:
+        raise JWTInvalidException()
+
+
+def get_next_payload_from_cookies(request: Request) -> Optional[dict]:
+    session_token = request.cookies.get(settings.next_cookie)
+
+    if session_token is None:
+        return None
+    try:
+        payload = decode_next_jwe(session_token, settings.jwt.next_secret)
+        if payload["exp"] < datetime.now().timestamp():
+            raise JWTExpiredException()
+        return payload
+    except jwt.PyJWTError as e:
+        log.warning("Next Cookie Error:", e)
+        raise JWTInvalidException() from e
 
 
 def get_jwt_payload_from_token(request: Request) -> dict:
@@ -19,16 +52,16 @@ def get_jwt_payload_from_token(request: Request) -> dict:
         raise JWTMissingException()
     try:
         payload = jwt.decode(session_token, settings.jwt.secret_key, algorithms=[settings.jwt.algorithm])
-        if payload["exp"] < datetime.utcnow().timestamp():
+        if payload["exp"] < datetime.now().timestamp():
             raise JWTExpiredException()
         return payload
     except jwt.PyJWTError as e:
-        print(e)
+        log.warning("Session Cookie Error:", e)
         raise JWTInvalidException() from e
 
 
-def get_session_id_from_token(request: Request) -> DBIdentifier:
-    return get_jwt_payload_from_token(request)["session"]
+def get_session_id_from_token(jwt_payload: dict = Depends(get_jwt_payload_from_token)) -> DBIdentifier:
+    return jwt_payload["session"]
 
 
 async def get_session_from_id(

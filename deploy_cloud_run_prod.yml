@@ -70,6 +70,8 @@ steps:
       - --set-secrets
       - JWT__SECRET_KEY=${_JWT__SECRET_KEY}
       - --set-secrets
+      - JWT__NEXT_SECRET=${_JWT__NEXT_SECRET}
+      - --set-secrets
       - DISCORD__NOTIFICATIONS_WEBHOOK_ID=${_DISCORD__NOTIFICATIONS_WEBHOOK_ID}
       - --cpu-boost
       - --cpu=2

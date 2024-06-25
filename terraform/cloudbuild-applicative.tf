@@ -27,6 +27,7 @@ resource "google_cloudbuild_trigger" "on-push-prod-api" {
     "_FIRESTORE__DATABASE" : "(default)"
     "_SENTRY__DSN" : "${google_secret_manager_secret.mm_sentry_dsn.name}:latest"
     "_JWT__SECRET_KEY" : "${google_secret_manager_secret.mm_jwt_secret_key.name}:latest"
+    "_JWT__NEXT_SECRET" : "${google_secret_manager_secret.mm_jwt_next_secret.name}:latest"
     "_DISCORD__NOTIFICATIONS_WEBHOOK_ID" : "${google_secret_manager_secret.discord_notifications_webhook_id.name}:latest"
     "_SA_EMAIL" : google_service_account.cloud_run_api_sa.email
   }

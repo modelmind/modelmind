@@ -19,6 +19,8 @@ ujson = "^5.9.0"
 pyjwt = "^2.8.0"
 shortuuid = "^1.0.13"
 aiocache = "^0.12.2"
+hkdf = "^0.0.3"
+python-jose = "^3.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -33,6 +35,9 @@ black = "23.11.0"
 pytest-cov = "^4.1.0"
 ipykernel = "^6.29.2"
 numpy = "^1.26.4"
+cryptography = "^42.0.8"
+hkdf = "^0.0.3"
+python-jose = "^3.3.0"
 
 
 [tool.mypy]

@@ -50,6 +50,9 @@ class DiscordSettings(BaseSettings):
 
 
 class JWTSettings(BaseSettings):
+    next_secret: str = ""
+    next_cookie_name: str = "next-auth.session-token"
+    next_cookie_prefix: str = "__Secure-"
     secret_key: str = "secret"
     algorithm: str = "HS256"
     session_timeout_minutes: int = 60 * 24 * 365 * 2
@@ -99,6 +102,12 @@ class Settings(BaseSettings):
     sentry: SentrySettings = SentrySettings()
     jwt: JWTSettings = JWTSettings()
     discord: DiscordSettings = DiscordSettings()
+
+    @property
+    def next_cookie(self) -> str:
+        if self.environment == Environment.PROD:
+            return self.jwt.next_cookie_prefix + self.jwt.next_cookie_name
+        return self.jwt.next_cookie_name
 
 
 settings = Settings()

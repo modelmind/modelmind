@@ -1,10 +1,10 @@
 import logging
 from typing import Optional
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException
 
 from modelmind.api.public.dependencies.daos.providers import profiles_dao_provider
-from modelmind.api.public.dependencies.session.get import get_jwt_payload_from_token
+from modelmind.api.public.dependencies.session.get import get_jwt_payload_from_token, get_next_payload_from_cookies
 from modelmind.api.public.exceptions.jwt import JWTExpiredException, JWTMissingException
 from modelmind.db.daos.profiles import ProfilesDAO
 from modelmind.db.exceptions.profiles import DBProfileNotFound
@@ -12,10 +12,14 @@ from modelmind.db.schemas import DBIdentifier
 from modelmind.db.schemas.profiles import DBProfile
 
 
-def get_profile_id_from_token(request: Request) -> Optional[DBIdentifier]:
+def get_profile_id_from_token(
+    session_payload: dict = Depends(get_jwt_payload_from_token),
+    next_payload: dict | None = Depends(get_next_payload_from_cookies),
+) -> DBIdentifier | None:
     try:
-        payload = get_jwt_payload_from_token(request)
-        return payload.get("profile")
+        if next_payload:
+            return next_payload.get("profileId")
+        return session_payload.get("profile")
     except JWTMissingException:
         return None
     except JWTExpiredException:
