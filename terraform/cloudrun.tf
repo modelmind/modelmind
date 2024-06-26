@@ -45,6 +45,12 @@ resource "google_secret_manager_secret_iam_member" "binding_mm_jwt_secret_key" {
   member    = "serviceAccount:${google_service_account.cloud_run_api_sa.email}"
 }
 
+resource "google_secret_manager_secret_iam_member" "binding_mm_jwt_next_secret" {
+  secret_id = google_secret_manager_secret.mm_jwt_next_secret.name
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cloud_run_api_sa.email}"
+}
+
 resource "google_secret_manager_secret_iam_member" "binding_mm_sentry_dsn" {
   secret_id = google_secret_manager_secret.mm_sentry_dsn.name
   role      = "roles/secretmanager.secretAccessor"
