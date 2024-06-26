@@ -38,6 +38,7 @@ def get_next_payload_from_cookies(request: Request) -> Optional[dict]:
     try:
         payload = decode_next_jwe(session_token, settings.jwt.next_secret)
         if payload["exp"] < datetime.now().timestamp():
+            log.exception("Next Cookie Error: JWT Expired for %s", payload.get("profileId"))
             raise JWTExpiredException()
         return payload
     except jwt.PyJWTError as e:
@@ -45,8 +46,8 @@ def get_next_payload_from_cookies(request: Request) -> Optional[dict]:
         raise JWTInvalidException() from e
 
 
-def get_jwt_payload_from_token(request: Request) -> dict:
-    session_token = request.cookies.get("MM_PROFILE_ID")
+def get_session_payload_from_token(request: Request) -> dict:
+    session_token = request.cookies.get(settings.mm_session_cookie)
 
     if session_token is None:
         raise JWTMissingException()
@@ -60,7 +61,7 @@ def get_jwt_payload_from_token(request: Request) -> dict:
         raise JWTInvalidException() from e
 
 
-def get_session_id_from_token(jwt_payload: dict = Depends(get_jwt_payload_from_token)) -> DBIdentifier:
+def get_session_id_from_token(jwt_payload: dict = Depends(get_session_payload_from_token)) -> DBIdentifier:
     return jwt_payload["session"]
 
 

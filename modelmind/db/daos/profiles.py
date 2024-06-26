@@ -1,7 +1,11 @@
+from datetime import datetime
+from typing import Optional
+from uuid import uuid4
+
 from google.cloud.firestore import ArrayUnion, AsyncClient
 
 from modelmind.db.exceptions.profiles import DBProfileCreationFailed, DBProfileNotFound
-from modelmind.db.schemas.profiles import Biographics, CreateProfile, DBIdentifier, DBProfile
+from modelmind.db.schemas.profiles import Biographics, DBIdentifier, DBProfile
 
 from .base import FirestoreDAO
 
@@ -13,9 +17,14 @@ class ProfilesDAO(FirestoreDAO[DBProfile]):
     def __init__(self, client: AsyncClient) -> None:
         super().__init__(client)
 
-    async def create(self) -> DBProfile:
+    async def create(self, profile_id: Optional[DBIdentifier] = None) -> DBProfile:
         try:
-            return await self.add(CreateProfile().model_dump())
+            profile_data = {
+                "id": profile_id or str(uuid4()),
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            }
+            return await self.add(profile_data)
         except Exception:
             raise DBProfileCreationFailed()
 

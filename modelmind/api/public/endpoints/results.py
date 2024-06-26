@@ -12,7 +12,7 @@ router = APIRouter(prefix="/results")
 
 
 @router.get("/{result_id}", response_model=ResultsResponse)
-async def get_public_result(
+async def get_result(
     db_result: DBResult = Depends(get_result_from_path),
     db_profile: DBProfile | None = Depends(get_profile_optional),
 ) -> ResultsResponse:

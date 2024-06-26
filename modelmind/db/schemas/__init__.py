@@ -1,6 +1,6 @@
 from abc import ABC
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -19,12 +19,6 @@ class DBObject(BaseModel, ABC):
     id: DBIdentifier
     created_at: datetime
     updated_at: datetime
-
-
-class DBObjectCreate(BaseModel):
-    id: DBIdentifier = Field(default_factory=lambda: str(uuid4()))
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class DBOBjectUpdate(BaseModel):

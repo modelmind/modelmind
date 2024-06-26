@@ -109,5 +109,13 @@ class Settings(BaseSettings):
             return self.jwt.next_cookie_prefix + self.jwt.next_cookie_name
         return self.jwt.next_cookie_name
 
+    @property
+    def mm_session_cookie(self) -> str:
+        return "MM_SESSION"
+
+    @property
+    def mm_profile_cookie(self) -> str:
+        return "MM_PROFILE_ID"
+
 
 settings = Settings()

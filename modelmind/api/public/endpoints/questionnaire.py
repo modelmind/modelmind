@@ -21,9 +21,10 @@ from modelmind.api.public.dependencies.session.create import create_jwt_session_
 from modelmind.api.public.dependencies.session.get import get_session_from_token
 from modelmind.api.public.dependencies.session.verify import session_status_completed, session_status_in_progress
 from modelmind.api.public.schemas.analytics import AnalyticsResponse
-from modelmind.api.public.schemas.profiles import ProfileSessionResponse
+from modelmind.api.public.schemas.profiles import SessionResponse
 from modelmind.api.public.schemas.questionnaires import NextQuestionsResponse
 from modelmind.api.public.schemas.results import ResultsResponse, ResultVisibility
+from modelmind.config import settings
 from modelmind.db.daos.profiles import ProfilesDAO
 from modelmind.db.daos.results import ResultsDAO
 from modelmind.db.daos.sessions import SessionsDAO, SessionStatus
@@ -46,18 +47,18 @@ async def questionnaire_session_start(
     profile: DBProfile = Depends(get_or_create_profile),
     profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
     sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
-) -> ProfileSessionResponse:
+) -> SessionResponse:
     session_id = await create_session(profile.id, questionnaire.id, language, {}, sessions_dao)
     await profiles_dao.add_session(profile.id, session_id)
     session_token = create_jwt_session_token(session_id, profile.id)
     response.set_cookie(
-        key="MM_PROFILE_ID",
+        key=settings.mm_session_cookie,
         value=session_token,
         httponly=True,
         secure=True,
         samesite="strict",
     )
-    return ProfileSessionResponse(profile_id=str(profile.id), session_id=str(session_id))
+    return SessionResponse(profile_id=str(profile.id), session_id=str(session_id))
 
 
 @router.post(

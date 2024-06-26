@@ -10,6 +10,6 @@ class Profile(BaseModel):
     sessions: Optional[list[str]] = None
 
 
-class ProfileSessionResponse(BaseResponse):
+class SessionResponse(BaseResponse):
     session_id: str
     profile_id: str
