@@ -115,7 +115,7 @@ class Settings(BaseSettings):
 
     @property
     def mm_profile_cookie(self) -> str:
-        return "MM_PROFILE_ID"
+        return "MM_PROFILE"
 
 
 settings = Settings()

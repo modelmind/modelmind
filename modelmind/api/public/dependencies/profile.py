@@ -3,6 +3,7 @@ from typing import Optional
 
 import jwt
 from fastapi import Depends, HTTPException, Request, Response
+from jwt.exceptions import InvalidSignatureError
 
 from modelmind.api.public.dependencies.daos.providers import profiles_dao_provider
 from modelmind.api.public.dependencies.session.get import get_next_payload_from_cookies
@@ -20,9 +21,20 @@ def create_profile_token(profile_id: DBIdentifier) -> str:
 
 
 def decode_profile_token(token: str) -> dict:
-    return jwt.decode(
-        token, settings.jwt.secret_key, algorithms=[settings.jwt.algorithm], audience="modelmind", issuer="modelmind"
-    )
+    try:
+        return jwt.decode(
+            token,
+            settings.jwt.secret_key,
+            algorithms=[settings.jwt.algorithm],
+            audience="modelmind",
+            issuer="modelmind",
+        )
+    except InvalidSignatureError as e:
+        log.warning(f"Profile Token Error: {e}")
+        raise HTTPException(status_code=401, detail="Invalid profile token") from e
+    except jwt.PyJWTError as e:
+        log.warning(f"Profile Token Error: {e}")
+        raise HTTPException(status_code=401, detail="Could not decode profile token") from e
 
 
 def get_profile_id_from_cookies(request: Request) -> DBIdentifier | None:
