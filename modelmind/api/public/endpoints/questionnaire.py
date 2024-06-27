@@ -48,9 +48,9 @@ async def questionnaire_session_start(
     profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
     sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
 ) -> SessionResponse:
-    session_id = await create_session(profile.id, questionnaire.id, language, {}, sessions_dao)
-    await profiles_dao.add_session(profile.id, session_id)
-    session_token = create_jwt_session_token(session_id, profile.id)
+    session = await create_session(profile.id, questionnaire.id, language, {}, sessions_dao)
+    await profiles_dao.add_session(profile.id, session.id)
+    session_token = create_jwt_session_token(session.id, profile.id)
     response.set_cookie(
         key=settings.mm_session_cookie,
         value=session_token,
@@ -58,7 +58,13 @@ async def questionnaire_session_start(
         secure=True,
         samesite="strict",
     )
-    return SessionResponse(profile_id=str(profile.id), session_id=str(session_id))
+    return SessionResponse(
+        profile_id=str(profile.id),
+        session_id=str(session.id),
+        questionnaire_id=str(questionnaire.id),
+        status=session.status.value,
+        language=session.language,
+    )
 
 
 @router.post(

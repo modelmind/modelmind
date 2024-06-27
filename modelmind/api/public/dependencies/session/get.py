@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional
 import jwt
 from fastapi import Depends, HTTPException, Request
 from hkdf import Hkdf
-from jose.jwe import decrypt
 from jose.exceptions import JWEError
+from jose.jwe import decrypt
 
 from modelmind.api.public.dependencies.daos.providers import sessions_dao_provider
 from modelmind.api.public.exceptions.jwt import JWTExpiredException, JWTInvalidException, JWTMissingException

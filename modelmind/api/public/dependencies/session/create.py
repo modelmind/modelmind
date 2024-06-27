@@ -7,7 +7,7 @@ from modelmind.api.public.dependencies.daos.providers import sessions_dao_provid
 from modelmind.config import settings
 from modelmind.db.daos.sessions import SessionsDAO
 from modelmind.db.schemas import DBIdentifier
-from modelmind.db.schemas.sessions import SessionStatus
+from modelmind.db.schemas.sessions import DBSession, SessionStatus
 
 
 def create_jwt_session_token(session_id: DBIdentifier, profile_id: DBIdentifier) -> str:
@@ -25,16 +25,14 @@ async def create_session(
     language: str,
     metadata: dict,
     sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
-) -> DBIdentifier:
+) -> DBSession:
     try:
-        return (
-            await sessions_dao.create(
-                profile_id=profile_id,
-                questionnaire_id=questionnaire_id,
-                status=SessionStatus.IN_PROGRESS,
-                language=language,
-                metadata=metadata,
-            )
-        ).id
+        return await sessions_dao.create(
+            profile_id=profile_id,
+            questionnaire_id=questionnaire_id,
+            status=SessionStatus.IN_PROGRESS,
+            language=language,
+            metadata=metadata,
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

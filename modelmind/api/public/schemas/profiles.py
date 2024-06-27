@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -13,3 +13,6 @@ class Profile(BaseModel):
 class SessionResponse(BaseResponse):
     session_id: str
     profile_id: str
+    questionnaire_id: str
+    language: str
+    status: Literal["in_progress", "completed", "expired"]
