@@ -37,7 +37,6 @@ def get_next_payload_from_cookies(request: Request) -> Optional[dict]:
     if session_token is None:
         return None
     try:
-        log.debug("session_token", session_token)
         payload = decode_next_jwe(session_token, settings.jwt.next_secret)
         if payload["exp"] < datetime.now().timestamp():
             log.exception("Next Cookie Error: JWT Expired for %s", payload.get("profileId"))
