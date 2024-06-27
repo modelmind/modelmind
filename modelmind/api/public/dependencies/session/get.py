@@ -6,6 +6,7 @@ import jwt
 from fastapi import Depends, HTTPException, Request
 from hkdf import Hkdf
 from jose.jwe import decrypt
+from jose.exceptions import JWEError
 
 from modelmind.api.public.dependencies.daos.providers import sessions_dao_provider
 from modelmind.api.public.exceptions.jwt import JWTExpiredException, JWTInvalidException, JWTMissingException
@@ -36,12 +37,13 @@ def get_next_payload_from_cookies(request: Request) -> Optional[dict]:
     if session_token is None:
         return None
     try:
+        log.debug("session_token", session_token)
         payload = decode_next_jwe(session_token, settings.jwt.next_secret)
         if payload["exp"] < datetime.now().timestamp():
             log.exception("Next Cookie Error: JWT Expired for %s", payload.get("profileId"))
             raise JWTExpiredException()
         return payload
-    except jwt.PyJWTError as e:
+    except JWEError as e:
         log.warning("Next Cookie Error:", e)
         raise JWTInvalidException() from e
 
