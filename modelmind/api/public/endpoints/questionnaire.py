@@ -27,7 +27,7 @@ from modelmind.api.public.schemas.results import ResultsResponse, ResultVisibili
 from modelmind.config import settings
 from modelmind.db.daos.profiles import ProfilesDAO
 from modelmind.db.daos.results import ResultsDAO
-from modelmind.db.daos.sessions import SessionsDAO, SessionStatus
+from modelmind.db.daos.sessions import SessionsDAO
 from modelmind.db.schemas.profiles import DBProfile
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.results import DBResult
@@ -86,7 +86,6 @@ async def questionnaire_session_questions_next(
     """Get the next questions for the current session and result"""
 
     if questionnaire.is_completed(current_result):
-        await sessions_dao.update_status(session.id, SessionStatus.COMPLETED)
         current_result.label = questionnaire.get_result_label(current_result)
         db_result = await results_dao.create(
             session_id=session.id,
@@ -95,7 +94,7 @@ async def questionnaire_session_questions_next(
             label=current_result.label,
         )
         await profiles_dao.add_result(session.profile_id, db_result.id)
-        # TODO: send to Discord
+        await sessions_dao.set_result(session.id, db_result.id)
 
         send_result_notifcation = SendResultNotificationCommand(
             questionnaire, current_result, notifier, session.profile_id, profiles_dao
@@ -137,6 +136,7 @@ async def get_questionnaire_session(
     return SessionResponse(
         profile_id=str(session.profile_id),
         session_id=str(session.id),
+        result_id=str(session.result_id) if session.result_id else None,
         questionnaire_id=str(session.questionnaire_id),
         status=session.status.value,
         language=session.language,

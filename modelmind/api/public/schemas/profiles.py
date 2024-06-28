@@ -14,6 +14,7 @@ class Profile(BaseModel):
 class SessionResponse(BaseResponse):
     session_id: str
     profile_id: str
+    result_id: Optional[str] = None
     questionnaire_id: str
     language: str
     status: Literal["in_progress", "completed", "expired"]

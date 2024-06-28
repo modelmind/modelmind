@@ -51,3 +51,9 @@ class SessionsDAO(FirestoreDAO[DBSession]):
             await self.update(session_id, DBUpdateSession(status=status).model_dump())
         except Exception as e:
             raise SessionNotFound(f"Session {session_id} not found: {str(e)}")
+
+    async def set_result(self, session_id: DBIdentifier, result_id: DBIdentifier) -> None:
+        try:
+            await self.update(session_id, {"result_id": result_id, "status": SessionStatus.COMPLETED})
+        except Exception as e:
+            raise SessionNotFound(f"Session {session_id} not found: {str(e)}")

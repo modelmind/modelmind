@@ -14,6 +14,7 @@ class SessionStatus(StrEnum):
 class DBSession(DBObject):
     profile_id: DBIdentifier
     questionnaire_id: DBIdentifier
+    result_id: Optional[DBIdentifier] = None
 
     status: SessionStatus
     language: str
