@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import StrEnum
 from typing import Optional
 
@@ -18,6 +19,7 @@ class DBSession(DBObject):
     language: str
 
     metadata: Optional[dict] = None
+    expires_at: Optional[datetime] = None
 
 
 class DBUpdateSession(DBOBjectUpdate):

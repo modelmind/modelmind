@@ -39,7 +39,7 @@ from modelmind.services.event_notifier import EventNotifier
 router = APIRouter(prefix="/questionnaire")
 
 
-@router.get("/{name}/{language}/session")
+@router.get("/{name}/{language}/session", operation_id="start_questionnaire_session")
 async def questionnaire_session_start(
     response: Response,
     language: str = Depends(validate_requested_language),
@@ -64,11 +64,15 @@ async def questionnaire_session_start(
         questionnaire_id=str(questionnaire.id),
         status=session.status.value,
         language=session.language,
+        expires_at=session.expires_at,
     )
 
 
 @router.post(
-    "/session/questions/next", response_model=NextQuestionsResponse, dependencies=[Depends(session_status_in_progress)]
+    "/session/questions/next",
+    response_model=NextQuestionsResponse,
+    dependencies=[Depends(session_status_in_progress)],
+    operation_id="get_questionnaire_session_next_questions",
 )
 async def questionnaire_session_questions_next(
     current_result: Result = Depends(get_result),
@@ -109,7 +113,12 @@ async def questionnaire_session_questions_next(
     return NextQuestionsResponse(questions=next_questions, completed=completed, remaining=remaining)
 
 
-@router.get("/session/results", response_model=ResultsResponse, dependencies=[Depends(session_status_completed)])
+@router.get(
+    "/session/results",
+    response_model=ResultsResponse,
+    dependencies=[Depends(session_status_completed)],
+    operation_id="get_questionnaire_session_results",
+)
 async def questionnaire_session_results(
     db_result: DBResult = Depends(get_result_from_session),
 ) -> ResultsResponse:
@@ -121,7 +130,21 @@ async def questionnaire_session_results(
     )
 
 
-@router.get("/results", response_model=ResultsResponse)
+@router.get("/session", response_model=SessionResponse, operation_id="get_questionnaire_session")
+async def get_questionnaire_session(
+    session: DBSession = Depends(get_session_from_token),
+) -> SessionResponse:
+    return SessionResponse(
+        profile_id=str(session.profile_id),
+        session_id=str(session.id),
+        questionnaire_id=str(session.questionnaire_id),
+        status=session.status.value,
+        language=session.language,
+        expires_at=session.expires_at,
+    )
+
+
+@router.get("/results", response_model=ResultsResponse, operation_id="get_questionnaire_results")
 async def get_questionnaire_results(
     db_result: DBResult = Depends(get_result_from_id),
     db_profile: DBProfile = Depends(get_profile),
@@ -137,7 +160,11 @@ async def get_questionnaire_results(
     )
 
 
-@router.post("/{name}/{language}/analytics", response_model=AnalyticsResponse)
+@router.post(
+    "/{name}/{language}/analytics",
+    response_model=AnalyticsResponse,
+    operation_id="calculate_questionnaire_result_analytics",
+)
 async def calculate_questionnaire_result_analytics(
     result: Result = Depends(get_result),
     questionnaire: Questionnaire = Depends(initialize_questionnaire_from_name),

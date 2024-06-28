@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal, Optional
 
 from pydantic import BaseModel
@@ -16,3 +17,4 @@ class SessionResponse(BaseResponse):
     questionnaire_id: str
     language: str
     status: Literal["in_progress", "completed", "expired"]
+    expires_at: Optional[datetime] = None

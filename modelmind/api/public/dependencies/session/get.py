@@ -14,7 +14,7 @@ from modelmind.config import settings
 from modelmind.db.daos.sessions import SessionsDAO
 from modelmind.db.exceptions.sessions import SessionNotFound
 from modelmind.db.schemas import DBIdentifier
-from modelmind.db.schemas.sessions import DBSession
+from modelmind.db.schemas.sessions import DBSession, SessionStatus
 from modelmind.logger import log
 
 
@@ -75,11 +75,19 @@ async def get_session_from_id(
         raise HTTPException(status_code=403, detail="Forbidden")
 
 
+async def fetch_session(session_id: DBIdentifier, sessions_dao: SessionsDAO) -> DBSession:
+    session = await get_session_from_id(session_id, sessions_dao)
+    if session.expires_at and session.expires_at < datetime.now():
+        await sessions_dao.update_status(session_id, SessionStatus.EXPIRED)
+        session.status = SessionStatus.EXPIRED
+    return session
+
+
 async def get_session_from_token(
     session_id: DBIdentifier = Depends(get_session_id_from_token),
     sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
 ) -> DBSession:
     try:
-        return await get_session_from_id(session_id, sessions_dao)
+        return await fetch_session(session_id, sessions_dao)
     except ValueError:
         raise HTTPException(status_code=403, detail="Forbidden")
