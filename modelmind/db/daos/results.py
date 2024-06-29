@@ -75,3 +75,17 @@ class ResultsDAO(FirestoreDAO[DBResult]):
         except Exception as e:
             # TODO: custom exception
             raise e
+
+    async def list_from_profile(
+        self, profile_id: DBIdentifier, limit: Optional[int] = None, start_after: Optional[datetime] = None
+    ) -> List[DBResult]:
+        try:
+            return await self.search(
+                filters=[FieldFilter("profile_id", "==", profile_id)],
+                order_by="created_at",
+                start_after={"created_at": start_after} if start_after else None,
+                limit=limit,
+            )
+        except Exception as e:
+            # TODO: custom exception
+            raise e

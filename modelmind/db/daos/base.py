@@ -127,6 +127,8 @@ class FirestoreDAO(Generic[T], ABC):
         limit: Optional[int] = None,
         order_by: Optional[str] = None,
         direction: Literal["ASCENDING"] | Literal["DESCENDING"] = Query.ASCENDING,
+        start_after: Optional[DocumentSnapshot | dict | List | tuple] = None,
+        end_before: Optional[DocumentSnapshot | dict | List | tuple] = None,
     ) -> List[T]:
         """
         Query the collection based on provided parameters.
@@ -138,6 +140,12 @@ class FirestoreDAO(Generic[T], ABC):
 
         if order_by:
             query = query.order_by(order_by, direction=direction)
+
+        if start_after:
+            query = query.start_after(start_after)
+
+        if end_before:
+            query = query.end_before(end_before)
 
         if limit:
             query = query.limit(limit)
