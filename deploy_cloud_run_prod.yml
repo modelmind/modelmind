@@ -24,6 +24,11 @@ steps:
       - .
     waitFor: [ "-" ]
 
+  - id: "Deploy Firebase"
+    name: "${_FIREBASE_IMAGE}"
+    args: ['deploy', '--only=firestore']
+    waitFor: [ "-" ]
+
   - id: "Publish image to Artifact Registry"
     name: "${_DOCKER_IMAGE}"
     args:

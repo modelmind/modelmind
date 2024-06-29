@@ -1,0 +1,19 @@
+{
+  "indexes": [
+    {
+        "collectionGroup": "results",
+        "queryScope": "COLLECTION",
+        "fields": [
+            {
+                "fieldPath": "profile_id",
+                "order": "ASCENDING"
+            },
+            {
+                "fieldPath": "created_at",
+                "order": "ASCENDING"
+            }
+        ]
+    }
+  ],
+  "fieldOverrides": []
+}

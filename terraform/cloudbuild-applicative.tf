@@ -20,6 +20,7 @@ resource "google_cloudbuild_trigger" "on-push-prod-api" {
     "_DOCKER_IMAGE" : "gcr.io/cloud-builders/docker:latest"
     "_PYTHON_IMAGE_SLIM" : "python:3.11-slim"
     "_CLOUD_SDK_IMAGE" : "gcr.io/google.com/cloudsdktool/cloud-sdk:latest"
+    "_FIREBASE_IMAGE" : "gcr.io/${var.project_id}/firebase"
     "_PORT" : "8080"
     "_CLOUDRUN_TAG" : "prod"
     "_SERVER__LOG_LEVEL" : "info"
