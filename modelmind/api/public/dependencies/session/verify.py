@@ -22,7 +22,7 @@ async def session_status_in_progress(session: DBSession = Depends(get_session_fr
     if session.status == SessionStatus.IN_PROGRESS:
         return session
     elif session.status == SessionStatus.COMPLETED:
-        raise SessionAlreadyCompletedException(str(session.id))
+        raise SessionAlreadyCompletedException(str(session.id), str(session.result_id))
     elif session.status == SessionStatus.EXPIRED:
         raise SessionExpiredException(str(session.id))
     else:

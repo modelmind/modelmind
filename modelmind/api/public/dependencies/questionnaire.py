@@ -96,7 +96,7 @@ async def get_questions_by_questionnaire_name(
 
 
 async def get_questions_by_questionnaire_id(
-    questionnaire_id: str = Path(...),
+    questionnaire_id: str = Path(alias="id"),
     questionnaires_dao: QuestionnairesDAO = Depends(questionnaires_dao_provider),
     language: str = Depends(validate_requested_language),
 ) -> List[DBQuestion]:

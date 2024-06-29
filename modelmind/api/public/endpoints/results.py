@@ -23,9 +23,12 @@ async def get_result(
 
     return ResultsResponse(
         id=str(db_result.id),
+        questionnaire_id=str(db_result.questionnaire_id),
+        session_id=str(db_result.session_id),
         data=db_result.data,
         created_at=db_result.created_at,
         visibility=ResultVisibility(db_result.visibility),
+        label=db_result.label,
     )
 
 

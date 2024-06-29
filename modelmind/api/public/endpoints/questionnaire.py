@@ -11,8 +11,8 @@ from modelmind.api.public.dependencies.daos.providers import (
 from modelmind.api.public.dependencies.notifier import get_event_notifier
 from modelmind.api.public.dependencies.profile import get_or_create_profile, get_profile
 from modelmind.api.public.dependencies.questionnaire import (
-    get_questionnaire_by_name,
-    initialize_questionnaire_from_name,
+    get_questionnaire_by_id,
+    initialize_questionnaire_from_id,
     initialize_questionnaire_from_session,
     validate_requested_language,
 )
@@ -39,11 +39,11 @@ from modelmind.services.event_notifier import EventNotifier
 router = APIRouter(prefix="/questionnaire")
 
 
-@router.get("/{name}/{language}/session", operation_id="start_questionnaire_session")
+@router.get("/{id}/{language}/session", operation_id="start_questionnaire_session")
 async def questionnaire_session_start(
     response: Response,
     language: str = Depends(validate_requested_language),
-    questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_name),
+    questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_id),
     profile: DBProfile = Depends(get_or_create_profile),
     profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
     sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
@@ -123,9 +123,12 @@ async def questionnaire_session_results(
 ) -> ResultsResponse:
     return ResultsResponse(
         id=str(db_result.id),
+        questionnaire_id=str(db_result.questionnaire_id),
+        session_id=str(db_result.session_id),
         data=db_result.data,
         created_at=db_result.created_at,
         visibility=ResultVisibility(db_result.visibility),
+        label=db_result.label,
     )
 
 
@@ -154,20 +157,23 @@ async def get_questionnaire_results(
 
     return ResultsResponse(
         id=str(db_result.id),
+        questionnaire_id=str(db_result.questionnaire_id),
+        session_id=str(db_result.session_id),
         data=db_result.data,
         created_at=db_result.created_at,
         visibility=ResultVisibility(db_result.visibility),
+        label=db_result.label,
     )
 
 
 @router.post(
-    "/{name}/{language}/analytics",
+    "/{id}/{language}/analytics",
     response_model=AnalyticsResponse,
     operation_id="calculate_questionnaire_result_analytics",
 )
 async def calculate_questionnaire_result_analytics(
     result: Result = Depends(get_result),
-    questionnaire: Questionnaire = Depends(initialize_questionnaire_from_name),
+    questionnaire: Questionnaire = Depends(initialize_questionnaire_from_id),
 ) -> AnalyticsResponse:
     analytics = questionnaire.get_analytics(result)
 

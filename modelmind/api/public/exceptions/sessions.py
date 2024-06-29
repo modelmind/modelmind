@@ -8,9 +8,9 @@ class SessionNotFoundException(NotFoundException):
 
 
 class SessionAlreadyCompletedException(ConflictException):
-    def __init__(self, session_id: str):
-        detail = f"Session with ID {session_id} already completed"
-        super().__init__(detail=detail)
+    def __init__(self, session_id: str, result_id: str):
+        msg = f"Session with ID {session_id} already completed"
+        super().__init__(detail={"msg": msg, "session_id": session_id, "result_id": result_id})
 
 
 class SessionInProgressException(ConflictException):
