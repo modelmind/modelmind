@@ -54,6 +54,7 @@ async def questionnaire_session_start(
     response.set_cookie(
         key=settings.mm_session_cookie,
         value=session_token,
+        domain=settings.domain,
         httponly=True,
         secure=True,
         samesite="strict",

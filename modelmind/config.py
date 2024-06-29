@@ -117,5 +117,11 @@ class Settings(BaseSettings):
     def mm_profile_cookie(self) -> str:
         return "MM_PROFILE"
 
+    @property
+    def domain(self) -> str:
+        if self.environment == Environment.PROD:
+            return "modelmind.me"
+        return "localhost"
+
 
 settings = Settings()

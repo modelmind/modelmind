@@ -101,7 +101,7 @@ async def get_or_create_profile(
     if profile_id is None:
         profile = await profiles_dao.create()
         profile_token = create_profile_token(profile.id)
-        response.set_cookie(settings.mm_profile_cookie, profile_token)
+        response.set_cookie(settings.mm_profile_cookie, profile_token, domain=settings.domain)
         return await profiles_dao.get_from_id(profile.id)
     else:
         try:
