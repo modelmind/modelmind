@@ -18,16 +18,24 @@ class ResultsDAO(FirestoreDAO[DBResult]):
         super().__init__(client)
 
     async def create(
-        self, questionnaire_id: DBIdentifier, session_id: DBIdentifier, data: dict[str, Any], label: str
+        self,
+        profile_id: DBIdentifier,
+        questionnaire_id: DBIdentifier,
+        session_id: DBIdentifier,
+        data: dict[str, Any],
+        label: str,
+        language: str | None = None,
     ) -> DBResult:
         result_id = str(uuid4())
 
         result_data = {
             "id": result_id,
+            "profile_id": profile_id,
             "questionnaire_id": questionnaire_id,
             "session_id": session_id,
             "data": data,
             "label": label,
+            "language": language,
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
         }

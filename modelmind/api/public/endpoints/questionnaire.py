@@ -1,6 +1,6 @@
 import asyncio
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, Response
 
 from modelmind.api.public.commands.send_result_notification import SendResultNotificationCommand
 from modelmind.api.public.dependencies.daos.providers import (
@@ -9,14 +9,14 @@ from modelmind.api.public.dependencies.daos.providers import (
     sessions_dao_provider,
 )
 from modelmind.api.public.dependencies.notifier import get_event_notifier
-from modelmind.api.public.dependencies.profile import get_or_create_profile, get_profile
+from modelmind.api.public.dependencies.profile import get_or_create_profile
 from modelmind.api.public.dependencies.questionnaire import (
     get_questionnaire_by_id,
     initialize_questionnaire_from_id,
     initialize_questionnaire_from_session,
     validate_requested_language,
 )
-from modelmind.api.public.dependencies.results import get_result, get_result_from_id, get_result_from_session
+from modelmind.api.public.dependencies.results import get_result, get_result_from_session
 from modelmind.api.public.dependencies.session.create import create_jwt_session_token, create_session
 from modelmind.api.public.dependencies.session.get import get_session_from_token
 from modelmind.api.public.dependencies.session.verify import session_status_completed, session_status_in_progress
@@ -91,8 +91,10 @@ async def questionnaire_session_questions_next(
         db_result = await results_dao.create(
             session_id=session.id,
             questionnaire_id=session.questionnaire_id,
+            profile_id=session.profile_id,
             data=current_result.data,
             label=current_result.label,
+            language=session.language,
         )
         await profiles_dao.add_result(session.profile_id, db_result.id)
         await sessions_dao.set_result(session.id, db_result.id)
@@ -124,12 +126,14 @@ async def questionnaire_session_results(
 ) -> ResultsResponse:
     return ResultsResponse(
         id=str(db_result.id),
+        profile_id=str(db_result.profile_id),
         questionnaire_id=str(db_result.questionnaire_id),
         session_id=str(db_result.session_id),
         data=db_result.data,
         created_at=db_result.created_at,
         visibility=ResultVisibility(db_result.visibility),
         label=db_result.label,
+        language=db_result.language,
     )
 
 
@@ -145,25 +149,6 @@ async def get_questionnaire_session(
         status=session.status.value,
         language=session.language,
         expires_at=session.expires_at,
-    )
-
-
-@router.get("/results", response_model=ResultsResponse, operation_id="get_questionnaire_results")
-async def get_questionnaire_results(
-    db_result: DBResult = Depends(get_result_from_id),
-    db_profile: DBProfile = Depends(get_profile),
-) -> ResultsResponse:
-    if db_result.visibility != DBResult.Visibility.PUBLIC and db_result.id not in db_profile.results:
-        raise HTTPException(status_code=403, detail="Not allowed to access this result")
-
-    return ResultsResponse(
-        id=str(db_result.id),
-        questionnaire_id=str(db_result.questionnaire_id),
-        session_id=str(db_result.session_id),
-        data=db_result.data,
-        created_at=db_result.created_at,
-        visibility=ResultVisibility(db_result.visibility),
-        label=db_result.label,
     )
 
 

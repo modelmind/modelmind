@@ -15,7 +15,9 @@ class ResultsResponse(BaseResponse):
     id: str
     questionnaire_id: str
     session_id: str
+    profile_id: str
     data: ResultData
     created_at: datetime
     visibility: ResultVisibility
     label: str | None = None
+    language: str | None = None
