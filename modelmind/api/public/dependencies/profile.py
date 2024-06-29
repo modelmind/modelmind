@@ -66,12 +66,12 @@ async def get_profile(
     profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
 ) -> DBProfile:
     if profile_id is None:
-        raise HTTPException(status_code=404, detail="Profile not found")
+        raise HTTPException(status_code=404, detail="Profile not provided")
     else:
         try:
             return await profiles_dao.get_from_id(profile_id)
         except DBProfileNotFound as e:
-            raise HTTPException(status_code=404, detail=str(e))
+            raise HTTPException(status_code=404, detail="Profile not found") from e
         except Exception as e:
             logging.error(f"Error getting profile: {e}")
             raise HTTPException(status_code=500, detail=str(e))
