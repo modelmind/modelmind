@@ -53,10 +53,7 @@ def get_session_payload_from_token(request: Request) -> dict:
     if session_token is None:
         raise JWTMissingException()
     try:
-        payload = jwt.decode(session_token, settings.jwt.secret_key, algorithms=[settings.jwt.algorithm])
-        if payload["exp"] < datetime.now().timestamp():
-            raise JWTExpiredException()
-        return payload
+        return jwt.decode(session_token, settings.jwt.secret_key, algorithms=[settings.jwt.algorithm])
     except jwt.PyJWTError as e:
         log.warning("Session Cookie Error:", e)
         raise JWTInvalidException() from e

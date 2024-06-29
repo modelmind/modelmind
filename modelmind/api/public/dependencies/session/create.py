@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 import jwt
 from fastapi import Depends, HTTPException
 
@@ -14,7 +12,6 @@ def create_jwt_session_token(session_id: DBIdentifier, profile_id: DBIdentifier)
     payload = {
         "session": str(session_id),
         "profile": str(profile_id),
-        "exp": datetime.now() + timedelta(minutes=settings.jwt.session_timeout_minutes),
     }
     return jwt.encode(payload, settings.jwt.secret_key, algorithm=settings.jwt.algorithm)
 
