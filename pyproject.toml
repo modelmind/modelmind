@@ -22,6 +22,8 @@ aiocache = "^0.12.2"
 hkdf = "^0.0.3"
 python-jose = "^3.3.0"
 cryptography = "^42.0.8"
+google-cloud-bigquery = {extras = ["opentelemetry"], version = "^3.25.0"}
+opentelemetry-exporter-gcp-trace = "^1.6.0"
 
 
 [tool.poetry.group.dev.dependencies]
