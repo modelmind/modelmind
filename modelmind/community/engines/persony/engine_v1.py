@@ -1,6 +1,6 @@
 import random
 from enum import StrEnum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -48,7 +48,7 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
                 return cls.ATTITUDE
             raise InvalidQuestionCategory(f"Question category {question_category} not supported.")
 
-    def __init__(self, questions: list[PersonyQuestion], config: "Config" = Config()) -> None:
+    def __init__(self, questions: list[PersonyQuestion], config: Any) -> None:
         super().__init__(questions)
         self.questions = questions
         self.config = self.Config(**config) or self.Config()
