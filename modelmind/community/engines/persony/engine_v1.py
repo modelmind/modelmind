@@ -51,7 +51,7 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
     def __init__(self, questions: list[PersonyQuestion], config: "Config" = Config()) -> None:
         super().__init__(questions)
         self.questions = questions
-        self.config = config or self.Config()
+        self.config = self.Config(**config) or self.Config()
         self.question_step_mapping = self._create_question_step_mapping(questions)
         self.analyzer = PersonyAnalyzer(
             config=PersonyAnalyzer.Config(neutral_addition=self.config.neutral_addition),
