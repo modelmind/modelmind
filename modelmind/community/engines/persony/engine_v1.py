@@ -48,10 +48,10 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
                 return cls.ATTITUDE
             raise InvalidQuestionCategory(f"Question category {question_category} not supported.")
 
-    def __init__(self, questions: list[PersonyQuestion], config: Any) -> None:
+    def __init__(self, questions: list[PersonyQuestion], config: dict[str, Any] | None) -> None:
         super().__init__(questions)
         self.questions = questions
-        self.config = self.Config(**config) or self.Config()
+        self.config = self.Config(**config) if config else self.Config()
         self.question_step_mapping = self._create_question_step_mapping(questions)
         self.analyzer = PersonyAnalyzer(
             config=PersonyAnalyzer.Config(neutral_addition=self.config.neutral_addition),
