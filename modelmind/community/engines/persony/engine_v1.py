@@ -23,8 +23,8 @@ class PersonyEngineV1(Engine[PersonyQuestion]):
         neutral_addition: int = 1
         questions_count: dict[str, int] = {
             "PREFERENCES": 32,
-            "LIFESTYLE": 16,
-            "TEMPERAMENT": 16,
+            "LIFESTYLE": 14,
+            "TEMPERAMENT": 14,
             "ATTITUDE": 16,
         }
         max_questions: int = 8
