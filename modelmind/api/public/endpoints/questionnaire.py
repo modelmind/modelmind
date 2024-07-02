@@ -2,7 +2,6 @@ import asyncio
 
 from fastapi import APIRouter, Depends, Response
 
-from modelmind.api.public.commands.send_result_notification import SendResultNotificationCommand
 from modelmind.api.public.dependencies.daos.providers import (
     profiles_dao_provider,
     results_dao_provider,
@@ -24,6 +23,7 @@ from modelmind.api.public.schemas.analytics import AnalyticsResponse
 from modelmind.api.public.schemas.profiles import SessionResponse
 from modelmind.api.public.schemas.questionnaires import NextQuestionsResponse
 from modelmind.api.public.schemas.results import ResultsResponse, ResultVisibility
+from modelmind.commands.send_result_notification import SendResultNotificationCommand
 from modelmind.config import settings
 from modelmind.db.daos.profiles import ProfilesDAO
 from modelmind.db.daos.results import ResultsDAO

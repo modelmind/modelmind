@@ -1,7 +1,7 @@
 from fastapi import Depends
 from google.cloud.firestore import AsyncClient
 
-from modelmind.api.public.dependencies.clients.firestore import get_firestore_client
+from modelmind.api.internal.dependencies.clients.firestore import get_firestore_client
 from modelmind.db.daos.profiles import ProfilesDAO
 from modelmind.db.daos.questionnaires import QuestionnairesDAO
 from modelmind.db.daos.results import ResultsDAO

@@ -1,6 +1,10 @@
-from typing import Optional
+from typing import Optional, TypedDict
 
 from . import DBObject
+
+
+class QuestionnaireConfig(TypedDict, total=False):
+    engine: dict
 
 
 class DBQuestionnaire(DBObject):
@@ -8,7 +12,7 @@ class DBQuestionnaire(DBObject):
     description: Optional[str]
     engine: str
 
-    config: dict
+    config: QuestionnaireConfig = QuestionnaireConfig()
 
     owner: str
     visibility: str

@@ -10,6 +10,11 @@ PACKAGE_NAME = Path(__file__).parent.name
 ENV_PREFIX = f"{PACKAGE_NAME.upper()}_"
 
 
+class App(str, Enum):
+    MAIN = "main"
+    INTERNAL = "internal"
+
+
 class Environment(str, Enum):
     DEV = "dev"
     PROD = "prod"

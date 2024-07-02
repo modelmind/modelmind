@@ -11,6 +11,7 @@ from modelmind.db.exceptions.questionnaires import DBQuestionnaireNotFound
 from modelmind.db.schemas import DBIdentifier
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.questions import DBQuestion
+from modelmind.db.schemas.statistics import StatisticsData
 from modelmind.logger import log
 
 from .base import FieldFilter, FirestoreDAO
@@ -25,6 +26,9 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
 
     def questions_collection(self, questionnaire_id: DBIdentifier) -> AsyncCollectionReference:
         return self.document_ref(questionnaire_id).collection("questions")
+
+    def statistics_collection(self, questionnaire_id: DBIdentifier) -> AsyncCollectionReference:
+        return self.document_ref(questionnaire_id).collection("statistics")
 
     @cached(ttl=3600, cache=Cache.MEMORY, serializer=PickleSerializer())
     async def get_from_id(self, questionnaire_id: DBIdentifier) -> DBQuestionnaire:
@@ -124,3 +128,12 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         question_ref = self.questions_collection(questionnaire_id).document(question_id)
         write_result: write.WriteResult = await question_ref.update(question)
         log.debug(f"Question {question_id} from questionnaire {questionnaire_id} updated at {write_result.update_time}")
+
+    async def add_statistics(self, questionnaire_id: DBIdentifier, statistics_data: StatisticsData) -> None:
+        statistics_collection = self.statistics_collection(questionnaire_id)
+        statistics_document = {
+            "questionnaire_id": questionnaire_id,
+            "created_at": datetime.now(),
+            "data": statistics_data,
+        }
+        await statistics_collection.add(statistics_document)
