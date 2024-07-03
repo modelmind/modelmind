@@ -2,6 +2,8 @@ import datetime
 import json
 from typing import Dict, Optional
 
+import google.auth.transport.requests
+import google.oauth2.id_token
 from google.cloud.tasks_v2 import CloudTasksAsyncClient, CreateTaskRequest, HttpMethod, HttpRequest, Task
 from google.protobuf import duration_pb2, timestamp_pb2
 
@@ -33,6 +35,11 @@ async def create_task(
     Returns:
         The newly created task.
     """
+
+    if headers is None:
+        auth_req = google.auth.transport.requests.Request()
+        id_token = google.oauth2.id_token.fetch_id_token(auth_req, url)
+        headers = {"Authorization": f"Bearer {id_token}"}
 
     # Construct the task.
     task = Task(
