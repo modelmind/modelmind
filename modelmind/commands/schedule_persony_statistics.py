@@ -35,7 +35,7 @@ class SchedulePersonyStatisticsCommand(Command[None]):
                 project=settings.tasks_queue_calculate_statistics.project,
                 location=settings.tasks_queue_calculate_statistics.location,
                 queue=settings.tasks_queue_calculate_statistics.queue,
-                url=f"{settings.server.base_url}/v1/internal/statistics/persony",
+                url="https://modelmind-internal-tiaczhwoiq-ew.a.run.app/prod/v1/internal/statistics/persony",
                 deadline_in_seconds=1200,
                 json_payload={
                     "questionnaire_id": questionnaire_id,
