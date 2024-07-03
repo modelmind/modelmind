@@ -9,7 +9,7 @@ from fastapi.responses import UJSONResponse
 from google.cloud import bigquery, firestore
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-from modelmind.api import internal_v1_router, monitoring_router, public_v1_router
+from modelmind.api import internal_v1_router, public_v1_router
 from modelmind.clients.firestore.client import initialize_firestore_client
 from modelmind.config import PACKAGE_NAME, Environment, settings
 from modelmind.logger import log
@@ -128,8 +128,6 @@ def internal() -> ModelMindInternalAPI:
     # Main router for the API.
     app.include_router(router=internal_v1_router, prefix=settings.server.prefix)
     log.info("Public API v1 router included")
-    app.include_router(router=monitoring_router, prefix=settings.server.prefix)
-    log.info("Monitoring router included")
 
     # see middleware.py
     setup_middlewares(app)
