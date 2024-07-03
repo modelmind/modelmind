@@ -34,7 +34,12 @@ def schedule_calculate_persony_statistics_tasks() -> None:
     from modelmind.clients.firestore.client import initialize_firestore_client
     from modelmind.commands.schedule_persony_statistics import SchedulePersonyStatisticsCommand
 
-    firestore_client = initialize_firestore_client()
-    cloud_tasks_client = CloudTasksAsyncClient()
-    command = SchedulePersonyStatisticsCommand(firestore_client=firestore_client, cloud_tasks_client=cloud_tasks_client)
-    asyncio.run(command.run())
+    async def run_command() -> None:
+        firestore_client = initialize_firestore_client()
+        cloud_tasks_client = CloudTasksAsyncClient()
+        command = SchedulePersonyStatisticsCommand(
+            firestore_client=firestore_client, cloud_tasks_client=cloud_tasks_client
+        )
+        await command.run()
+
+    asyncio.run(run_command())
