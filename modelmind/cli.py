@@ -25,6 +25,16 @@ def run(
     )
 
 
-@cli.command()
-def hello_world() -> None:
-    print("Hello World!")
+@cli.command(name="schedule-calculate-persony-statistics-tasks")
+def schedule_calculate_persony_statistics_tasks() -> None:
+    import asyncio
+
+    from google.cloud.tasks_v2 import CloudTasksAsyncClient
+
+    from modelmind.clients.firestore.client import initialize_firestore_client
+    from modelmind.commands.schedule_persony_statistics import SchedulePersonyStatisticsCommand
+
+    firestore_client = initialize_firestore_client()
+    cloud_tasks_client = CloudTasksAsyncClient()
+    command = SchedulePersonyStatisticsCommand(firestore_client=firestore_client, cloud_tasks_client=cloud_tasks_client)
+    asyncio.run(command.run())

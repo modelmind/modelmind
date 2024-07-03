@@ -62,6 +62,12 @@ class JWTSettings(BaseSettings):
     algorithm: str = "HS256"
 
 
+class CloudTasksQueueSettings(BaseSettings):
+    project: str = ""
+    location: str = ""
+    queue: str = ""
+
+
 class Server(BaseModel):
     port: int = 8080
     host: str = "0.0.0.0"
@@ -69,6 +75,7 @@ class Server(BaseModel):
     service: str | None = None
     tag: str | None = None
     workers: int = 1
+    domain: str = "localhost"
 
     @property
     def prefix(self) -> str:
@@ -82,6 +89,12 @@ class Server(BaseModel):
             return "/" + "/".join(prefixes)
         else:
             return ""
+
+    @property
+    def base_url(self) -> str:
+        if settings.environment == Environment.PROD:
+            return f"https://{settings.server.domain}{self.prefix}"
+        return f"http://{self.host}:{self.port}{self.prefix}"
 
 
 class Settings(BaseSettings):
@@ -106,6 +119,7 @@ class Settings(BaseSettings):
     sentry: SentrySettings = SentrySettings()
     jwt: JWTSettings = JWTSettings()
     discord: DiscordSettings = DiscordSettings()
+    tasks_queue_calculate_statistics: CloudTasksQueueSettings = CloudTasksQueueSettings()
 
     @property
     def next_cookie(self) -> str:

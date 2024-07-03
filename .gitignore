@@ -163,3 +163,5 @@ cython_debug/
 # Custom
 *playground.ipynb
 *.csv
+
+.vscode/

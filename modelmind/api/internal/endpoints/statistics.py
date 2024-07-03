@@ -4,7 +4,7 @@ from modelmind.api.internal.dependencies.clients.bigquery import get_bigquery_cl
 from modelmind.api.internal.schemas.requests import CalculateStatisticsRequest
 from modelmind.api.public.dependencies.daos.providers import questionnaires_dao_provider
 from modelmind.clients.bigquery.client import BigqueryClient
-from modelmind.commands.calculate_statistics import CalculatePersonyStatisticsCommand
+from modelmind.commands.calculate_persony_statistics import CalculatePersonyStatisticsCommand
 from modelmind.db.daos.questionnaires import QuestionnairesDAO
 
 router = APIRouter(prefix="/statistics")

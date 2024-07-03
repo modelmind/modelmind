@@ -35,8 +35,9 @@ steps:
       - push
       - --all-tags
       - ${_TARGET_SERVICE_IMAGE}
+    waitFor: [ "Build image and tag it" ]
 
-  - id: "Deploy revision with tag"
+  - id: "Deploy Main revision with tag"
     name: "${_CLOUD_SDK_IMAGE}"
     entrypoint: "gcloud"
     args:
@@ -52,36 +53,29 @@ steps:
       - --ingress=all
       - --service-account=${_SA_EMAIL}
       - --port=${_PORT}
-      - --execution-environment=gen1
+      - --execution-environment=gen2
       - --timeout=60
       - --command=${_COMMAND}
       - --args=${_ARGS}
-      - --set-env-vars
-      - SERVER__PORT=${_PORT}
-      - --set-env-vars
-      - SERVER__RELOAD=false
-      - --set-env-vars
-      - SERVER__TAG=${_CLOUDRUN_TAG}
-      - --set-env-vars
-      - SERVER__WORKERS=2
-      - --set-env-vars
-      - ENVIRONMENT=${_ENVIRONMENT}
-      - --set-env-vars
-      - SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
-      - --set-env-vars
-      - FIRESTORE__DATABASE=${_FIRESTORE__DATABASE}
-      - --set-secrets
-      - SENTRY__DSN=${_SENTRY__DSN}
-      - --set-secrets
-      - JWT__SECRET_KEY=${_JWT__SECRET_KEY}
-      - --set-secrets
-      - JWT__NEXT_SECRET=${_JWT__NEXT_SECRET}
-      - --set-secrets
-      - DISCORD__NOTIFICATIONS_WEBHOOK_ID=${_DISCORD__NOTIFICATIONS_WEBHOOK_ID}
+      - --set-env-vars=SERVER__PORT=${_PORT}
+      - --set-env-vars=SERVER__RELOAD=false
+      - --set-env-vars=SERVER__TAG=${_CLOUDRUN_TAG}
+      - --set-env-vars=SERVER__WORKERS=2
+      - --set-env-vars=SERVER__DOMAIN=${_DOMAIN}
+      - --set-env-vars=ENVIRONMENT=${_ENVIRONMENT}
+      - --set-env-vars=SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
+      - --set-env-vars=FIRESTORE__DATABASE=${_FIRESTORE__DATABASE}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__PROJECT=${_TASKS_QUEUE_CALCULATE_STATISTICS__PROJECT}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__LOCATION=${_TASKS_QUEUE_CALCULATE_STATISTICS__LOCATION}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__QUEUE=${_TASKS_QUEUE_CALCULATE_STATISTICS__QUEUE}
+      - --set-secrets=SENTRY__DSN=${_SENTRY__DSN}
+      - --set-secrets=JWT__SECRET_KEY=${_JWT__SECRET_KEY}
+      - --set-secrets=JWT__NEXT_SECRET=${_JWT__NEXT_SECRET}
+      - --set-secrets=DISCORD__NOTIFICATIONS_WEBHOOK_ID=${_DISCORD__NOTIFICATIONS_WEBHOOK_ID}
       - --cpu-boost
       - --cpu=2
       - --memory=1Gi
-
+    waitFor: [ "Publish image to Artifact Registry" ]
 
   - id: "Update Traffic to prod"
     name: "${_CLOUD_SDK_IMAGE}"
@@ -95,3 +89,76 @@ steps:
       - ${_CLOUDRUN_TAG}=100
       - --region
       - ${_REGION}
+    waitFor: [ "Deploy Main revision with tag" ]
+
+  - id: "Deploy Internal revision with tag"
+    name: "${_CLOUD_SDK_IMAGE}"
+    entrypoint: "gcloud"
+    args:
+      - run
+      - deploy
+      - ${_INTERNAL_SERVICE_NAME}
+      - --platform=managed
+      - --region=${_REGION}
+      - --image=${_TARGET_SERVICE_IMAGE}:${SHORT_SHA}
+      - --args=run
+      - --tag=${_CLOUDRUN_TAG}
+      - --no-allow-unauthenticated
+      - --ingress=internal
+      - --service-account=${_SA_EMAIL}
+      - --port=${_PORT}
+      - --execution-environment=gen1
+      - --timeout=60
+      - --command=${_COMMAND}
+      - --args=-m,${_APP_NAME},run,--app,internal
+      - --set-env-vars=SERVER__PORT=${_PORT}
+      - --set-env-vars=SERVER__RELOAD=false
+      - --set-env-vars=SERVER__TAG=${_CLOUDRUN_TAG}
+      - --set-env-vars=SERVER__WORKERS=2
+      - --set-env-vars=SERVER__DOMAIN=${_DOMAIN}
+      - --set-env-vars=ENVIRONMENT=${_ENVIRONMENT}
+      - --set-env-vars=SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
+      - --set-env-vars=FIRESTORE__DATABASE=${_FIRESTORE__DATABASE}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__PROJECT=${_TASKS_QUEUE_CALCULATE_STATISTICS__PROJECT}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__LOCATION=${_TASKS_QUEUE_CALCULATE_STATISTICS__LOCATION}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__QUEUE=${_TASKS_QUEUE_CALCULATE_STATISTICS__QUEUE}
+      - --set-secrets=DISCORD__NOTIFICATIONS_WEBHOOK_ID=${_DISCORD__NOTIFICATIONS_WEBHOOK_ID}
+      - --cpu-boost
+      - --cpu=1
+      - --memory=1Gi
+    waitFor: [ "Publish image to Artifact Registry" ]
+
+
+  - id: "Deploy Schedule Calculate Persony Statistics Job"
+    name: "${_CLOUD_SDK_IMAGE}"
+    entrypoint: "gcloud"
+    args:
+      - run
+      - jobs
+      - deploy
+      - ${_JOBS_SCHEDULE_CALCULATE_STATISTICS_TASKS__NAME}
+      - --region
+      - ${_JOBS_SCHEDULE_CALCULATE_STATISTICS_TASKS__LOCATION}
+      - --image
+      - ${_TARGET_SERVICE_IMAGE}:${SHORT_SHA}
+      - --service-account
+      - ${_SA_EMAIL}
+      - --task-timeout
+      - "300"
+      - --memory
+      - "1Gi"
+      - --cpu
+      - "1"
+      - --max-retries=0
+      - --command=python3
+      - --args=-m,${_APP_NAME},${_JOBS_SCHEDULE_CALCULATE_STATISTICS_TASKS__NAME}
+      - --set-env-vars=SERVER__TAG=${_CLOUDRUN_TAG}
+      - --set-env-vars=SERVER__WORKERS=2
+      - --set-env-vars=SERVER__DOMAIN=${_DOMAIN}
+      - --set-env-vars=ENVIRONMENT=${_ENVIRONMENT}
+      - --set-env-vars=SERVER__LOG_LEVEL=${_SERVER__LOG_LEVEL}
+      - --set-env-vars=FIRESTORE__DATABASE=${_FIRESTORE__DATABASE}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__PROJECT=${_TASKS_QUEUE_CALCULATE_STATISTICS__PROJECT}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__LOCATION=${_TASKS_QUEUE_CALCULATE_STATISTICS__LOCATION}
+      - --set-env-vars=TASKS_QUEUE_CALCULATE_STATISTICS__QUEUE=${_TASKS_QUEUE_CALCULATE_STATISTICS__QUEUE}
+    waitFor: [ "Publish image to Artifact Registry" ]
