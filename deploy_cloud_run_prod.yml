@@ -152,6 +152,8 @@ steps:
       - --max-retries=0
       - --command=python3
       - --args=-m,${_APP_NAME},${_JOBS_SCHEDULE_CALCULATE_STATISTICS_TASKS__NAME}
+      - --set-env-vars=SERVER__PORT=${_PORT}
+      - --set-env-vars=SERVER__RELOAD=false
       - --set-env-vars=SERVER__TAG=${_CLOUDRUN_TAG}
       - --set-env-vars=SERVER__WORKERS=2
       - --set-env-vars=SERVER__DOMAIN=${_DOMAIN}
