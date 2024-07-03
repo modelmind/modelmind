@@ -110,7 +110,7 @@ steps:
       - --execution-environment=gen1
       - --timeout=60
       - --command=${_COMMAND}
-      - --args=-m,${_APP_NAME},run,--app,internal
+      - --args=--app,internal
       - --set-env-vars=SERVER__PORT=${_PORT}
       - --set-env-vars=SERVER__RELOAD=false
       - --set-env-vars=SERVER__TAG=${_CLOUDRUN_TAG}
