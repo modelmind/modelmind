@@ -52,6 +52,7 @@ resource "google_project_iam_member" "project_iam_member_sa" {
   for_each = toset([
     "roles/datastore.user",
     "roles/bigquery.user",
+    "roles/bigquery.dataViewer",
     "roles/cloudtrace.agent",
   ])
   role    = each.key

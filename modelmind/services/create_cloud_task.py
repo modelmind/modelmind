@@ -36,7 +36,7 @@ async def create_task(
         The newly created task.
     """
 
-    if headers is None:
+    if not headers:
         auth_req = google.auth.transport.requests.Request()
         id_token = google.oauth2.id_token.fetch_id_token(auth_req, url)
         headers = {"Authorization": f"Bearer {id_token}"}
