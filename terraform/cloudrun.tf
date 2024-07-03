@@ -17,6 +17,25 @@ resource "google_cloud_run_v2_service" "cloud_run_api" {
   }
 }
 
+resource "google_cloud_run_v2_service" "internal_cloud_run_api" {
+  name     = local.internal_api_cloud_run_name
+  location = "europe-west1"
+  # Only initial deployment
+  lifecycle {
+    ignore_changes = [
+      template,
+      client,
+      client_version,
+    ]
+  }
+
+  template {
+    containers {
+      image = "gcr.io/cloudrun/hello"
+    }
+  }
+}
+
 resource "google_service_account" "cloud_run_api_sa" {
   account_id   = local.api_cloud_run_name
   display_name = "Service Account for ${google_cloud_run_v2_service.cloud_run_api.name}"
@@ -33,6 +52,7 @@ resource "google_project_iam_member" "project_iam_member_sa" {
   for_each = toset([
     "roles/datastore.user",
     "roles/bigquery.user",
+    "roles/cloudtrace.agent",
   ])
   role    = each.key
   member  = "serviceAccount:${google_service_account.cloud_run_api_sa.email}"

@@ -115,7 +115,9 @@ async def initialize_questionnaire_from_id(
     # BaseQuestion is abstract, so we need to convert to the correct subclass
     questions = [Question(**question.model_dump()) for question in db_questions]
 
-    engine = EngineFactory.create_engine(db_questionnaire.engine, questions=questions, config=None)
+    engine = EngineFactory.create_engine(
+        db_questionnaire.engine, questions=questions, config=db_questionnaire.config.get("engine")
+    )
 
     return Questionnaire(name=db_questionnaire.name, engine=engine, questions=questions)
 

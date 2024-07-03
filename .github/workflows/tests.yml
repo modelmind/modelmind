@@ -16,7 +16,7 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Run black check
-      run: poetry run black -l 120 --check .
+      run: poetry run black -l 120 --check ./modelmind
   mypy:
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +30,7 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Run mypy check
-      run: poetry run mypy --ignore-missing-imports .
+      run: poetry run mypy --ignore-missing-imports ./modelmind
   pytest:
     runs-on: ubuntu-latest
     steps:
