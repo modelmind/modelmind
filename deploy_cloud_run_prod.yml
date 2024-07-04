@@ -148,7 +148,7 @@ steps:
       - --memory
       - "1Gi"
       - --cpu
-      - "1"
+      - "2"
       - --max-retries=0
       - --command=python3
       - --args=-m,${_APP_NAME},${_JOBS_SCHEDULE_CALCULATE_STATISTICS_TASKS__NAME}
