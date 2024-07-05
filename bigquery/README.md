@@ -8,7 +8,6 @@ A guide on how to use the script can be found [here](https://github.com/firebase
 $ npx @firebaseextensions/fs-bq-schema-views \
   --non-interactive \
   --project=${param:PROJECT_ID} \
-  --big-query-project=${param:BIGQUERY_PROJECT_ID} \
   --dataset=${param:DATASET_ID} \
   --table-name-prefix=${param:TABLE_ID} \
   --schema-files=./test_schema.json

@@ -1,0 +1,136 @@
+{
+    "fields": [
+        {
+            "name": "questionnaire_id",
+            "type": "string"
+        },
+        {
+            "name": "data",
+            "type": "map",
+            "fields": [
+                {
+                    "name": "accuracy",
+                    "type": "map",
+                    "fields": [
+                        {
+                            "name": "total",
+                            "type": "map",
+                            "fields": [
+                                {
+                                    "name": "total_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "correct_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "percentage",
+                                    "type": "number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "confidence_ge_1",
+                            "type": "map",
+                            "fields": [
+                                {
+                                    "name": "total_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "correct_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "percentage",
+                                    "type": "number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "confidence_ge_2",
+                            "type": "map",
+                            "fields": [
+                                {
+                                    "name": "total_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "correct_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "percentage",
+                                    "type": "number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "confidence_ge_3",
+                            "type": "map",
+                            "fields": [
+                                {
+                                    "name": "total_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "correct_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "percentage",
+                                    "type": "number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "confidence_ge_4",
+                            "type": "map",
+                            "fields": [
+                                {
+                                    "name": "total_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "correct_predictions",
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "percentage",
+                                    "type": "number"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "counts",
+                    "type": "map",
+                    "fields": [
+                        {
+                            "name": "total",
+                            "type": "number"
+                        },
+                        {
+                            "name": "with_label",
+                            "type": "number"
+                        },
+                        {
+                            "name": "male",
+                            "type": "number"
+                        },
+                        {
+                            "name": "female",
+                            "type": "number"
+                        }
+                    ]
+                },
+                {
+                    "name": "type",
+                    "type": "string"
+                }
+            ]
+        }
+    ]
+}

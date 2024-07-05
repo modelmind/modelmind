@@ -83,3 +83,13 @@ resource "google_secret_manager_secret_iam_member" "binding_discord_notification
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.cloud_run_api_sa.email}"
 }
+
+resource "google_cloud_run_service_iam_binding" "invoke_internal_cloud_run_api" {
+  location = google_cloud_run_v2_service.internal_cloud_run_api.location
+  project  = google_cloud_run_v2_service.internal_cloud_run_api.project
+  service  = google_cloud_run_v2_service.internal_cloud_run_api.name
+  role     = "roles/run.invoker"
+  members = [
+    "serviceAccount:${google_service_account.cloud_run_api_sa.email}",
+  ]
+}
