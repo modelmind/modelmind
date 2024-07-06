@@ -10,9 +10,9 @@ from google.cloud import bigquery, firestore
 from sentry_sdk.integrations.logging import LoggingIntegration
 
 from modelmind.api import internal_v1_router, public_v1_router
-from modelmind.clients.firestore.client import initialize_firestore_client
 from modelmind.config import PACKAGE_NAME, Environment, settings
 from modelmind.logger import log
+from modelmind.services.firestore.client import initialize_firestore_client
 
 from .middleware import setup_middlewares
 
@@ -102,7 +102,7 @@ def internal() -> ModelMindInternalAPI:
 
     :return: application.
     """
-    from modelmind.clients.bigquery.client import BigqueryClient
+    from modelmind.services.bigquery.client import BigqueryClient
 
     @asynccontextmanager
     async def lifespan(app: ModelMindInternalAPI) -> AsyncGenerator[None, None]:

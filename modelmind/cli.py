@@ -31,8 +31,8 @@ def schedule_calculate_persony_statistics_tasks() -> None:
 
     from google.cloud.tasks_v2 import CloudTasksAsyncClient
 
-    from modelmind.clients.firestore.client import initialize_firestore_client
     from modelmind.commands.schedule_persony_statistics import SchedulePersonyStatisticsCommand
+    from modelmind.services.firestore.client import initialize_firestore_client
 
     async def run_command() -> None:
         firestore_client = initialize_firestore_client()

@@ -1,4 +1,4 @@
-from modelmind.clients.httpx_client import HttpxClient
+from modelmind.services.httpx_client import HttpxClient
 
 from .schemas import WebhookBody
 

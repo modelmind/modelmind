@@ -1,9 +1,12 @@
+from datetime import datetime
 from typing import Optional
 
-from modelmind.clients.discord.schemas import Embed, Field, WebhookBody
-from modelmind.clients.discord.webhook import DiscordWebhookClient
 from modelmind.db.schemas.profiles import Biographics
+from modelmind.db.schemas.questionnaires import DBQuestionnaire
+from modelmind.db.schemas.statistics import AccuracyMetric, CountsMetric, PersonyStatistics
 from modelmind.models.analytics.schemas import Analytics
+from modelmind.services.discord.schemas import Embed, Field, WebhookBody
+from modelmind.services.discord.webhook import DiscordWebhookClient
 
 
 class EventNotifier:
@@ -74,4 +77,57 @@ class EventNotifier:
         self, questionnaire_name: str, label: str | None, analytics: list[Analytics], biographics: Biographics
     ) -> None:
         body = self.format_analytics_to_message(questionnaire_name, label, analytics, biographics)
+        await self.discord_notifications_client.send_embed_message(body)
+
+    def format_statistics_to_message(self, questionnaire_name: str, statistics: PersonyStatistics) -> WebhookBody:
+        embeds: list[Embed] = []
+
+        accuracy = statistics["accuracy"]
+        counts = statistics["counts"]
+
+        def format_accuracy(accuracy: AccuracyMetric) -> str:
+            return (
+                f"**Total Sample**: {accuracy['total']['total_predictions']}\n"
+                f"**Acc. Percentage**: {accuracy['total']['percentage']:.2f}%\n\n"
+                f"**Confidence >= 1**:\n"
+                f"- Sample: {accuracy['confidence_ge_1']['total_predictions']}\n"
+                f"- Percentage: {accuracy['confidence_ge_1']['percentage']:.2f}%\n\n"
+                f"**Confidence >= 2**:\n"
+                f"- Sample: {accuracy['confidence_ge_2']['total_predictions']}\n"
+                f"- Percentage: {accuracy['confidence_ge_2']['percentage']:.2f}%\n\n"
+                f"**Confidence >= 3**:\n"
+                f"- Sample: {accuracy['confidence_ge_3']['total_predictions']}\n"
+                f"- Percentage: {accuracy['confidence_ge_3']['percentage']:.2f}%\n\n"
+                f"**Confidence >= 4**:\n"
+                f"- Sample: {accuracy['confidence_ge_4']['total_predictions']}\n"
+                f"- Percentage: {accuracy['confidence_ge_4']['percentage']:.2f}%"
+            )
+
+        def format_counts(counts: CountsMetric) -> str:
+            return (
+                f"**Total**: {counts['total']}\n"
+                f"**With Label**: {counts['with_label']}\n"
+                f"**Male**: {counts['male']}\n"
+                f"**Female**: {counts['female']}\n"
+                f"**Other**: {counts['other']}"
+            )
+
+        fields: list[Field] = [
+            {"name": "Accuracy", "value": format_accuracy(accuracy), "inline": False},
+            {"name": "Counts", "value": format_counts(counts), "inline": False},
+        ]
+
+        embeds.append(
+            {
+                "title": questionnaire_name,
+                "description": f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                "fields": fields,
+                "color": 0x800080,
+            }
+        )
+
+        return {"username": "Statistics Bot", "embeds": embeds, "content": "@everyone"}
+
+    async def new_statistics(self, db_questionnaire: DBQuestionnaire, statistics: PersonyStatistics) -> None:
+        body = self.format_statistics_to_message(db_questionnaire.name, statistics)
         await self.discord_notifications_client.send_embed_message(body)

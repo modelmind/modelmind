@@ -119,8 +119,12 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
             raise e
 
     async def add_questions(self, questionnaire_id: DBIdentifier, questions: List[dict[str, Any]]) -> None:
+        doc_ids = [f"{questionnaire_id}_{question['id']}" for question in questions]
+        for question in questions:
+            question["questionnaire_id"] = questionnaire_id
+
         questions_collection = self.questions_collection(questionnaire_id)
-        await self.batch_add(questions, questions_collection)
+        await self.batch_add(questions, questions_collection, doc_ids)
 
     async def update_question(
         self, questionnaire_id: DBIdentifier, question_id: DBIdentifier, question: dict[str, Any]

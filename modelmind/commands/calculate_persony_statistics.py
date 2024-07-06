@@ -1,11 +1,15 @@
+from typing import Optional
+
 from google.cloud.bigquery.table import RowIterator, _EmptyRowIterator
 
 from bigquery.queries.calculate_accuracy import QUERY as ACCURACY_QUERY
 from bigquery.queries.results_counts import QUERY as COUNTS_QUERY
-from modelmind.clients.bigquery.client import BigqueryClient
+from modelmind.commands.send_statistics_notification import SendPersonyStatisticsNotificationCommand
 from modelmind.db.daos.questionnaires import QuestionnairesDAO
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
 from modelmind.db.schemas.statistics import Accuracy, AccuracyMetric, CountsMetric, PersonyStatistics
+from modelmind.services.bigquery.client import BigqueryClient
+from modelmind.services.event_notifier import EventNotifier
 
 from .base import Command
 
@@ -16,10 +20,12 @@ class CalculatePersonyStatisticsCommand(Command[None]):
         questionnaire_id: str,
         bigquery_client: BigqueryClient,
         questionnaires_dao: QuestionnairesDAO,
+        event_notifier: Optional[EventNotifier] = None,
     ) -> None:
         self.questionnaire_id = questionnaire_id
         self.bigquery_client = bigquery_client
         self.questionnaires_dao = questionnaires_dao
+        self.event_notifier = event_notifier
 
     async def get_db_questionnaire(self, questionnaire_id: str) -> DBQuestionnaire:
         try:
@@ -98,3 +104,6 @@ class CalculatePersonyStatisticsCommand(Command[None]):
         )
 
         await self.questionnaires_dao.add_statistics(db_questionnaire.id, statistics_data)
+
+        if self.event_notifier:
+            await SendPersonyStatisticsNotificationCommand(db_questionnaire, statistics_data, self.event_notifier).run()
