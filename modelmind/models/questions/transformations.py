@@ -50,6 +50,7 @@ def create_question_from_string_dict(question_data: Dict[str, str]) -> Question:
                 low_label=question_data["low_label"],
                 high_label=question_data["high_label"],
                 shuffle=question_data.get("shuffle", "False").lower() == "true",
+                reversed=question_data.get("reversed", "False").lower() == "true",
             )
         else:
             raise ValueError(f"Invalid question type: {question_type} from {question_data}")

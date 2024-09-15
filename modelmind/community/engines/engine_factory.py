@@ -4,15 +4,16 @@ from typing import Any, Optional, Type
 from modelmind.models.engines.base import Engine
 from modelmind.models.questions.schemas import Question
 
-from .persony import PersonyEngineV1
+from .persony import PersonyEngineV1, PersonyEngineV2
 
 
 class EngineName(StrEnum):
     PERSONY_V1 = "persony-v1"
+    PERSONY_V2 = "persony-v2"
 
 
 class EngineFactory:
-    engine_map = {EngineName.PERSONY_V1: PersonyEngineV1}
+    engine_map = {EngineName.PERSONY_V1: PersonyEngineV1, EngineName.PERSONY_V2: PersonyEngineV2}
 
     @classmethod
     def get_engine(cls, engine_name: str) -> Type[Engine]:

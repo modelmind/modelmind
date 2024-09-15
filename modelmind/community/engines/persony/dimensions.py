@@ -2,6 +2,7 @@ from enum import StrEnum
 
 from modelmind.community.theory.jung.functions import JungFunction
 from modelmind.community.theory.mbti.trait import MBTITrait
+from modelmind.community.theory.neuroticism.trait import NeuroticismTrait
 
 
 class ClassVar:
@@ -36,6 +37,7 @@ class PersonyDimension(StrEnum):
     ATTITUDE_EFJ = "A-EFJ"
     ATTITUDE_ENP = "A-ENP"
     ATTITUDE_ESP = "A-ESP"
+    NEUROTICISM_1 = "NEUR-1"
 
     _category_data = ClassVar(
         {
@@ -139,6 +141,7 @@ class PersonyDimension(StrEnum):
                 "lowFunction": JungFunction.Ni,
                 "highFunction": JungFunction.Se,
             },
+            "NEUROTICISM_1": {"lowNeuroticism": NeuroticismTrait.S1, "highNeuroticism": NeuroticismTrait.N1},
         },
     )
 
@@ -153,6 +156,10 @@ class PersonyDimension(StrEnum):
     @property
     def data_functions(self) -> dict[str, JungFunction]:
         return {k: v for k, v in self.data.items() if isinstance(v, JungFunction)}
+
+    @property
+    def data_neuroticism(self) -> dict[str, NeuroticismTrait]:
+        return {k: v for k, v in self.data.items() if isinstance(v, NeuroticismTrait)}
 
     @property
     def high_trait(self) -> MBTITrait | None:
@@ -173,6 +180,18 @@ class PersonyDimension(StrEnum):
     @property
     def has_function(self) -> bool:
         return self.low_function is not None or self.high_function is not None
+
+    @property
+    def low_neuroticism(self) -> NeuroticismTrait | None:
+        return self.data_neuroticism.get("lowNeuroticism")
+
+    @property
+    def high_neuroticism(self) -> NeuroticismTrait | None:
+        return self.data_neuroticism.get("highNeuroticism")
+
+    @property
+    def has_neuroticism(self) -> bool:
+        return self.low_neuroticism is not None or self.high_neuroticism is not None
 
     @classmethod
     def preferences(cls) -> list[str]:
@@ -213,3 +232,7 @@ class PersonyDimension(StrEnum):
             cls.ATTITUDE_ENP,
             cls.ATTITUDE_ESP,
         ]
+
+    @classmethod
+    def neuroticism(cls) -> list[str]:
+        return [cls.NEUROTICISM_1]

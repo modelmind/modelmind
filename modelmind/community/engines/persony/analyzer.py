@@ -4,6 +4,7 @@ from modelmind.community.engines.persony.dimensions import PersonyDimension
 from modelmind.community.theory.jung.functions import JungFunctionsAnalytics
 from modelmind.community.theory.mbti.trait import MBTITraitsAnalytics
 from modelmind.community.theory.mbti.types import MBTIType
+from modelmind.community.theory.neuroticism.trait import NeuroticismAnalytics
 from modelmind.logger import log
 from modelmind.models.analytics.base import BaseAnalytics
 from modelmind.models.questions import QuestionKey
@@ -25,6 +26,7 @@ class PersonyAnalyzer:
         self.base_mbti_analytics = MBTITraitsAnalytics(complexity=MBTITraitsAnalytics.Complexity.basic)
         self.advanced_mbti_analytics = MBTITraitsAnalytics(complexity=MBTITraitsAnalytics.Complexity.advanced)
         self.jung_analytics = JungFunctionsAnalytics()
+        self.neuroticism_analytics = NeuroticismAnalytics()
 
     def _add_traits_and_functions(self, dimension: PersonyDimension, value: int, max_value: int) -> None:
         if value < 0:
@@ -43,6 +45,8 @@ class PersonyAnalyzer:
             self.jung_analytics.add(dimension.low_function, abs(value), max_value=max_value)
         if dimension.high_function:
             self.jung_analytics.add(dimension.high_function, 0, max_value=max_value)
+        if dimension.low_neuroticism:
+            self.neuroticism_analytics.add(dimension.low_neuroticism, abs(value), max_value=max_value)
 
     def _handle_positive_value(self, dimension: PersonyDimension, value: int, max_value: int) -> None:
         if dimension.high_trait:
@@ -53,6 +57,8 @@ class PersonyAnalyzer:
             self.jung_analytics.add(dimension.low_function, 0, max_value=max_value)
         if dimension.high_function:
             self.jung_analytics.add(dimension.high_function, value, max_value=max_value)
+        if dimension.high_neuroticism:
+            self.neuroticism_analytics.add(dimension.high_neuroticism, value, max_value=max_value)
 
     def _handle_neutral_value(self, dimension: PersonyDimension, max_value: int) -> None:
         if dimension.low_trait and dimension.high_trait:
@@ -64,6 +70,9 @@ class PersonyAnalyzer:
         if dimension.low_function and dimension.high_function:
             self.jung_analytics.add(dimension.low_function, self.config.neutral_addition, max_value)
             self.jung_analytics.add(dimension.high_function, self.config.neutral_addition, max_value)
+        if dimension.low_neuroticism and dimension.high_neuroticism:
+            self.neuroticism_analytics.add(dimension.low_neuroticism, self.config.neutral_addition, max_value)
+            self.neuroticism_analytics.add(dimension.high_neuroticism, self.config.neutral_addition, max_value)
 
     def calculate_analytics(self, current_result: Result) -> list[BaseAnalytics]:
         """Build the analytics for the current result."""
@@ -77,6 +86,7 @@ class PersonyAnalyzer:
                 continue
 
             dimension = PersonyDimension(question.category)
+            value = -value if question.question.reversed else value
             self._add_traits_and_functions(dimension, value, question.question.max)
 
         return [self.base_mbti_analytics, self.advanced_mbti_analytics, self.jung_analytics]

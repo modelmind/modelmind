@@ -39,6 +39,7 @@ class ScaleQuestion(QuestionType):
     low_label: str
     high_label: str
     shuffle: bool = True
+    reversed: bool = False
     answer_type: AnswerType = "number"
 
 
