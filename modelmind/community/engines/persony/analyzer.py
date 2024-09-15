@@ -89,7 +89,7 @@ class PersonyAnalyzer:
             value = -value if question.question.reversed else value
             self._add_traits_and_functions(dimension, value, question.question.max)
 
-        return [self.base_mbti_analytics, self.advanced_mbti_analytics, self.jung_analytics]
+        return [self.base_mbti_analytics, self.advanced_mbti_analytics, self.jung_analytics, self.neuroticism_analytics]
 
     @staticmethod
     def find_base_analytics(analytics: list[BaseAnalytics]) -> MBTITraitsAnalytics | None:
