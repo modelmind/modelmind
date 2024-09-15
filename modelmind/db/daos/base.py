@@ -21,7 +21,6 @@ T = TypeVar("T", bound=DBObject)
 
 
 class FirestoreDAO(Generic[T], ABC):
-
     """
     Opiniated base class to manage models persistence in Firestore.
 

@@ -14,17 +14,17 @@ install:          ## Install the project in dev mode.
 
 .PHONY: format
 format:           ## Format code using black & isort.
-	autoflake --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports --recursive $(module_name)/
-	isort $(module_name)/
-	black -l 120 $(module_name)/
-	black -l 120 tests/
+	poetry run autoflake --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports --recursive $(module_name)/
+	poetry run isort $(module_name)/
+	poetry run black -l 120 $(module_name)/
+	poetry run black -l 120 tests/
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
 	flake8 $(module_name)/
 	black -l 120 --check $(module_name)/
 	black -l 120 --check tests/
-	mypy --ignore-missing-imports $(module_name)/
+	poetry run mypy --ignore-missing-imports $(module_name)/
 
 
 .PHONY: test
@@ -40,7 +40,7 @@ watch:            ## Run tests on every change.
 
 .PHONY: export
 poetry-export:          ## Export poetry requirements to requirements.txt.
-	poetry export --without-hashes --without dev -f requirements.txt -o requirements.txt
+	poetry export --without-hashes --without dev --without analytics -f requirements.txt -o requirements.txt
 
 
 .PHONY: update

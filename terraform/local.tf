@@ -9,6 +9,7 @@ locals {
   internal_api_cloud_run_name = "${local.app_name}-internal"
   lb_ip_address_name          = "lb-${local.app_name}-ip-address"
 
+  rootdomain_name     = "modelmind.me"
   modelmind_zone_name = "modelmind-me"
   modelmind_dns_name  = "modelmind.me."
   subdomain_name      = "api"
