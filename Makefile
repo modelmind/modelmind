@@ -14,22 +14,18 @@ install:          ## Install the project in dev mode.
 
 .PHONY: format
 format:           ## Format code using black & isort.
-	poetry run autoflake --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports --recursive $(module_name)/
-	poetry run isort $(module_name)/
-	poetry run black -l 120 $(module_name)/
-	poetry run black -l 120 tests/
+	poetry run ruff check $(module_name)/ --fix
+	poetry run ruff format $(module_name)/
+	tofu fmt -recursive infra/
 
 .PHONY: lint
-lint:             ## Run pep8, black, mypy linters.
-	flake8 $(module_name)/
-	black -l 120 --check $(module_name)/
-	black -l 120 --check tests/
-	poetry run mypy --ignore-missing-imports $(module_name)/
+lint:             ## Run mypy linter.
+	mypy --ignore-missing-imports $(module_name)/ --config-file mypy.ini
 
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.
-	pytest -v --cov-config .coveragerc --cov=$(module_name) -l --tb=short --maxfail=1 tests/
+	poetry run pytest -v --cov-config .coveragerc --cov=$(module_name) -l --tb=short --maxfail=1 tests/
 	coverage xml
 	coverage html
 
