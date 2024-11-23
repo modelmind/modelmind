@@ -3,7 +3,11 @@ from typing import Optional
 
 from modelmind.db.schemas.profiles import Biographics
 from modelmind.db.schemas.questionnaires import DBQuestionnaire
-from modelmind.db.schemas.statistics import AccuracyMetric, CountsMetric, PersonyStatistics
+from modelmind.db.schemas.statistics import (
+    AccuracyMetric,
+    CountsMetric,
+    PersonyStatistics,
+)
 from modelmind.models.analytics.schemas import Analytics
 from modelmind.services.discord.schemas import Embed, Field, WebhookBody
 from modelmind.services.discord.webhook import DiscordWebhookClient
@@ -25,7 +29,11 @@ class EventNotifier:
             return 0xFF0000
 
     def format_analytics_to_message(
-        self, questionnaire_name: str, label: str | None, analytics: list[Analytics], biographics: Biographics
+        self,
+        questionnaire_name: str,
+        label: str | None,
+        analytics: list[Analytics],
+        biographics: Biographics,
     ) -> WebhookBody:
         embeds: list[Embed] = []
 
@@ -57,7 +65,13 @@ class EventNotifier:
             sorted_items = sorted(analysis.items, key=lambda x: x.percentage or x.value, reverse=True)
             descriptions.append("\n".join(format_analytics_item(item) for item in sorted_items))
 
-        fields.append({"name": "Biographics", "value": format_biographics(biographics), "inline": False})
+        fields.append(
+            {
+                "name": "Biographics",
+                "value": format_biographics(biographics),
+                "inline": False,
+            }
+        )
 
         # TODO: remove this business logic
         target_dominants = biographics.get("personality", {}).get("mbti", {}).get("type", None)  # type: ignore
@@ -74,7 +88,11 @@ class EventNotifier:
         return {"username": questionnaire_name, "embeds": embeds}
 
     async def new_result(
-        self, questionnaire_name: str, label: str | None, analytics: list[Analytics], biographics: Biographics
+        self,
+        questionnaire_name: str,
+        label: str | None,
+        analytics: list[Analytics],
+        biographics: Biographics,
     ) -> None:
         body = self.format_analytics_to_message(questionnaire_name, label, analytics, biographics)
         await self.discord_notifications_client.send_embed_message(body)

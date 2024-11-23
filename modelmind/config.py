@@ -1,3 +1,4 @@
+import typing
 from enum import Enum
 from pathlib import Path
 from tempfile import gettempdir
@@ -11,13 +12,14 @@ ENV_PREFIX = f"{PACKAGE_NAME.upper()}_"
 
 
 class App(str, Enum):
-    MAIN = "main"
+    BUSINESS = "business"
     INTERNAL = "internal"
 
 
 class Environment(str, Enum):
     DEV = "dev"
     PROD = "prod"
+    LOCAL = "local"
 
 
 class LogLevel(str, Enum):  # noqa: WPS600
@@ -68,22 +70,31 @@ class CloudTasksQueueSettings(BaseSettings):
     queue: str = ""
 
 
-class Server(BaseModel):
+class CORSConfiguration(BaseSettings):
+    allow_origins: typing.Sequence[str] = ["https://modelmind.me", "https://www.modelmind.me", "http://localhost:3000"]
+    allow_credentials: bool = True
+    allow_methods: typing.Sequence[str] = ["*"]
+    allow_headers: typing.Sequence[str] = ["*"]
+    expose_headers: typing.Sequence[str] = ()
+    max_age: int = 600
+
+
+class ServerSettings(BaseModel):
     port: int = 8080
     host: str = "0.0.0.0"
-    reload: bool = False
     service: str | None = None
     tag: str | None = None
     workers: int = 1
     domain: str = "localhost"
+    cors: CORSConfiguration = CORSConfiguration()
 
     @property
     def prefix(self) -> str:
         prefixes = []
-        if settings.server.service is not None:
-            prefixes.append(settings.server.service)
-        if settings.server.tag is not None:
-            prefixes.append(settings.server.tag)
+        if self.service is not None:
+            prefixes.append(self.service)
+        if self.tag is not None:
+            prefixes.append(self.tag)
 
         if len(prefixes) > 0:
             return "/" + "/".join(prefixes)
@@ -93,7 +104,7 @@ class Server(BaseModel):
     @property
     def base_url(self) -> str:
         if settings.environment == Environment.PROD:
-            return f"https://{settings.server.domain}{self.prefix}"
+            return f"https://{self.domain}{self.prefix}"
         return f"http://{self.host}:{self.port}{self.prefix}"
 
 
@@ -105,8 +116,9 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
-    server: Server = Server()
-    environment: Environment = Environment.DEV
+    server: ServerSettings = ServerSettings()
+
+    environment: Environment = Environment.LOCAL
     logging: LoggingSettings = LoggingSettings()
 
     model_config = SettingsConfigDict(

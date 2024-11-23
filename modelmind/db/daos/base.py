@@ -1,6 +1,16 @@
 from abc import ABC
 from time import perf_counter
-from typing import Any, AsyncIterator, Dict, Generic, List, Literal, Optional, Type, TypeVar
+from typing import (
+    Any,
+    AsyncIterator,
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Type,
+    TypeVar,
+)
 
 from google.cloud.firestore import (
     AsyncClient,

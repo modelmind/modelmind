@@ -8,15 +8,15 @@ cli = typer.Typer(name="{PACKAGE_NAME} Api")
 
 @cli.command()
 def run(
-    app: App = App.MAIN,
+    app: App = App.BUSINESS,
     port: int = settings.server.port,
     host: str = settings.server.host,
     log_level: str = settings.logging.level.value,
-    reload: bool = settings.server.reload,
+    reload: bool = False,
     workers: int = settings.server.workers,
 ) -> None:
     uvicorn.run(
-        f"{PACKAGE_NAME}.api.app:{app.value}",
+        f"{PACKAGE_NAME}.api.{app.value}.app:app",
         host=host,
         port=port,
         log_level=log_level,

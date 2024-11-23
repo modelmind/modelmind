@@ -14,7 +14,6 @@ pydantic-settings = "^2.1.0"
 google-cloud-firestore = "^2.14.0"
 httpx = "^0.26.0"
 typer = "^0.9.0"
-sentry-sdk = {extras = ["fastapi"], version = "^1.40.4"}
 ujson = "^5.9.0"
 pyjwt = "^2.8.0"
 shortuuid = "^1.0.13"
@@ -25,6 +24,12 @@ cryptography = "^42.0.8"
 google-cloud-bigquery = {extras = ["opentelemetry"], version = "^3.25.0"}
 opentelemetry-exporter-gcp-trace = "^1.6.0"
 google-cloud-tasks = "^2.16.3"
+google-cloud-error-reporting = "^1.11.1"
+opentelemetry-exporter-gcp-monitoring = "^1.7.0a0"
+opentelemetry-instrumentation-fastapi = "^0.49b2"
+google-cloud-logging = "^3.11.3"
+opentelemetry-propagator-gcp = "^1.7.0"
+google-cloud-storage = "^2.18.2"
 
 
 [tool.poetry.group.dev.dependencies]
