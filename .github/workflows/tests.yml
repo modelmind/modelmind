@@ -17,8 +17,8 @@ jobs:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Install dependencies
       run: poetry install
-    - name: Run black check
-      run: poetry run black -l 120 --check ./modelmind
+    - name: Run ruff check
+      run: poetry run ruff check ./modelmind
     - name: Run mypy check
       run: poetry run mypy --ignore-missing-imports ./modelmind
   pytest:

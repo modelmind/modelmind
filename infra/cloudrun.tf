@@ -54,6 +54,12 @@ resource "google_project_iam_member" "project_iam_member_sa" {
     "roles/bigquery.user",
     "roles/bigquery.dataViewer",
     "roles/cloudtrace.agent",
+    "roles/monitoring.metricWriter",
+    "roles/logging.logWriter",
+    "roles/cloudtrace.agent",
+    "roles/cloudsql.client",
+    "roles/errorreporting.user",
+    "roles/errorreporting.writer",
   ])
   role    = each.key
   member  = "serviceAccount:${google_service_account.cloud_run_api_sa.email}"

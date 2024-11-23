@@ -45,6 +45,12 @@ poetry-update:          ## Update poetry dependencies and export to requirements
 	make poetry-export
 
 
+.PHONY: terraform-apply-prod
+terraform-apply-prod:          ## Apply terraform.
+	terraform -chdir=infra init -var-file="prod.tfvars" -reconfigure
+	terraform -chdir=infra apply -var-file="prod.tfvars"
+
+
 .PHONY: clean
 clean:            ## Clean unused files.
 	@find ./ -name '*.pyc' -exec rm -f {} \;
