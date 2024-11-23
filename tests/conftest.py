@@ -1,7 +1,7 @@
 from starlette.testclient import TestClient
 import pytest
 from fastapi import FastAPI
-from modelmind.api.app import main
+from modelmind.api.business.app import app as main
 
 
 @pytest.fixture(scope="module")
