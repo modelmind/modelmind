@@ -41,10 +41,11 @@ async def get_questionnaire_by_id(
 
 
 async def validate_requested_language(
+    db_questionnaire: DBQuestionnaire,
     language: str = Path(..., description="The language code for the questionnaire"),
     questionnaires_dao: QuestionnairesDAO = Depends(questionnaires_dao_provider),
 ) -> str:
-    is_language_available = await questionnaires_dao.is_language_available(language)
+    is_language_available = await questionnaires_dao.is_language_available(db_questionnaire.id, language)
 
     if not is_language_available:
         raise HTTPException(status_code=400, detail=f"Language {language} not available for this questionnaire")
@@ -82,6 +83,7 @@ async def get_questions_from_session(
 
 async def get_questions_by_questionnaire_name(
     name: str = Path(...),
+    db_questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_name),
     questionnaires_dao: QuestionnairesDAO = Depends(questionnaires_dao_provider),
     questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_name),
     language: str = Depends(validate_requested_language),
@@ -95,6 +97,7 @@ async def get_questions_by_questionnaire_name(
 
 async def get_questions_by_questionnaire_id(
     questionnaire_id: str = Path(alias="id"),
+    db_questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_id),
     questionnaires_dao: QuestionnairesDAO = Depends(questionnaires_dao_provider),
     language: str = Depends(validate_requested_language),
 ) -> List[DBQuestion]:
