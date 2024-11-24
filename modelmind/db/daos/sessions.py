@@ -52,6 +52,12 @@ class SessionsDAO(FirestoreDAO[DBSession]):
         except Exception as e:
             raise SessionNotFound(f"Session {session_id} not found: {str(e)}")
 
+    async def update_language(self, session_id: DBIdentifier, language: str) -> None:
+        try:
+            await self.update(session_id, {"language": language})
+        except Exception as e:
+            raise SessionNotFound(f"Session {session_id} not found: {str(e)}")
+
     async def set_result(self, session_id: DBIdentifier, result_id: DBIdentifier) -> None:
         try:
             await self.update(session_id, {"result_id": result_id, "status": SessionStatus.COMPLETED})

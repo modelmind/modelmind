@@ -137,8 +137,8 @@ async def questionnaire_session_results(
     )
 
 
-@router.get("/session", response_model=SessionResponse, operation_id="get_questionnaire_session")
-async def get_questionnaire_session(
+@router.get("/session", response_model=SessionResponse, operation_id="get_current_session")
+async def get_current_session(
     session: DBSession = Depends(get_session_from_token),
 ) -> SessionResponse:
     return SessionResponse(
@@ -150,6 +150,14 @@ async def get_questionnaire_session(
         language=session.language,
         expires_at=session.expires_at,
     )
+
+
+@router.put("/session/language", operation_id="update_current_session_language")
+async def update_current_session_language(
+    session: DBSession = Depends(get_session_from_token),
+    sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
+) -> None:
+    await sessions_dao.update_language(session.id, session.language)
 
 
 @router.post(
