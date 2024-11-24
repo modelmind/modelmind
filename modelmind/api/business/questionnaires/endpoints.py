@@ -21,7 +21,7 @@ from modelmind.api._dependencies.session.get import get_session_from_token
 from modelmind.api._dependencies.session.verify import session_status_completed, session_status_in_progress
 from modelmind.api.business.analytics.schemas import AnalyticsResponse
 from modelmind.api.business.profiles.schemas import SessionResponse
-from modelmind.api.business.questionnaires.schemas import NextQuestionsResponse
+from modelmind.api.business.questionnaires.schemas import NextQuestionsResponse, SessionLanguageUpdateRequest
 from modelmind.api.business.results.schemas import ResultsResponse, ResultVisibility
 from modelmind.commands.send_result_notification import SendResultNotificationCommand
 from modelmind.config import settings
@@ -154,10 +154,11 @@ async def get_current_session(
 
 @router.put("/session/language", operation_id="update_current_session_language")
 async def update_current_session_language(
+    update_request: SessionLanguageUpdateRequest,
     session: DBSession = Depends(get_session_from_token),
     sessions_dao: SessionsDAO = Depends(sessions_dao_provider),
 ) -> None:
-    await sessions_dao.update_language(session.id, session.language)
+    await sessions_dao.update_language(session.id, update_request.language)
 
 
 @router.post(

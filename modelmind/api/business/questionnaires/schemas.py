@@ -12,3 +12,7 @@ class NextQuestionsResponse(BaseResponse):
     completed: int
     remaining: int
     result_id: Optional[str] = None
+
+
+class SessionLanguageUpdateRequest(BaseResponse):
+    language: str
