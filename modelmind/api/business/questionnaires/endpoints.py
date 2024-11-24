@@ -10,10 +10,10 @@ from modelmind.api._dependencies.daos.providers import (
 from modelmind.api._dependencies.notifier import get_event_notifier
 from modelmind.api._dependencies.profile import get_or_create_profile
 from modelmind.api._dependencies.questionnaire import (
+    get_language_from_path,
     get_questionnaire_by_id,
     initialize_questionnaire_from_id,
     initialize_questionnaire_from_session,
-    validate_requested_language,
 )
 from modelmind.api._dependencies.results import get_result, get_result_from_session
 from modelmind.api._dependencies.session.create import create_jwt_session_token, create_session
@@ -42,7 +42,7 @@ router = APIRouter(prefix="/questionnaire")
 @router.get("/{id}/{language}/session", operation_id="start_questionnaire_session")
 async def questionnaire_session_start(
     response: Response,
-    language: str = Depends(validate_requested_language),
+    language: str = Depends(get_language_from_path),
     questionnaire: DBQuestionnaire = Depends(get_questionnaire_by_id),
     profile: DBProfile = Depends(get_or_create_profile),
     profiles_dao: ProfilesDAO = Depends(profiles_dao_provider),
