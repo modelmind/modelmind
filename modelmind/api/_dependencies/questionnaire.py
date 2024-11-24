@@ -40,13 +40,13 @@ async def get_questionnaire_by_id(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-def validate_requested_language(
+async def validate_requested_language(
     language: str = Path(..., description="The language code for the questionnaire"),
+    questionnaires_dao: QuestionnairesDAO = Depends(questionnaires_dao_provider),
 ) -> str:
-    # TODO: we may want to check the languages available for the questions in db given a questionnaire name
-    available_languages = ["en"]
+    is_language_available = await questionnaires_dao.is_language_available(language)
 
-    if language not in available_languages:
+    if not is_language_available:
         raise HTTPException(status_code=400, detail=f"Language {language} not available for this questionnaire")
     return language
 

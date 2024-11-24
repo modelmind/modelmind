@@ -61,7 +61,7 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
 
         return db_questions
 
-    @cached(ttl=3600, cache=Cache.MEMORY, serializer=PickleSerializer())
+    @cached(ttl=300, cache=Cache.MEMORY, serializer=PickleSerializer())
     async def get_available_languages(self, questionnaire_id: DBIdentifier) -> List[str]:
         # TODO: optimize this, maybe we can store the available languages in the questionnaire document
         questions = self.questions_collection(questionnaire_id)
@@ -71,6 +71,14 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
         async for question in questions_iterator:
             languages.add(question.get("language"))
         return list(languages)
+
+    @cached(ttl=300, cache=Cache.MEMORY, serializer=PickleSerializer())
+    async def is_language_available(self, questionnaire_id: DBIdentifier, language: str) -> bool:
+        """Check if questionnaire has at least one question in specified language."""
+        questions = self.questions_collection(questionnaire_id).where("language", "==", language).limit(1)
+        async for _ in questions.stream():
+            return True
+        return False
 
     async def create_questionnaire(
         self,
@@ -107,7 +115,10 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
             questionnaire = await self.add(questionnaire_data, questionnare_id)
             questions_collection_ref = self.questions_collection(questionnaire.id)
 
-            doc_ids = [f"{questionnaire.id}_{question['id']}" for question in questions]
+            doc_ids = [
+                self.build_question_doc_id(questionnaire.id, question["id"], question["language"])
+                for question in questions
+            ]
             for question in questions:
                 question["questionnaire_id"] = questionnaire.id
 
@@ -119,19 +130,23 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
             raise e
 
     async def add_questions(self, questionnaire_id: DBIdentifier, questions: List[dict[str, Any]]) -> None:
-        doc_ids = [f"{questionnaire_id}_{question['id']}" for question in questions]
+        doc_ids = [
+            self.build_question_doc_id(questionnaire_id, question["id"], question["language"]) for question in questions
+        ]
         for question in questions:
             question["questionnaire_id"] = questionnaire_id
 
         questions_collection = self.questions_collection(questionnaire_id)
         await self.batch_add(questions, questions_collection, doc_ids)
 
-    async def update_question(
-        self, questionnaire_id: DBIdentifier, question_id: DBIdentifier, question: dict[str, Any]
-    ) -> None:
-        question_ref = self.questions_collection(questionnaire_id).document(question_id)
+    async def update_question(self, questionnaire_id: DBIdentifier, question: dict[str, Any]) -> None:
+        question_ref = self.questions_collection(questionnaire_id).document(
+            self.build_question_doc_id(questionnaire_id, question["id"], question["language"])
+        )
         write_result: write.WriteResult = await question_ref.update(question)
-        log.debug(f"Question {question_id} from questionnaire {questionnaire_id} updated at {write_result.update_time}")
+        log.debug(
+            f"Question {question["id"]} from questionnaire {questionnaire_id} updated at {write_result.update_time}"
+        )
 
     async def add_statistics(self, questionnaire_id: DBIdentifier, statistics_data: StatisticsData) -> None:
         statistics_collection = self.statistics_collection(questionnaire_id)
@@ -141,3 +156,7 @@ class QuestionnairesDAO(FirestoreDAO[DBQuestionnaire]):
             "data": statistics_data,
         }
         await statistics_collection.add(statistics_document)
+
+    @staticmethod
+    def build_question_doc_id(questionnaire_id: DBIdentifier, question_id: str, language: str) -> str:
+        return f"{questionnaire_id}_{question_id}_{language}"
