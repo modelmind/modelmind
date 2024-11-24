@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from modelmind.api.business.sessions.sessions import (
+from modelmind.api.business.sessions.exceptions import (
     SessionAlreadyCompletedException,
     SessionExpiredException,
     SessionInProgressException,
