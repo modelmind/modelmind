@@ -7,15 +7,14 @@ from fastapi.datastructures import State as FastAPIState
 from fastapi.responses import UJSONResponse
 from google.cloud import bigquery, firestore
 from google.cloud.logging import Logger
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from modelmind.api.internal import health_router, statistics_router
 from modelmind.config import PACKAGE_NAME, settings
 from modelmind.logger import log
 from modelmind.services.firestore.client import initialize_firestore_client
-from modelmind.services.monitoring.cloud_trace import meter_provider, tracer_provider
-from modelmind.services.monitoring.error_reporting import ErrorReporting
 
+# from modelmind.services.monitoring.cloud_trace import meter_provider, tracer_provider
+# from modelmind.services.monitoring.error_reporting import ErrorReporting
 from .middleware import setup_middlewares
 
 
@@ -25,7 +24,6 @@ class InternalAPI(FastAPI):
         bigquery: bigquery.Client
         logging: logging.Client | None
         logger: Logger | None
-        error_reporting: ErrorReporting | None
 
     state: State
 
@@ -48,7 +46,7 @@ def app() -> InternalAPI:
         app.state.bigquery = BigqueryClient()
         app.state.logging = logging.Client()
         app.state.logger = app.state.logging.logger(PACKAGE_NAME)
-        app.state.error_reporting = ErrorReporting(service=PACKAGE_NAME)
+        # app.state.error_reporting = ErrorReporting(service=PACKAGE_NAME)
         app.build_middleware_stack()
         yield
         # On shutdown
@@ -64,11 +62,11 @@ def app() -> InternalAPI:
         lifespan=lifespan,
     )
 
-    FastAPIInstrumentor().instrument_app(
-        app,
-        tracer_provider=tracer_provider,
-        meter_provider=meter_provider,
-    )
+    # FastAPIInstrumentor().instrument_app(
+    #     app,
+    #     tracer_provider=tracer_provider,
+    #     meter_provider=meter_provider,
+    # )
     # Main router for the API.
     v1_router = APIRouter(prefix="/v1")
     v1_router.include_router(router=statistics_router)
