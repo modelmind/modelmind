@@ -7,15 +7,14 @@ from fastapi.datastructures import State as FastAPIState
 from fastapi.responses import UJSONResponse
 from google.cloud import firestore
 from google.cloud.logging import Logger
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from modelmind.api.business import health_router, profile_router, questionnaire_router, results_router
 from modelmind.config import PACKAGE_NAME, settings
 from modelmind.logger import log
 from modelmind.services.firestore.client import initialize_firestore_client
-from modelmind.services.monitoring.cloud_trace import meter_provider, tracer_provider
-from modelmind.services.monitoring.error_reporting import ErrorReporting
 
+# from modelmind.services.monitoring.cloud_trace import meter_provider, tracer_provider
+# from modelmind.services.monitoring.error_reporting import ErrorReporting
 from .middleware import setup_middlewares
 
 
@@ -24,7 +23,7 @@ class BusinessAPI(FastAPI):
         firestore: firestore.AsyncClient
         logging: logging.Client | None
         logger: Logger | None
-        error_reporting: ErrorReporting | None
+        # error_reporting: ErrorReporting | None
 
     state: State
 
@@ -45,7 +44,7 @@ def app() -> BusinessAPI:
         app.state.firestore = initialize_firestore_client()
         app.state.logging = logging.Client()
         app.state.logger = app.state.logging.logger(PACKAGE_NAME)
-        app.state.error_reporting = ErrorReporting(service=PACKAGE_NAME)
+        # app.state.error_reporting = ErrorReporting(service=PACKAGE_NAME)
         app.build_middleware_stack()
         yield
         # On shutdown
@@ -62,11 +61,11 @@ def app() -> BusinessAPI:
     )
     log.info("FastAPI application created")
     log.info("FastAPI application created")
-    FastAPIInstrumentor().instrument_app(
-        app,
-        tracer_provider=tracer_provider,
-        meter_provider=meter_provider,
-    )
+    # FastAPIInstrumentor().instrument_app(
+    #     app,
+    #     tracer_provider=tracer_provider,
+    #     meter_provider=meter_provider,
+    # )
     # Main router for the API.
     v1_router = APIRouter(prefix="/v1")
     v1_router.include_router(router=profile_router)
