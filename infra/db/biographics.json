@@ -1,0 +1,36 @@
+{
+  "biographics": {
+    "birth_year": null,
+    "gender": null,
+    "occupation": null,
+    "education": null,
+    "country": null,
+    "interests": null,
+    "relationship_status": null,
+    "sexual_orientation": null,
+    "cultural_origin": null,
+    "income": null,
+    "religion": null,
+    "political_orientation": null,
+    "number_of_children": null,
+    "personality": {
+      "mbti": {
+        "type": "INTJ",
+        "confidence": 0.9
+      },
+      "enneagram": {
+        "type": "5w6",
+        "wing": "5",
+        "tritype": "5-4-9",
+        "confidence": 0.85
+      },
+      "big_five": {
+        "openness": 0.85,
+        "conscientiousness": 0.75,
+        "extraversion": 0.6,
+        "agreeableness": 0.7,
+        "neuroticism": 0.4
+      }
+    }
+  }
+}

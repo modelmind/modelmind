@@ -1,0 +1,17 @@
+{
+  "session": {
+    "id": "session_id",
+    "inventory": {
+      "id": "inventory_id",
+      "name": "inventory_name"
+    },
+    "language": "en",
+    "started_at": "2022-01-01T00:00:00Z",
+    "completed_at": null,
+    "cancelled_at": null,
+    "expires_at": "2022-01-01T01:00:00Z",
+    "profile_id": "profile_id",
+    "from": "shared_link",
+    "metadata": {}
+  }
+}

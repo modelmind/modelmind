@@ -1,0 +1,23 @@
+{
+  "shared_link": {
+    "inventory": {
+      "id": ""
+    },
+    "created_by": {
+      "id": "",
+      "name": ""
+    },
+    "viewed_by": [
+      {
+        "id": "",
+        "name": ""
+      }
+    ],
+    "completed_by": [
+      {
+        "id": "",
+        "name": ""
+      }
+    ]
+  }
+}

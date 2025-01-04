@@ -1,8 +1,11 @@
 {
   "inventory": {
     "id": "",
-    "created_by": "",
     "title": "",
+    "images": {
+      "thumbnail": "",
+      "cover": ""
+    },
     "description": "",
     "settings": {
       "time_limit": 3600,
@@ -11,6 +14,19 @@
     "version": 0,
     "status": "draft", // draft, published, archived
     "visibility": "private", // private, public
+    "votes": [{ "profile_id": "", "type": "up", "createdAt": "" }],
+    "createdBy": {
+      "profile_id": "",
+      "name": ""
+    },
+    "contributors": [
+      {
+        "profile_id": "",
+        "name": "",
+        "role": "author" // author, editor, reviewer
+      }
+    ],
+    "biographics": ["birth_year", "gender"],
     "items": [
       {
         "id": 1,
@@ -19,32 +35,32 @@
         "required": true,
         "grading": {
           "pointValue": 1,
-          "correct_answers": [{ "value": "option1" }, { "value": "option2" }],
-          "when_right": {
-            "rich_text": "correct answer!",
+          "correctAnswers": [{ "value": "option1" }, { "value": "option2" }],
+          "whenRight": {
+            "richText": "correct answer!",
             "attachments": []
           },
-          "when_wrong": {
-            "rich_text": "incorrect answer.",
+          "whenWrong": {
+            "richText": "incorrect answer.",
             "attachments": []
           },
-          "general_feedback": {
-            "rich_text": "there were 2 options.",
+          "generalFeedback": {
+            "richText": "there were 2 options.",
             "attachments": []
           }
         },
         "item": {
           "type": "choice_question",
-          "rich_text": "this is the question",
+          "richText": "this is the question",
           "multiple": true,
           "display": "radio",
           "options": [
-            { "value": "option1", "rich_text": "option1", "attachments": [] },
-            { "value": "option2", "rich_text": "option2", "attachments": [] },
-            { "value": "option3", "rich_text": "option3", "attachments": [] }
+            { "value": "option1", "richText": "option1", "attachments": [] },
+            { "value": "option2", "richText": "option2", "attachments": [] },
+            { "value": "option3", "richText": "option3", "attachments": [] }
           ],
           "shuffle": true,
-          "answer_type": "string",
+          "answerType": "string",
           "attachments": [
             {
               "type": "image", // image, video, html
@@ -60,17 +76,37 @@
         "order": 1,
         "section": 1,
         "required": true,
+        "scale": "id1",
         "item": {
           "type": "scale_question",
-          "rich_text": "this is the question",
+          "richText": "this is the question",
           "min": -3,
           "max": 3,
           "interval": 1,
-          "low_label": "something",
-          "high_label": "else",
+          "minLabel": "something",
+          "maxLabel": "else",
           "shuffle": true,
           "reversed": false,
-          "answer_type": "string"
+          "answerType": "string"
+        }
+      },
+      {
+        "id": 3,
+        "order": 2,
+        "section": 1,
+        "required": true,
+        "scale": "id2",
+        "item": {
+          "type": "scale_question",
+          "richText": "this is another question",
+          "min": -3,
+          "max": 3,
+          "interval": 1,
+          "minLabel": "something",
+          "maxLabel": "else",
+          "shuffle": true,
+          "reversed": false,
+          "answerType": "string"
         }
       }
     ],
@@ -78,11 +114,48 @@
       {
         "id": "id1",
         "name": "extraversion",
-        "low_end": "introversion",
-        "high_end": "extraversion",
+        "lowEnd": "introvert",
+        "highEnd": "extravert",
         "description": "the extraversion scale",
         "type": "standard"
+      },
+      {
+        "id": "id2",
+        "name": "agreeableness",
+        "lowEnd": "disagreeable",
+        "highEnd": "agreeable",
+        "description": "the agreeableness scale",
+        "type": "standard"
       }
-    ]
+    ],
+    "rules": {
+      "scales": {
+        "itemRules": [
+          {
+            "rule_id": "positive_answer",
+            "conditions": [{ "item_id": 2, "operator": ">", "value": 0 }],
+            "actions": [
+              { "scaleId": "extraversion", "operation": "add" },
+              {
+                "scaleId": "introversion",
+                "operation": "subtract",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "rule_id": "neutral_answer",
+            "conditions": [{ "item_id": 2, "operator": "==", "value": 0 }],
+            "actions": [
+              { "scaleId": "extraversion", "operation": "add", "value": 1 },
+              { "scaleId": "introversion", "operation": "add", "value": 1 }
+            ]
+          }
+        ],
+        "mergeRules": []
+      }
+    },
+    "sessions": [],
+    "results": []
   }
 }
