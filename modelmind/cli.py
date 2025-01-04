@@ -16,7 +16,7 @@ def run(
     workers: int = settings.server.workers,
 ) -> None:
     uvicorn.run(
-        f"{PACKAGE_NAME}.api.{app.value}.app:app",
+        f"{PACKAGE_NAME}._api.{app.value}.app:app",
         host=host,
         port=port,
         log_level=log_level,

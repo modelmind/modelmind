@@ -21,7 +21,7 @@ aiocache = "^0.12.2"
 hkdf = "^0.0.3"
 python-jose = "^3.3.0"
 cryptography = "^42.0.8"
-google-cloud-bigquery = {extras = ["opentelemetry"], version = "^3.25.0"}
+google-cloud-bigquery = { extras = ["opentelemetry"], version = "^3.25.0" }
 opentelemetry-exporter-gcp-trace = "^1.6.0"
 google-cloud-tasks = "^2.16.3"
 google-cloud-error-reporting = "^1.11.1"
@@ -46,7 +46,6 @@ python-jose = "^3.3.0"
 ruff = "^0.8.0"
 
 
-
 [tool.poetry.group.analytics.dependencies]
 pandas = "^2.2.2"
 scipy = "^1.14.0"
@@ -58,7 +57,13 @@ mpld3 = "^0.5.10"
 
 [tool.mypy]
 ignore_missing_imports = true
+warn_return_any = false
+disallow_untyped_defs = true
+warn_unused_configs = true
 plugins = "pydantic.mypy"
+[[tool.mypy.overrides]]
+module = ["google.protobuf.*"]
+ignore_missing_imports = true
 
 [tool.pydantic-mypy]
 init_forbid_extra = true
@@ -69,7 +74,6 @@ warn_untyped_fields = true
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
 
 
 [tool.ruff]

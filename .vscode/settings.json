@@ -11,4 +11,7 @@
       "source.fixAll": "always"
     }
   },
+  "mypy-type-checker.args": [
+    "--config-file=../pyproject.toml"
+  ],
 }

@@ -1,0 +1,88 @@
+{
+  "inventory": {
+    "id": "",
+    "created_by": "",
+    "title": "",
+    "description": "",
+    "settings": {
+      "time_limit": 3600,
+      "allow_back_navigation": true
+    },
+    "version": 0,
+    "status": "draft", // draft, published, archived
+    "visibility": "private", // private, public
+    "items": [
+      {
+        "id": 1,
+        "order": 0,
+        "section": 1,
+        "required": true,
+        "grading": {
+          "pointValue": 1,
+          "correct_answers": [{ "value": "option1" }, { "value": "option2" }],
+          "when_right": {
+            "rich_text": "correct answer!",
+            "attachments": []
+          },
+          "when_wrong": {
+            "rich_text": "incorrect answer.",
+            "attachments": []
+          },
+          "general_feedback": {
+            "rich_text": "there were 2 options.",
+            "attachments": []
+          }
+        },
+        "item": {
+          "type": "choice_question",
+          "rich_text": "this is the question",
+          "multiple": true,
+          "display": "radio",
+          "options": [
+            { "value": "option1", "rich_text": "option1", "attachments": [] },
+            { "value": "option2", "rich_text": "option2", "attachments": [] },
+            { "value": "option3", "rich_text": "option3", "attachments": [] }
+          ],
+          "shuffle": true,
+          "answer_type": "string",
+          "attachments": [
+            {
+              "type": "image", // image, video, html
+              "url": "",
+              "position": "before_text", // before, after
+              "order": 0
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "order": 1,
+        "section": 1,
+        "required": true,
+        "item": {
+          "type": "scale_question",
+          "rich_text": "this is the question",
+          "min": -3,
+          "max": 3,
+          "interval": 1,
+          "low_label": "something",
+          "high_label": "else",
+          "shuffle": true,
+          "reversed": false,
+          "answer_type": "string"
+        }
+      }
+    ],
+    "scales": [
+      {
+        "id": "id1",
+        "name": "extraversion",
+        "low_end": "introversion",
+        "high_end": "extraversion",
+        "description": "the extraversion scale",
+        "type": "standard"
+      }
+    ]
+  }
+}
