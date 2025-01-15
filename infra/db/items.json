@@ -1,0 +1,167 @@
+[
+  {
+    "id": 1,
+    "item": {
+      "type": "question",
+      "questionType": "choiceQuestion",
+      "richText": "this is the text question",
+      "multiple": true,
+      "display": "radio", // radio, checkbox
+      "options": [
+        {
+          "value": "option1",
+          "richText": "option1",
+          "attachments": [],
+          "icon": null
+        },
+        {
+          "value": "option2",
+          "richText": "option2",
+          "attachments": [],
+          "icon": null
+        },
+        {
+          "value": "option3",
+          "richText": "option3",
+          "attachments": [],
+          "icon": null
+        }
+      ],
+      "shuffle": true,
+      "answerType": "string",
+      "allowOther": true,
+      "attachments": [
+        {
+          "type": "image", // image, video, html
+          "url": "./placeholder.png",
+          "position": "before_text", // before, after
+          "order": 0
+        }
+      ],
+      "required": true,
+      "grading": {
+        "maxPoints": 2,
+        "correctAnswers": [{ "value": "option1" }, { "value": "option2" }],
+        "partialCredit": true,
+        "incorrectPenalty": 0.5,
+        "allowNegative": false, // Prevent score from going below zero
+        "whenRight": {
+          "richText": "correct answer!",
+          "attachments": []
+        },
+        "whenWrong": {
+          "richText": "incorrect answer.",
+          "attachments": []
+        },
+        "generalFeedback": {
+          "richText": "there were 2 correct answers.",
+          "attachments": []
+        }
+      }
+    }
+  },
+  {
+    "id": 2,
+    "item": {
+      "type": "question",
+      "questionType": "scaleQuestion",
+      "richText": "this is the question",
+      "min": -3,
+      "max": 3,
+      "interval": 1,
+      "minLabel": "something",
+      "maxLabel": "else",
+      "shuffle": true,
+      "reversed": false,
+      "answerType": "string",
+      "required": true,
+      "grading": null
+    }
+  },
+  {
+    "id": 3,
+    "item": {
+      "type": "question",
+      "questionType": "scaleQuestion",
+      "richText": "this is a free text question",
+      "allowMultiple": false,
+      "textArea": false,
+      "placeholder": "here is...",
+      "default": null,
+      "regex": null,
+      "attachments": [],
+      "required": true,
+      "grading": null
+    }
+  },
+  {
+    "id": 4,
+    "item": {
+      "type": "question",
+      "questionType": "numberQuestion",
+      "richText": "this is a number question",
+      "placeholder": "2000",
+      "min": 0,
+      "max": 10000,
+      "default": null,
+      "attachments": [],
+      "required": true,
+      "grading": null
+    }
+  },
+  {
+    "id": 5,
+    "item": {
+      "type": "question",
+      "questionType": "calendarQuestion",
+      "richText": "this is a date question",
+      "time": true,
+      "date": true,
+      "attachments": [],
+      "required": true,
+      "grading": null
+    }
+  },
+  {
+    "id": 6,
+    "item": {
+      "type": "text",
+      "richText": "this is a text "
+    }
+  },
+  {
+    "id": 7,
+    "item": {
+      "type": "image",
+      "url": "./placeholder.png",
+      "height": 100,
+      "width": 100,
+      "caption": "this is an image"
+    }
+  },
+  {
+    "id": 8,
+    "item": {
+      "type": "video",
+      "url": "./placeholder.mp4",
+      "height": 100,
+      "width": 100,
+      "caption": "this is a video"
+    }
+  },
+  {
+    "id": 8,
+    "item": {
+      "type": "audio",
+      "url": "./placeholder.mp3",
+      "caption": "this is an audio"
+    }
+  },
+  {
+    "id": 9,
+    "item": {
+      "type": "html",
+      "html": "<p>this is an html</p>"
+    }
+  }
+]

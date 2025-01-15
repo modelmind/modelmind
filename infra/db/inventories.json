@@ -8,13 +8,14 @@
     },
     "description": "",
     "settings": {
-      "time_limit": 3600,
-      "allow_back_navigation": true
+      "timeLimit": 3600,
+      "allowBackNavigation": true
     },
     "version": 0,
     "status": "draft", // draft, published, archived
     "visibility": "private", // private, public
-    "votes": [{ "profile_id": "", "type": "up", "createdAt": "" }],
+    "estimatedTime": 30,
+    "votes": [{ "profileId": "", "type": "up", "createdAt": "" }],
     "createdBy": {
       "profile_id": "",
       "name": ""
@@ -27,10 +28,20 @@
       }
     ],
     "biographics": ["birth_year", "gender"],
+    "graph": {
+      "nodes": {
+        "A": {
+          "id": "A",
+          "type": "section",
+          "title": "Section 1",
+          "items": [1, 2, 3]
+        }
+      },
+      "edges": []
+    },
     "items": [
       {
-        "id": 1,
-        "order": 0,
+        "id": "1",
         "section": 1,
         "required": true,
         "grading": {
@@ -50,7 +61,8 @@
           }
         },
         "item": {
-          "type": "choice_question",
+          "type": "question",
+          "questionType": "choice",
           "richText": "this is the question",
           "multiple": true,
           "display": "radio",
@@ -72,13 +84,14 @@
         }
       },
       {
-        "id": 2,
+        "id": "2",
         "order": 1,
         "section": 1,
         "required": true,
         "scale": "id1",
         "item": {
-          "type": "scale_question",
+          "type": "question",
+          "questionType": "scale",
           "richText": "this is the question",
           "min": -3,
           "max": 3,
@@ -91,13 +104,14 @@
         }
       },
       {
-        "id": 3,
+        "id": "3",
         "order": 2,
         "section": 1,
         "required": true,
         "scale": "id2",
         "item": {
-          "type": "scale_question",
+          "type": "question",
+          "questionType": "scale",
           "richText": "this is another question",
           "min": -3,
           "max": 3,
@@ -117,42 +131,66 @@
         "lowEnd": "introvert",
         "highEnd": "extravert",
         "description": "the extraversion scale",
-        "type": "standard"
+        "items": ["1", "2"],
+        "icons": {
+          "default": "/images/default.png",
+          "lowEnd": "/images/lowEnd.png",
+          "highEnd": "/images/highEnd.png"
+        }
       },
       {
         "id": "id2",
         "name": "agreeableness",
+        "items": ["3"],
         "lowEnd": "disagreeable",
         "highEnd": "agreeable",
         "description": "the agreeableness scale",
-        "type": "standard"
+        "icons": {
+          "default": "/images/default.png",
+          "lowEnd": "/images/lowEnd.png",
+          "highEnd": "/images/highEnd.png"
+        }
       }
     ],
     "rules": {
       "scales": {
-        "itemRules": [
-          {
-            "rule_id": "positive_answer",
-            "conditions": [{ "item_id": 2, "operator": ">", "value": 0 }],
-            "actions": [
-              { "scaleId": "extraversion", "operation": "add" },
-              {
-                "scaleId": "introversion",
-                "operation": "subtract",
-                "value": 1
+        "id1": {
+          "type": "float",
+          "items": {
+            "1": {
+              "weight": 1.0,
+              "optionsMapping": {
+                "option1": null,
+                "option2": null,
+                "option3": 1
               }
-            ]
-          },
-          {
-            "rule_id": "neutral_answer",
-            "conditions": [{ "item_id": 2, "operator": "==", "value": 0 }],
-            "actions": [
-              { "scaleId": "extraversion", "operation": "add", "value": 1 },
-              { "scaleId": "introversion", "operation": "add", "value": 1 }
-            ]
+            },
+            "missingStrategy": "skip",
+            "conditions": []
           }
-        ],
-        "mergeRules": []
+        },
+        "id2": {
+          "type": "float",
+          "items": {
+            "1": {
+              "weight": 1.0,
+              "transform": {
+                "type": "linear", // linear, exponential, logarithmic
+                "multiplier": 1.0,
+                "offset": 0.0
+              }
+            },
+            "missingStrategy": "skip",
+            "conditions": []
+          }
+        },
+        "id3": {
+          "type": "float",
+          "items": {
+            "missingStrategy": "skip",
+            "conditions": []
+          }
+        }
       }
     },
     "sessions": [],

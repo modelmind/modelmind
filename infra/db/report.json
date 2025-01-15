@@ -1,0 +1,17 @@
+{
+  "analytics": {
+    "inventory": {
+      "id": "",
+      "name": ""
+    },
+    "scales": {},
+    "items": [
+      {
+        "type": "score",
+        "name": "",
+        "value": 4,
+        "percentage": 23.3
+      }
+    ]
+  }
+}
